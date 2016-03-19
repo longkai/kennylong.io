@@ -23,17 +23,18 @@ var (
 )
 
 type MarkdownMeta struct {
+	Id       string    `json:"id"`
+	Title    string    `json:"title"`
+	Tags     []string  `json:"tags"`
 	Publish  bool      `json:"publish"`
+	Date     time.Time `json:"date"`
 	Weather  string    `json:"weather"`
 	Summary  string    `json:"summary"`
 	Location string    `json:"location"`
-	Tags     []string  `json:"tags"`
-	Date     time.Time `json:"date"`
 }
 
 type Markdown struct {
-	Text  string
-	Title string
+	Text string
 	MarkdownMeta
 }
 
@@ -46,11 +47,16 @@ func NewMarkdown(src string) (*Markdown, error) {
 	title, b := parseTitle(b)
 
 	text, meta := separateTextAndMeta(b)
+	meta.Id = trimExt(src[len(env.Config().ArticleRepo):])
+	meta.Title = title
 	m := new(Markdown)
-	m.Title = title
 	m.Text = text
 	m.MarkdownMeta = meta
 	return m, nil
+}
+
+func (m *Markdown) Render() ([]byte, error) {
+	return New(m.Text).Render()
 }
 
 func parseTitle(slice []byte) (string, []byte) {
@@ -77,6 +83,21 @@ func separateTextAndMeta(slice []byte) (string, MarkdownMeta) {
 	// drop the json code block
 	slice = bytes.Replace(slice, result[0], []byte(""), -1)
 	return string(slice), meta
+}
+
+// trim the file extention, never ends `.`
+func trimExt(s string) string {
+	j := -1
+	for i := len(s) - 1; i >= 0; i-- {
+		if s[i] == '.' {
+			j = i
+			break
+		}
+	}
+	if j != -1 {
+		return s[:j]
+	}
+	return s
 }
 
 type MarkdownRender struct {

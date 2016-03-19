@@ -1,6 +1,8 @@
 package env
 
 import (
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -12,5 +14,9 @@ func TestInitEnv(t *testing.T) {
 	}()
 
 	InitEnv("../testing_env.json")
-	Config() // don't care the value
+	c := Config()
+
+	if strings.HasSuffix(c.AccessToken, string(filepath.Separator)) {
+		t.Errorf("repo path should not has Separator.\n")
+	}
 }

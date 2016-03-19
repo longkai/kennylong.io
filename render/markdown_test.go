@@ -54,12 +54,37 @@ func TestParseTitle(t *testing.T) {
 }
 
 func TestSeparateMetaAndText(t *testing.T) {
-	s := fmt.Sprintf("### EOF \n%sjson\n%s\n%s", CODE_BLOCK, `{
+	s := fmt.Sprintf("heheh### EOF \n%sjson\n%s\n%s", CODE_BLOCK, `{
 		"date": "2006-01-02T15:04:05+07:00"
 }`, CODE_BLOCK)
 	text, _ := separateTextAndMeta([]byte(s))
 	if strings.Contains(text, "EOF") {
 		t.Errorf("should not contain **EOF**, got %s\n", text)
+	}
+	fmt.Println(text)
+}
+
+func TestTrimExt(t *testing.T) {
+	cases := []string{
+		"a.md",
+		"a.c.md",
+		".aa.md",
+		"abc.",
+		"abc",
+		".",
+	}
+	wanted := []string{
+		"a",
+		"a.c",
+		".aa",
+		"abc",
+		"abc",
+		"",
+	}
+	for i, s := range cases {
+		if v := trimExt(cases[i]); v != wanted[i] {
+			t.Errorf("case %s, want %s, got %s\n", s, wanted[i], v)
+		}
 	}
 }
 

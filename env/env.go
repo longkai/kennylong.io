@@ -4,10 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
+)
+
+const (
+	FrontEnd = "../frontend" // where puts the static files
 )
 
 type Env struct {
 	AccessToken string `json:"access_token"`
+	ArticleRepo string `json:"article_repo"`
 }
 
 var (
@@ -17,6 +24,14 @@ var (
 func init() {
 	// TODO: for simple testing, we hard code here
 	InitEnv("../testing_env.json")
+	// ensure front dir exist
+	_, err := os.Stat(FrontEnd)
+	if os.IsNotExist(err) {
+		err = os.Mkdir(FrontEnd, 0755)
+		if err != nil {
+			panic(fmt.Sprintf("Mkdir %s fail, %v\n", FrontEnd))
+		}
+	}
 }
 
 func InitEnv(src string) {
@@ -27,6 +42,11 @@ func InitEnv(src string) {
 	err = json.Unmarshal(bytes, &env)
 	if err != nil {
 		panic(fmt.Sprintf("Unmarshal env json fail, %v\n", err))
+	}
+
+	// trim the last `/`
+	if env.ArticleRepo[len(env.ArticleRepo)-1] == filepath.Separator {
+		env.ArticleRepo = env.ArticleRepo[:len(env.ArticleRepo)-1]
 	}
 }
 
