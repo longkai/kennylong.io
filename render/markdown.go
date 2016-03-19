@@ -23,10 +23,11 @@ var (
 )
 
 type MarkdownMeta struct {
-	Tags     []string  `json:"tags"`
-	Location string    `json:"location"`
-	Weather  string    `json:"weather"`
 	Publish  bool      `json:"publish"`
+	Weather  string    `json:"weather"`
+	Summary  string    `json:"summary"`
+	Location string    `json:"location"`
+	Tags     []string  `json:"tags"`
 	Date     time.Time `json:"date"`
 }
 
