@@ -8,11 +8,75 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"time"
 )
 
 const (
-	ENDPOINT = "https://api.github.com"
+	ENDPOINT   = "https://api.github.com"
+	CODE_BLOCK = "```"
 )
+
+var (
+	titleRegexp = regexp.MustCompile(`([\S ]+)\s*=+\s+`)
+	metaRegexp  = regexp.MustCompile(`#+\s*EOF\s+` + CODE_BLOCK + `json\s+([\s\S]*)\s+` + CODE_BLOCK)
+)
+
+type MarkdownMeta struct {
+	Tags     []string  `json:"tags"`
+	Location string    `json:"location"`
+	Weather  string    `json:"weather"`
+	Publish  bool      `json:"publish"`
+	Date     time.Time `json:"date"`
+}
+
+type Markdown struct {
+	Text  string
+	Title string
+	MarkdownMeta
+}
+
+func NewMarkdown(src string) (*Markdown, error) {
+	b, err := ioutil.ReadFile(src)
+	if err != nil {
+		return nil, err
+	}
+	// the first line is the title
+	title, b := parseTitle(b)
+
+	text, meta := separateTextAndMeta(b)
+	m := new(Markdown)
+	m.Title = title
+	m.Text = text
+	m.MarkdownMeta = meta
+	return m, nil
+}
+
+func parseTitle(slice []byte) (string, []byte) {
+	result := titleRegexp.FindSubmatch(slice)
+	if result == nil {
+		return "", slice
+	}
+	t := string(bytes.TrimSpace(result[1]))
+	slice = slice[len(result[0]):]
+	return t, slice
+}
+
+func separateTextAndMeta(slice []byte) (string, MarkdownMeta) {
+	meta := MarkdownMeta{}
+	result := metaRegexp.FindSubmatch(slice)
+	if result == nil {
+		return string(slice), meta
+	}
+	err := json.Unmarshal(result[1], &meta)
+	if err != nil {
+		fmt.Println(err)
+		return "", meta
+	}
+	// drop the json code block
+	slice = bytes.Replace(slice, result[0], []byte(""), -1)
+	return string(slice), meta
+}
 
 type MarkdownRender struct {
 	Text    string `json:"text"`
