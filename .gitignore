@@ -25,3 +25,7 @@ _testmain.go
 
 # self retain
 testing_env.json
+
+gen/
+assets/fonts/
+bower_components/

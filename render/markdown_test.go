@@ -64,25 +64,21 @@ func TestSeparateMetaAndText(t *testing.T) {
 	fmt.Println(text)
 }
 
-func TestTrimExt(t *testing.T) {
+func TestTrimBasename(t *testing.T) {
 	cases := []string{
-		"a.md",
-		"a.c.md",
-		".aa.md",
-		"abc.",
-		"abc",
+		"a/a.md",
+		"b/a.c.md",
+		"abc.md",
 		".",
 	}
 	wanted := []string{
 		"a",
-		"a.c",
-		".aa",
-		"abc",
-		"abc",
-		"",
+		"b",
+		"abc.md",
+		".",
 	}
 	for i, s := range cases {
-		if v := trimExt(cases[i]); v != wanted[i] {
+		if v := trimBasename(cases[i]); v != wanted[i] {
 			t.Errorf("case %s, want %s, got %s\n", s, wanted[i], v)
 		}
 	}

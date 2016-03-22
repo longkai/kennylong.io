@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -36,6 +37,7 @@ type MarkdownMeta struct {
 
 type Markdown struct {
 	Text string
+	Html template.HTML
 	MarkdownMeta
 }
 
@@ -48,7 +50,7 @@ func NewMarkdown(src string) (*Markdown, error) {
 	title, b := parseTitle(b)
 
 	text, meta := separateTextAndMeta(b)
-	meta.Id = trimExt(src[len(env.Config().ArticleRepo):])
+	meta.Id = trimBasename(src[len(env.Config().ArticleRepo):])
 	meta.Title = title
 	m := new(Markdown)
 	m.Text = text
@@ -86,17 +88,45 @@ func separateTextAndMeta(slice []byte) (string, MarkdownMeta) {
 	return string(slice), meta
 }
 
-// trim the file extention, never ends `.`
-func trimExt(s string) string {
+// trim the basename of the file
+func trimBasename(s string) string {
 	j := -1
 	for i := len(s) - 1; i >= 0; i-- {
-		if s[i] == '.' {
+		if s[i] == '/' {
 			j = i
 			break
 		}
 	}
 	if j != -1 {
 		return s[:j]
+	}
+	return s
+}
+
+// helper functions
+func DaysAgo(t time.Time) int { return int(time.Since(t).Hours() / 24) }
+
+func HasColor(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	return s[0] == '#'
+}
+
+func HasImage(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	return s[0] != '#'
+}
+
+func Tags(m []string) string {
+	s := ""
+	for i, v := range m {
+		s += "#" + v
+		if i != len(m)-1 {
+			s += ", "
+		}
 	}
 	return s
 }

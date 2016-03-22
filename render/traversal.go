@@ -4,8 +4,8 @@ package render
 import (
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
+	"html/template"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +15,12 @@ import (
 var (
 	dirSema    = make(chan struct{}, 20) // max concurrent dir travel routine
 	renderSema = make(chan struct{}, 5)  // max render routine
+	entryTempl = template.Must(template.New("entry.html").Funcs(template.FuncMap{
+		"daysAgo":  DaysAgo,
+		"tags":     Tags,
+		"hasColor": HasColor,
+		"hasImage": HasImage,
+	}).ParseFiles(env.Template + "/entry.html"))
 )
 
 func Traversal(root string) []MarkdownMeta {
@@ -50,7 +56,7 @@ func doTraversal(dir string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 			go doRender(fname, n, metas)
 		default:
 			// static file, copy it
-			copyFile(fname, filepath.Join(env.FrontEnd, fname[len(env.Config().ArticleRepo):]))
+			copyFile(fname, filepath.Join(env.GEN, fname[len(env.Config().ArticleRepo):]))
 		}
 	}
 }
@@ -71,16 +77,21 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	if err != nil {
 		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))
 	}
-	// save the file as .html
-	// TODO: transform it to ``index.html`` for simple use cases
-	dest := filepath.Join(env.FrontEnd, m.Id+".html")
-	ensureDir(dest)
+	// save the file as index.html
+	dest := filepath.Join(env.GEN, m.Id+"/index.html")
+	err = ensureDir(dest)
 	fmt.Printf("%s -> %s\n", fname, dest)
-	err = ioutil.WriteFile(dest, b, 0644)
-	if err != nil {
-		panic(fmt.Sprintf("write file fail, %v\n", err))
+	if f, err := os.Create(dest); err != nil {
+		panic(fmt.Sprintf("create dest file fail, %v\n", err))
+	} else {
+		// write the template
+		m.Html = template.HTML(b)
+		if err = entryTempl.Execute(f, m); err != nil {
+			panic(fmt.Sprintf("write entry template fail, %v\n", err))
+		} else {
+			metas <- m.MarkdownMeta
+		}
 	}
-	metas <- m.MarkdownMeta
 }
 
 // dirents returns the entries of dir

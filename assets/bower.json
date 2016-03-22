@@ -1,0 +1,20 @@
+{
+  "name": "xiaolongtongxue.com",
+  "homepage": "https://github.com/longkai/xiaolongtongxue.com",
+  "authors": [
+    "longkai"
+  ],
+  "description": "https://xiaolongtongxue.com",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "markdown",
+    "material",
+    "blog",
+    "golang"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "material-design-lite": "^1.1.3"
+  }
+}

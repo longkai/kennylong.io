@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	FrontEnd = "../frontend" // where puts the static files
+	GEN      = "gen" // where puts the gen articles files, in the root of this repo.
+	Template = "templ"
 )
 
 type Env struct {
@@ -47,11 +48,11 @@ func InitEnv(src string) {
 	}
 
 	// ensure front dir exist
-	_, err = os.Stat(FrontEnd)
+	_, err = os.Stat(GEN)
 	if os.IsNotExist(err) {
-		err = os.Mkdir(FrontEnd, 0755)
+		err = os.Mkdir(GEN, 0755)
 		if err != nil {
-			panic(fmt.Sprintf("Mkdir %s fail, %v\n", FrontEnd))
+			panic(fmt.Sprintf("Mkdir %s fail, %v\n", GEN))
 		}
 	}
 }

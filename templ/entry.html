@@ -1,0 +1,291 @@
+<!doctype html>
+<!--
+  Material Design Lite
+  Copyright 2015 Google Inc. All rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="小龙同学">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>{{.Title}} - 小龙同学</title>
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" sizes="192x192" href="/assets/images/android-desktop.png">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="小龙同学">
+  <link rel="apple-touch-icon-precomposed" href="/assets/images/ios-desktop.png">
+
+  <!-- Tile icon for Win8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileColor" content="#DA532C">
+
+  <link rel="shortcut icon" href="/assets/images/favicon.png">
+
+  <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+  <!--
+  <link rel="canonical" href="http://www.example.com/">
+  -->
+
+  <!-- uncomment if your netword is not block
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  -->
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/fonts/icons.css">
+  <link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css">
+  <link rel="stylesheet" href="/assets/layouts/styles.css">
+  <link rel="stylesheet" href="/assets/layouts/gfm.css">
+</head>
+<body>
+<div class="demo-blog demo-blog--blogpost mdl-layout mdl-js-layout has-drawer is-upgraded">
+  <main class="mdl-layout__content">
+    <div class="demo-back" id="back">
+      <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" title="go back" role="button">
+        <i class="material-icons" role="presentation">arrow_back</i>
+      </a>
+    </div>
+    <div class="demo-home">
+      <button id="demo-menu-lower-right"
+              class="mdl-button mdl-js-button mdl-button--icon">
+        <i class="material-icons">more_vert</i>
+      </button>
+
+      <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+          for="demo-menu-lower-right">
+        <li class="mdl-menu__item" id="home">首页</li>
+        <li class="mdl-menu__item">About</li>
+      </ul>
+    </div>
+    <div class="demo-blog__posts mdl-grid">
+      <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
+        <div class="mdl-card__media mdl-color-text--grey-50" style="{{if .Background}}background-image: url('{{.Background}}'){{end}}">
+          <h3>{{.Title}}</h3>
+        </div>
+        <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
+          <div class="minilogo"></div>
+          <div>
+            <strong>小龙同学</strong>
+            <span>{{.Date | daysAgo}} 天前{{if .Location}}, {{.Location}}{{end}}{{if .Weather}}, {{.Weather}}{{end}}</span>
+          </div>
+          <div class="section-spacer"></div>
+          <!-- TODO: impl it, backend!
+          <div class="meta__favorites">
+            425 <i class="material-icons" role="presentation">favorite</i>
+            <span class="visuallyhidden">favorites</span>
+          </div>
+          <div>
+            <i class="material-icons" role="presentation">bookmark</i>
+            <span class="visuallyhidden">bookmark</span>
+          </div>
+          -->
+          <div>
+            <i class="material-icons" role="presentation">share</i>
+            <span class="visuallyhidden">share</span>
+          </div>
+        </div>
+        <article class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
+          <!-- content start -->
+          {{.Html}}
+          <!-- content end -->
+        </article>
+        <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
+          <div class="tags">
+            {{range $i, $t := .Tags}}
+            {{if gt $i 0}}, {{end}}
+            <i class="material-icons" role="presentation">bookmark</i>
+            <span class="visuallyhidden">bookmark</span>{{$t}}
+            {{end}}
+          </div>
+          <!--
+          <form>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <textarea rows=1 class="mdl-textfield__input" id="comment"></textarea>
+              <label for="comment" class="mdl-textfield__label">Join the discussion</label>
+            </div>
+            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+              <i class="material-icons" role="presentation">check</i><span class="visuallyhidden">add comment</span>
+            </button>
+          </form>
+          <div class="comment mdl-color-text--grey-700">
+            <header class="comment__header">
+              <img src="images/co1.jpg" class="comment__avatar">
+              <div class="comment__author">
+                <strong>James Splayd</strong>
+                <span>2 days ago</span>
+              </div>
+            </header>
+            <div class="comment__text">
+              In in culpa nulla elit esse. Ex cillum enim aliquip sit sit ullamco ex eiusmod fugiat. Cupidatat ad minim officia mollit laborum magna dolor tempor cupidatat mollit. Est velit sit ad aliqua ullamco laborum excepteur dolore proident incididunt in labore elit.
+            </div>
+            <nav class="comment__actions">
+              <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                <i class="material-icons" role="presentation">thumb_up</i><span class="visuallyhidden">like comment</span>
+              </button>
+              <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                <i class="material-icons" role="presentation">thumb_down</i><span class="visuallyhidden">dislike comment</span>
+              </button>
+              <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                <i class="material-icons" role="presentation">share</i><span class="visuallyhidden">share comment</span>
+              </button>
+            </nav>
+            <div class="comment__answers">
+              <div class="comment">
+                <header class="comment__header">
+                  <img src="images/co2.jpg" class="comment__avatar">
+                  <div class="comment__author">
+                    <strong>John Dufry</strong>
+                    <span>2 days ago</span>
+                  </div>
+                </header>
+                <div class="comment__text">
+                  Yep, agree!
+                </div>
+                <nav class="comment__actions">
+                  <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                    <i class="material-icons" role="presentation">thumb_up</i><span class="visuallyhidden">like comment</span>
+                  </button>
+                  <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                    <i class="material-icons" role="presentation">thumb_down</i><span class="visuallyhidden">dislike comment</span>
+                  </button>
+                  <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                    <i class="material-icons" role="presentation">share</i><span class="visuallyhidden">share comment</span>
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+          -->
+        </div>
+      </div>
+
+      <nav class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
+        <a class="demo-nav__button">
+          <button
+              id="prev" me="{{.Id}}"
+              class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
+              role="presentation">
+            <i class="material-icons">arrow_back</i>
+          </button>
+          上一篇
+        </a>
+        <div class="section-spacer"></div>
+        <a class="demo-nav__button">
+          下一篇
+          <button
+              id="next" me="{{.Id}}"
+              class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
+              role="presentation">
+            <i class="material-icons">arrow_forward</i>
+          </button>
+        </a>
+      </nav>
+    </div>
+    <footer class="mdl-mini-footer">
+      <div class="mdl-mini-footer--left-section">
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__gmail">
+          <span class="visuallyhidden">Gmail</span>
+        </button>
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__stackoverflow">
+          <span class="visuallyhidden">Stackoverflow</span>
+        </button>
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__github">
+          <span class="visuallyhidden">Github</span>
+        </button>
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__instagram">
+          <span class="visuallyhidden">Instagram</span>
+        </button>
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__medium">
+          <span class="visuallyhidden">Medium</span>
+        </button>
+        <button class="mdl-mini-footer--social-btn social-btn social-btn__twitter">
+          <span class="visuallyhidden">Twitter</span>
+        </button>
+      </div>
+      <div class="mdl-mini-footer--right-section">
+        <button class="mdl-mini-footer--social-btn social-btn__share">
+          <i class="material-icons" role="presentation">share</i>
+          <span class="visuallyhidden">share</span>
+        </button>
+      </div>
+    </footer>
+    <div id="toast" aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+      <div class="mdl-snackbar__text"></div>
+      <button type="button" class="mdl-snackbar__action"></button>
+    </div>
+  </main>
+  <div class="mdl-layout__obfuscator"></div>
+</div>
+<script src="/assets/bower_components/material-design-lite/material.min.js"></script>
+<script src="/assets/scripts/xiaolongtongxue.js"></script>
+<script type="application/javascript">
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var toast = document.getElementById('toast');
+
+  if (window.history.length > 1) {
+    document.getElementById('back').addEventListener('click', function () {
+      window.history.back();
+    });
+  } else {
+    document.getElementById('back').style.display = 'none';
+  }
+
+  document.getElementById('home').addEventListener('click', function () {
+    window.open(window.location.protocol + '//' + window.location.host, "_self");
+  });
+
+  prev.addEventListener('click', function () {
+    var me = prev.getAttribute('me');
+    go(me, -1);
+  });
+
+  next.addEventListener('click', function () {
+    var me = next.getAttribute('me');
+    go(me, 1);
+  });
+
+  function go(me, inc) {
+    ajax(
+        'GET',
+        '/articles/inc?inc=' + inc + '&me=' + me,
+        function (m) {
+          console.log(m);
+          window.open(window.location.protocol + '//' + window.location.host + m.id, '_self');
+        },
+        function (statusCode) {
+          console.log(statusCode);
+          var msg;
+          if (statusCode == 404) {
+            if (inc > 0) {
+              msg = '没有下一篇了';
+            } else {
+              msg = '没有上一篇了';
+            }
+          } else {
+            msg = '出错了: ' + statusCode;
+          }
+          toast.MaterialSnackbar.showSnackbar({message: msg});
+        }
+    );
+  }
+</script>
+</body>
+</html>
