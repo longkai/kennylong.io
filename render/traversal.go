@@ -73,6 +73,10 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	if err != nil {
 		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))
 	}
+	// if the file is reserved, no render (default is false)
+	if m.Reserved {
+		return
+	}
 	b, err := m.Render()
 	if err != nil {
 		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))

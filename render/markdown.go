@@ -27,7 +27,7 @@ type MarkdownMeta struct {
 	Id         string    `json:"id"`
 	Title      string    `json:"title"`
 	Tags       []string  `json:"tags"`
-	Publish    bool      `json:"publish"`
+	Reserved   bool      `json:"reserved"`
 	Date       time.Time `json:"date"`
 	Weather    string    `json:"weather"`
 	Summary    string    `json:"summary"`
