@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
 	"github.com/longkai/xiaolongtongxue.com/render"
@@ -32,7 +33,11 @@ var (
 )
 
 func main() {
-	env.InitEnv("testing_env.json")
+	port := flag.Int("port", 1217, "http port number")
+	conf := flag.String("conf", "testing_env.json", "config file path")
+	flag.Parse()
+	env.InitEnv(*conf)
+
 	var list articles = render.Traversal(env.Config().ArticleRepo)
 	sort.Sort(list)
 	http.HandleFunc("/", list.home)
@@ -46,7 +51,7 @@ func main() {
 		http.Handle(fmt.Sprintf("/%s/", dir), http.HandlerFunc(article))
 	}
 	fmt.Printf("\nHappy hackcing :)\n")
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
 func article(resp http.ResponseWriter, req *http.Request) {
