@@ -47,13 +47,17 @@ func doTraversal(dir string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 		case strings.HasPrefix(entry.Name(), "."):
 			// dot file, ignore
 		case entry.IsDir():
-			// dir, dive into
-			n.Add(1)
-			go doTraversal(fname, n, metas)
+			if !env.Ignored(fname) {
+				// dir, dive into
+				n.Add(1)
+				go doTraversal(fname, n, metas)
+			}
 		case strings.HasSuffix(entry.Name(), ".md"):
-			// a .md file, render it
-			n.Add(1)
-			go doRender(fname, n, metas)
+			if !env.Ignored(fname) {
+				// a .md file, render it
+				n.Add(1)
+				go doRender(fname, n, metas)
+			}
 		default:
 			// static file, copy it
 			copyFile(fname, filepath.Join(env.GEN, fname[len(env.Config().ArticleRepo):]))
@@ -73,8 +77,8 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	if err != nil {
 		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))
 	}
-	// if the file is reserved, no render (default is false)
-	if m.Reserved {
+	// if the file is reserved or no title, no render (default is false)
+	if m.Reserved || m.Title == "" {
 		return
 	}
 	b, err := m.Render()

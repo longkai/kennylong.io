@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -129,6 +130,16 @@ func Tags(m []string) string {
 		}
 	}
 	return s
+}
+
+func IsRelImage(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	if s[0] == '/' || strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://") {
+		return false
+	}
+	return true
 }
 
 type MarkdownRender struct {

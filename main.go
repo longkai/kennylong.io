@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	MAX_PAGE_SIZE = 20
+	MAX_PAGE_SIZE     = 20
+	DEFAULT_PAGE_SIZE = 7
 )
 
 type articles []render.MarkdownMeta
@@ -24,6 +25,7 @@ var (
 		"tags":     render.Tags,
 		"hasColor": render.HasColor,
 		"hasImage": render.HasImage,
+		"relImage": render.IsRelImage,
 	}).ParseFiles(env.Template + "/index.html"))
 
 	staticFs = http.FileServer(http.Dir(env.GEN))
@@ -37,15 +39,17 @@ func main() {
 	http.HandleFunc("/articles/inc", list.inc)
 	http.HandleFunc("/pagination", list.pagination)
 	http.HandleFunc("/len", list.len)
+	// frontend static files
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-	// article
-	http.Handle("/articles/", http.HandlerFunc(article))
+	// gen articles
+	for _, dir := range env.Config().PublishDirs {
+		http.Handle(fmt.Sprintf("/%s/", dir), http.HandlerFunc(article))
+	}
 	fmt.Printf("\nHappy hackcing :)\n")
 	log.Fatalln(http.ListenAndServe(":8080", nil))
 }
 
 func article(resp http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.URL.Path)
 	staticFs.ServeHTTP(resp, req)
 }
 
@@ -100,7 +104,7 @@ func (a articles) pagination(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	p, size := 0, 7                               // default page and size per page
+	p, size := 0, DEFAULT_PAGE_SIZE               // default page and size per page
 	p, _ = strconv.Atoi(req.URL.Query().Get("p")) // don' t care
 	if str := req.URL.Query().Get("size"); str != "" {
 		tmp, err := strconv.Atoi(str)
@@ -150,7 +154,13 @@ func (a articles) home(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := homeTmpl.Execute(resp, a); err != nil {
+	var out articles
+	if len(a) < DEFAULT_PAGE_SIZE {
+		out = a
+	} else {
+		out = a[:DEFAULT_PAGE_SIZE]
+	}
+	if err := homeTmpl.Execute(resp, out); err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 	}
 }

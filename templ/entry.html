@@ -21,7 +21,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="小龙同学">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <title>{{.Title}} - 小龙同学</title>
+  <title>{{if .Title}}{{.Title}} - {{end}}小龙同学</title>
 
   <!-- Add to homescreen for Chrome on Android -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -71,7 +71,7 @@
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
           for="demo-menu-lower-right">
         <li class="mdl-menu__item" id="home">首页</li>
-        <li class="mdl-menu__item">About</li>
+        <!--<li class="mdl-menu__item" id="abuout">About</li>-->
       </ul>
     </div>
     <div class="demo-blog__posts mdl-grid">
@@ -250,6 +250,9 @@
 
   document.getElementById('home').addEventListener('click', function () {
     window.open(window.location.protocol + '//' + window.location.host, "_self");
+  });
+  document.getElementById('about').addEventListener('click', function () {
+    window.open(window.location.protocol + '//' + window.location.host + '/misc/resume', '_blank');
   });
 
   prev.addEventListener('click', function () {

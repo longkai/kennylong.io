@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -14,8 +15,9 @@ const (
 )
 
 type Env struct {
-	AccessToken string `json:"access_token"`
-	ArticleRepo string `json:"article_repo"`
+	AccessToken string   `json:"access_token"`
+	ArticleRepo string   `json:"article_repo"`
+	PublishDirs []string `json:"publish_dirs"`
 }
 
 var (
@@ -62,4 +64,30 @@ func Config() Env {
 		panic(fmt.Sprintf("plz call `InitEnv(string)` first"))
 	}
 	return *env
+}
+
+// Ignore file not in the PublishDirs or top level *.md file
+func Ignored(path string) bool {
+	// ignore top level *.md file since it doesn't make any sense, we won't use it as /index.html
+	if strings.HasSuffix(path, ".md") {
+		// find last `/`
+		test := -1
+		for i := len(path) - 1; i >= 0; i-- {
+			if path[i] == '/' {
+				test = i
+				break
+			}
+		}
+
+		if test != -1 && path[0:test] == env.ArticleRepo {
+			return true
+		}
+	}
+
+	for _, v := range env.PublishDirs {
+		if strings.HasPrefix(path, filepath.Join(env.ArticleRepo, v)) {
+			return false
+		}
+	}
+	return true
 }
