@@ -18,32 +18,6 @@ const (
 	DEFAULT_PAGE_SIZE = 7
 )
 
-type articles []render.MarkdownMeta
-
-func (a articles) offset(start, offset int) articles {
-	if start > len(a) {
-		// no more
-		return a[len(a):]
-	}
-	if start+offset > len(a) {
-		// not enough
-		return a[start:]
-	}
-	return a[start : start+offset]
-}
-
-func (a articles) render(resp http.ResponseWriter) {
-	b, err := json.Marshal(a)
-	if err != nil {
-		log.Println(err.Error()) // log locally
-		http.Error(resp, "", http.StatusInternalServerError)
-		return
-	}
-
-	resp.Header().Add("Content-Type", "application/json; charset=utf-8")
-	fmt.Fprintf(resp, "%s", b)
-}
-
 var (
 	homeTmpl = template.Must(template.New("index.html").Funcs(template.FuncMap{
 		"daysAgo":  render.DaysAgo,
@@ -55,14 +29,14 @@ var (
 
 	staticFs = http.FileServer(http.Dir(env.GEN))
 
-	requests  = make(chan articles) // if chan value is nil, then clients want our data or just new incoming data source
-	responses = make(chan articles)
+	requests  = make(chan render.Articles) // if chan value is nil, then clients want our data or just new incoming data source
+	responses = make(chan render.Articles)
 )
 
 // looper confine all data for safety concurrency
 // NOTE: we just simply return the data we hold, it's okay since it just a blog =.=, no write to the data itsefl now :)
 func looper() {
-	var list articles = render.Traversal(env.Config().ArticleRepo)
+	var list render.Articles = render.Traversal(env.Config().ArticleRepo)
 	sort.Sort(list)
 	fmt.Printf("\nHappy hackcing :)\n")
 	for {
@@ -92,6 +66,8 @@ func main() {
 	http.HandleFunc("/articles/inc", inc)
 	http.HandleFunc("/pagination", pagination)
 	http.HandleFunc("/count", count)
+	// api
+	http.Handle("/api/", http.StripPrefix("/api", http.HandlerFunc(api)))
 	// frontend static files
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	// gen articles
@@ -99,6 +75,13 @@ func main() {
 		http.Handle(fmt.Sprintf("/%s/", dir), http.HandlerFunc(article))
 	}
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
+}
+
+func api(resp http.ResponseWriter, req *http.Request) {
+	switch req.URL.Path {
+	case "/github/hook": // github webhook
+		fmt.Println("github ")
+	}
 }
 
 func article(resp http.ResponseWriter, req *http.Request) {
@@ -185,8 +168,8 @@ func pagination(resp http.ResponseWriter, req *http.Request) {
 
 	requests <- nil
 	a := <-responses
-	result := a.offset(p*size, size)
-	result.render(resp)
+	result := a.Offset(p*size, size)
+	result.Render(resp)
 }
 
 func home(resp http.ResponseWriter, req *http.Request) {
@@ -202,7 +185,7 @@ func home(resp http.ResponseWriter, req *http.Request) {
 
 	requests <- nil
 	a := <-responses
-	var out articles
+	var out render.Articles
 	if len(a) < DEFAULT_PAGE_SIZE {
 		out = a
 	} else {
@@ -226,9 +209,3 @@ func mustNature(n int, key string) error {
 	}
 	return nil
 }
-
-func (a articles) Len() int { return len(a) }
-
-func (a articles) Less(i, j int) bool { return a[i].Date.After(a[j].Date) }
-
-func (a articles) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
