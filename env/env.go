@@ -15,6 +15,7 @@ const (
 )
 
 type Env struct {
+	HookSecret  string   `json:"hook_secret"`
 	AccessToken string   `json:"access_token"`
 	ArticleRepo string   `json:"article_repo"`
 	PublishDirs []string `json:"publish_dirs"`
