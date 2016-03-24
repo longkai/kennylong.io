@@ -27,7 +27,7 @@ var (
 		"hasColor": render.HasColor,
 		"hasImage": render.HasImage,
 		"relImage": render.IsRelImage,
-	}).ParseFiles(env.Template + "/index.html"))
+	}).ParseFiles(env.Template + "/index.html", env.Template + "/include.html"))
 
 	staticFs = http.FileServer(http.Dir(env.GEN))
 )

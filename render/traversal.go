@@ -20,7 +20,7 @@ var (
 		"tags":     Tags,
 		"hasColor": HasColor,
 		"hasImage": HasImage,
-	}).ParseFiles(env.Template + "/entry.html"))
+	}).ParseFiles(env.Template + "/entry.html", env.Template + "/include.html"))
 )
 
 func Traversal(root string) []MarkdownMeta {
