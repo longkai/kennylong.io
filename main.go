@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+  "github.com/longkai/xiaolongtongxue.com/github"
 )
 
 const (
@@ -38,11 +39,11 @@ var (
 func looper() {
 	var list render.Articles = render.Traversal(env.Config().ArticleRepo)
 	sort.Sort(list)
-	fmt.Printf("\nHappy hackcing :)\n")
+	fmt.Printf("\nTotal article: %d, Happy hackcing :)\n", len(list))
 	for {
 		select {
 		case newly := <-requests:
-			if newly == nil {
+			if len(newly) == 0 {
 				// clients want our data
 				responses <- list
 			} else {
@@ -80,7 +81,7 @@ func main() {
 func api(resp http.ResponseWriter, req *http.Request) {
 	switch req.URL.Path {
 	case "/github/hook": // github webhook
-		fmt.Println("github ")
+    github.Hook(resp, req, requests)
 	}
 }
 
