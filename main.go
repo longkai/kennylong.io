@@ -37,7 +37,7 @@ var (
 // looper confine all data for safety concurrency
 // NOTE: we just simply return the data we hold, it's okay since it just a blog =.=, no write to the data itsefl now :)
 func looper() {
-	var list render.Articles = render.Traversal(env.Config().ArticleRepo)
+	list := render.Traversal(env.Config().ArticleRepo)
 	sort.Sort(list)
 	fmt.Printf("\nTotal article: %d, Happy hackcing :)\n", len(list))
 	for {

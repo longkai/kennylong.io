@@ -47,12 +47,13 @@ func NewMarkdown(src string) (*Markdown, error) {
 	if err != nil {
 		return nil, err
 	}
-	// the first line is the title
-	title, b := parseTitle(b)
 
+	title, b := parseTitle(b) // seperate title block
 	text, meta := separateTextAndMeta(b)
 	meta.Id = trimBasename(src[len(env.Config().ArticleRepo):])
-	meta.Title = title
+	if meta.Title == "" { // if title not provided in json meta
+		meta.Title = title
+	}
 	m := new(Markdown)
 	m.Text = text
 	m.MarkdownMeta = meta

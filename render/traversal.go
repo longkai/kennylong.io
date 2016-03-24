@@ -23,7 +23,7 @@ var (
 	}).ParseFiles(env.Template+"/entry.html", env.Template+"/include.html"))
 )
 
-func Traversal(root string) []MarkdownMeta {
+func Traversal(root string) Articles {
 	metas := make(chan MarkdownMeta)
 	var n sync.WaitGroup
 	n.Add(1)
@@ -32,7 +32,7 @@ func Traversal(root string) []MarkdownMeta {
 		n.Wait()
 		close(metas)
 	}()
-	results := []MarkdownMeta{}
+	results := Articles{}
 	for m := range metas {
 		results = append(results, m)
 	}
@@ -79,8 +79,8 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
 		return
 	}
-	// if the file is reserved or no title, no render (default is false)
-	if m.Reserved || m.Title == "" {
+	// if the file is reserved, no render (default is false)
+	if m.Reserved {
 		return
 	}
 	b, err := m.Render()
@@ -98,8 +98,9 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 		// write the template
 		m.Html = template.HTML(b)
 		if err = entryTempl.Execute(f, m); err != nil {
-			panic(fmt.Sprintf("write entry template fail, %v\n", err))
-		} else {
+			fmt.Fprintf(os.Stderr, "write entry template fail, %v\n", err)
+		} else if m.Title != "" {
+			// by default, a non titled article will not appear in the article list...
 			metas <- m.MarkdownMeta
 		}
 	}
