@@ -20,7 +20,7 @@ var (
 		"tags":     Tags,
 		"hasColor": HasColor,
 		"hasImage": HasImage,
-	}).ParseFiles(env.Template + "/entry.html", env.Template + "/include.html"))
+	}).ParseFiles(env.Template+"/entry.html", env.Template+"/include.html"))
 )
 
 func Traversal(root string) []MarkdownMeta {
@@ -75,7 +75,9 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	}()
 	m, err := NewMarkdown(fname)
 	if err != nil {
-		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))
+		// if render fail, just skip it, same below
+		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
+		return
 	}
 	// if the file is reserved or no title, no render (default is false)
 	if m.Reserved || m.Title == "" {
@@ -83,14 +85,15 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	}
 	b, err := m.Render()
 	if err != nil {
-		panic(fmt.Sprintf("render md %s fail, %v\n", fname, err))
+		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
+		return
 	}
 	// save the file as index.html
 	dest := filepath.Join(env.GEN, m.Id+"/index.html")
 	err = ensureDir(dest)
-	fmt.Printf("%s -> %s\n", fname, dest)
+	// fmt.Printf("%s -> %s\n", fname, dest)
 	if f, err := os.Create(dest); err != nil {
-		panic(fmt.Sprintf("create dest file fail, %v\n", err))
+		fmt.Fprintf(os.Stderr, "create dest file fail, %v\n", err)
 	} else {
 		// write the template
 		m.Html = template.HTML(b)

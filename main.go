@@ -5,13 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
+	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/longkai/xiaolongtongxue.com/render"
 	"html/template"
 	"log"
 	"net/http"
 	"sort"
 	"strconv"
-  "github.com/longkai/xiaolongtongxue.com/github"
 )
 
 const (
@@ -81,7 +81,7 @@ func main() {
 func api(resp http.ResponseWriter, req *http.Request) {
 	switch req.URL.Path {
 	case "/github/hook": // github webhook
-    github.Hook(resp, req, requests)
+		github.Hook(resp, req, requests)
 	}
 }
 
