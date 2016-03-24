@@ -23,6 +23,10 @@ _testmain.go
 *.test
 *.prof
 
+# idea support
+.idea/
+*.iml
+
 # self retain
 testing_env.json
 
