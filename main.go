@@ -20,6 +20,30 @@ const (
 
 type articles []render.MarkdownMeta
 
+func (a articles) offset(start, offset int) articles {
+	if start > len(a) {
+		// no more
+		return a[len(a):]
+	}
+	if start+offset > len(a) {
+		// not enough
+		return a[start:]
+	}
+	return a[start : start+offset]
+}
+
+func (a articles) render(resp http.ResponseWriter) {
+	b, err := json.Marshal(a)
+	if err != nil {
+		log.Println(err.Error()) // log locally
+		http.Error(resp, "", http.StatusInternalServerError)
+		return
+	}
+
+	resp.Header().Add("Content-Type", "application/json; charset=utf-8")
+	fmt.Fprintf(resp, "%s", b)
+}
+
 var (
 	homeTmpl = template.Must(template.New("index.html").Funcs(template.FuncMap{
 		"daysAgo":  render.DaysAgo,
@@ -27,10 +51,34 @@ var (
 		"hasColor": render.HasColor,
 		"hasImage": render.HasImage,
 		"relImage": render.IsRelImage,
-	}).ParseFiles(env.Template + "/index.html", env.Template + "/include.html"))
+	}).ParseFiles(env.Template+"/index.html", env.Template+"/include.html"))
 
 	staticFs = http.FileServer(http.Dir(env.GEN))
+
+	requests  = make(chan articles) // if chan value is nil, then clients want our data or just new incoming data source
+	responses = make(chan articles)
 )
+
+// looper confine all data for safety concurrency
+// NOTE: we just simply return the data we hold, it's okay since it just a blog =.=, no write to the data itsefl now :)
+func looper() {
+	var list articles = render.Traversal(env.Config().ArticleRepo)
+	sort.Sort(list)
+	fmt.Printf("\nHappy hackcing :)\n")
+	for {
+		select {
+		case newly := <-requests:
+			if newly == nil {
+				// clients want our data
+				responses <- list
+			} else {
+				// incoming new data!
+				sort.Sort(newly)
+				list = newly
+			}
+		}
+	}
+}
 
 func main() {
 	port := flag.Int("port", 1217, "http port number")
@@ -38,19 +86,18 @@ func main() {
 	flag.Parse()
 	env.InitEnv(*conf)
 
-	var list articles = render.Traversal(env.Config().ArticleRepo)
-	sort.Sort(list)
-	http.HandleFunc("/", list.home)
-	http.HandleFunc("/articles/inc", list.inc)
-	http.HandleFunc("/pagination", list.pagination)
-	http.HandleFunc("/len", list.len)
+	go looper()
+
+	http.HandleFunc("/", home)
+	http.HandleFunc("/articles/inc", inc)
+	http.HandleFunc("/pagination", pagination)
+	http.HandleFunc("/count", count)
 	// frontend static files
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	// gen articles
 	for _, dir := range env.Config().PublishDirs {
 		http.Handle(fmt.Sprintf("/%s/", dir), http.HandlerFunc(article))
 	}
-	fmt.Printf("\nHappy hackcing :)\n")
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
@@ -58,7 +105,7 @@ func article(resp http.ResponseWriter, req *http.Request) {
 	staticFs.ServeHTTP(resp, req)
 }
 
-func (a articles) inc(resp http.ResponseWriter, req *http.Request) {
+func inc(resp http.ResponseWriter, req *http.Request) {
 	if err := requiredMethod(http.MethodGet, req.Method); err != nil {
 		http.Error(resp, err.Error(), http.StatusMethodNotAllowed)
 		return
@@ -68,6 +115,8 @@ func (a articles) inc(resp http.ResponseWriter, req *http.Request) {
 	inc, _ = strconv.Atoi(req.URL.Query().Get("inc"))
 
 	// TODO: seq search, since it's not large
+	requests <- nil
+	a := <-responses
 	i := -1
 	for j, m := range a {
 		if m.Id == id {
@@ -95,15 +144,17 @@ func (a articles) inc(resp http.ResponseWriter, req *http.Request) {
 }
 
 // this should be used rarely
-func (a articles) len(resp http.ResponseWriter, req *http.Request) {
+func count(resp http.ResponseWriter, req *http.Request) {
 	if err := requiredMethod(http.MethodGet, req.Method); err != nil {
 		http.Error(resp, err.Error(), http.StatusMethodNotAllowed)
 		return
 	}
+	requests <- nil
+	a := <-responses
 	fmt.Fprintf(resp, "%d", len(a))
 }
 
-func (a articles) pagination(resp http.ResponseWriter, req *http.Request) {
+func pagination(resp http.ResponseWriter, req *http.Request) {
 	if err := requiredMethod(http.MethodGet, req.Method); err != nil {
 		http.Error(resp, err.Error(), http.StatusMethodNotAllowed)
 		return
@@ -132,23 +183,13 @@ func (a articles) pagination(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	requests <- nil
+	a := <-responses
 	result := a.offset(p*size, size)
 	result.render(resp)
 }
 
-func (a articles) offset(start, offset int) articles {
-	if start > len(a) {
-		// no more
-		return a[len(a):]
-	}
-	if start+offset > len(a) {
-		// not enough
-		return a[start:]
-	}
-	return a[start : start+offset]
-}
-
-func (a articles) home(resp http.ResponseWriter, req *http.Request) {
+func home(resp http.ResponseWriter, req *http.Request) {
 	if req.URL.Path != "/" {
 		http.Error(resp, "404 page not found", http.StatusNotFound)
 		return
@@ -159,6 +200,8 @@ func (a articles) home(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	requests <- nil
+	a := <-responses
 	var out articles
 	if len(a) < DEFAULT_PAGE_SIZE {
 		out = a
@@ -168,18 +211,6 @@ func (a articles) home(resp http.ResponseWriter, req *http.Request) {
 	if err := homeTmpl.Execute(resp, out); err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func (a articles) render(resp http.ResponseWriter) {
-	b, err := json.Marshal(a)
-	if err != nil {
-		log.Println(err.Error()) // log locally
-		http.Error(resp, "", http.StatusInternalServerError)
-		return
-	}
-
-	resp.Header().Add("Content-Type", "application/json; charset=utf-8")
-	fmt.Fprintf(resp, "%s", b)
 }
 
 func requiredMethod(required, got string) error {
