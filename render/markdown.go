@@ -21,7 +21,7 @@ var (
 	metaRegexp  = regexp.MustCompile(`#+\s*EOF\s+` + fenced_block + `json\s+([\s\S]*)\s+` + fenced_block)
 )
 
-type MarkdownMeta struct {
+type markdownMeta struct {
 	Id         string    `json:"id"`
 	Title      string    `json:"title"`
 	Tags       []string  `json:"tags"`
@@ -33,27 +33,27 @@ type MarkdownMeta struct {
 	Background string    `json:"background"`
 }
 
-type Markdown struct {
+type markdown struct {
+	markdownMeta
 	Text string
 	Html template.HTML
-	MarkdownMeta
 }
 
-func NewMarkdown(src string) (*Markdown, error) {
+func newMarkdown(src string) (*markdown, error) {
 	b, err := ioutil.ReadFile(src)
 	if err != nil {
 		return nil, err
 	}
 
-	title, b := parseTitle(b) // seperate title block
+	title, b := parseTitle(b) // separate title block
 	text, meta := separateTextAndMeta(b)
 	meta.Id = trimBasename(src[len(env.Config().ArticleRepo):])
 	if meta.Title == "" { // if title not provided in json meta
 		meta.Title = title
 	}
-	m := new(Markdown)
+	m := new(markdown)
 	m.Text = text
-	m.MarkdownMeta = meta
+	m.markdownMeta = meta
 	return m, nil
 }
 
@@ -67,8 +67,8 @@ func parseTitle(slice []byte) (string, []byte) {
 	return t, slice
 }
 
-func separateTextAndMeta(slice []byte) (string, MarkdownMeta) {
-	meta := MarkdownMeta{}
+func separateTextAndMeta(slice []byte) (string, markdownMeta) {
+	meta := markdownMeta{}
 	result := metaRegexp.FindSubmatch(slice)
 	if result == nil {
 		return string(slice), meta

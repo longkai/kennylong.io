@@ -26,7 +26,7 @@ var (
 )
 
 func Traversal(root string) Articles {
-	metas := make(chan MarkdownMeta)
+	metas := make(chan markdownMeta)
 	var n sync.WaitGroup
 	n.Add(1)
 	doTraversal(root, &n, metas)
@@ -42,7 +42,7 @@ func Traversal(root string) Articles {
 	return a
 }
 
-func doTraversal(dir string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
+func doTraversal(dir string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	defer n.Done()
 	for _, entry := range dirents(dir) {
 		fname := filepath.Join(dir, entry.Name())
@@ -68,7 +68,7 @@ func doTraversal(dir string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	}
 }
 
-func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
+func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	defer n.Done()
 	// acquire token
 	renderSema <- struct{}{}
@@ -76,7 +76,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 		// release token
 		<-renderSema
 	}()
-	m, err := NewMarkdown(fname)
+	m, err := newMarkdown(fname)
 	if err != nil {
 		// if render fail, just skip it, same below
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
@@ -104,7 +104,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 			fmt.Fprintf(os.Stderr, "write entry template fail, %v\n", err)
 		} else if m.Title != "" {
 			// by default, a non titled article will not appear in the article list...
-			metas <- m.MarkdownMeta
+			metas <- m.markdownMeta
 		}
 	}
 }

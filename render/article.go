@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type Articles []MarkdownMeta
+type Articles []markdownMeta
 
 func (a Articles) Offset(start, offset int) Articles {
 	if start > len(a) {
