@@ -141,9 +141,10 @@
           </div>
           -->
         </div>
+        <div id="progress" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
       </div>
 
-      <nav class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
+      <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
         <a class="demo-nav__button">
           <button
               id="prev" me="{{.Id}}"
@@ -174,6 +175,11 @@
   var prev = document.getElementById('prev');
   var next = document.getElementById('next');
   var toast = document.getElementById('toast');
+  var progress = document.getElementById('progress');
+
+  // hide progress first
+  progress.style.width = '100%';
+  progress.style.display = 'none';
 
   if (window.history.length > 1) {
     document.getElementById('back').addEventListener('click', function () {
@@ -198,15 +204,18 @@
   });
 
   function go(me, inc) {
+    toggleProgress(true);
     ajax(
         'GET',
         '/articles/inc?inc=' + inc + '&me=' + me,
         function (m) {
           console.log(m);
+          toggleProgress(false);
           window.open(window.location.protocol + '//' + window.location.host + m.id, '_self');
         },
         function (statusCode) {
           console.log(statusCode);
+          toggleProgress(false);
           var msg;
           if (statusCode == 404) {
             if (inc > 0) {
@@ -220,6 +229,12 @@
           toast.MaterialSnackbar.showSnackbar({message: msg});
         }
     );
+  }
+
+  function toggleProgress(show) {
+    progress.style.display = show ? 'block' : 'none';
+    prev.disabled = show;
+    next.disabled = show;
   }
 </script>
 </body>
