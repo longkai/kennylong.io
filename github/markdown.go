@@ -35,7 +35,7 @@ func (m *markdownRender) Read(p []byte) (n int, err error) {
 
 // Render the makrdown to html []byte with Github API.
 func Markdown(text string) ([]byte, error) {
-	m := &markdownRender{text, "gfm", "github/longkai", nil}
+	m := &markdownRender{text, "markdown", "", nil}
 	req, err := http.NewRequest(http.MethodPost, endpoint+"/markdown", m)
 	if err != nil {
 		return nil, err
