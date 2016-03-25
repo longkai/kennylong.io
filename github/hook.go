@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
-	"github.com/longkai/xiaolongtongxue.com/render"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,13 +13,13 @@ import (
 	"os/exec"
 )
 
-func Hook(resp http.ResponseWriter, req *http.Request, requests chan<- render.Articles) {
+func Hook(resp http.ResponseWriter, req *http.Request, invalidate chan<- struct{}) {
+	event := req.Header.Get("X-GitHub-Event")
 	signature := req.Header.Get("X-Hub-Signature")
 	delivery := req.Header.Get("X-GitHub-Delivery")
-	event := req.Header.Get("X-GitHub-Event")
 	// handle security problem
 	defer req.Body.Close()
-	if err := handleSecuriy(req.Body, signature); err != nil {
+	if err := handleSecurity(req.Body, signature); err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -28,13 +27,13 @@ func Hook(resp http.ResponseWriter, req *http.Request, requests chan<- render.Ar
 	log.Printf("receive github webhook, event: %q, delivery: %q, signature: %q\n", event, delivery, signature)
 	if event == "push" {
 		// NOTE: we do a simple job, each time we receive a push hook, just pull the master brach, then render again
-		go pull(requests)
+		go pull(invalidate)
 	}
 	// send pong message back to Github
 	fmt.Fprint(resp, "thx :)")
 }
 
-func pull(requests chan<- render.Articles) {
+func pull(invalidate chan<- struct{}) {
 	log.Println("executing shell command...")
 	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd %s; git pull;", env.Config().ArticleRepo))
 	b, err := cmd.Output()
@@ -43,17 +42,11 @@ func pull(requests chan<- render.Articles) {
 		return
 	}
 	fmt.Printf("%s\n", b)
-	// go render again :)
-	go doRender(requests)
+	// request render again :)
+	invalidate <- struct{}{}
 }
 
-func doRender(requests chan<- render.Articles) {
-	articles := render.Traversal(env.Config().ArticleRepo)
-	log.Printf("hook -> pull -> reload %d articles :) \n", len(articles))
-	requests <- articles
-}
-
-func handleSecuriy(reader io.Reader, signature string) error {
+func handleSecurity(reader io.Reader, signature string) error {
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err

@@ -4,10 +4,12 @@ package render
 import (
 	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
+	"github.com/longkai/xiaolongtongxue.com/github"
 	"html/template"
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -32,11 +34,12 @@ func Traversal(root string) Articles {
 		n.Wait()
 		close(metas)
 	}()
-	results := Articles{}
+	a := Articles{}
 	for m := range metas {
-		results = append(results, m)
+		a = append(a, m)
 	}
-	return results
+	sort.Sort(a)
+	return a
 }
 
 func doTraversal(dir string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
@@ -83,7 +86,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- MarkdownMeta) {
 	if m.Reserved {
 		return
 	}
-	b, err := m.Render()
+	b, err := github.Markdown(m.Text)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
 		return

@@ -2,29 +2,14 @@ package render
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"testing"
 )
 
-func TestMarkdownRederRead(t *testing.T) {
-	m := New("hello, world")
-	if _, err := ioutil.ReadAll(m); err != nil {
-		t.Errorf("reading fail, %v\n", err)
-	}
-}
-
-func TestMarkdownRender(t *testing.T) {
-	m := New("Hello world github/longkai#1 **cool**, and #1!")
-	if _, err := m.Render(); err != nil {
-		t.Errorf("render fail, %v\n", err)
-	}
-}
-
 func TestMetadataRegexp(t *testing.T) {
-	s := fmt.Sprintf("### EOF \n%sjson\n%s\n%s", CODE_BLOCK, `{
+	s := fmt.Sprintf("### EOF \n%sjson\n%s\n%s", fenced_block, `{
 	"key": "value"
-}`, CODE_BLOCK)
+}`, fenced_block)
 	if !metaRegexp.MatchString(s) {
 		t.Errorf("%s not match json block!\n", s)
 	}
@@ -54,9 +39,9 @@ func TestParseTitle(t *testing.T) {
 }
 
 func TestSeparateMetaAndText(t *testing.T) {
-	s := fmt.Sprintf("heheh### EOF \n%sjson\n%s\n%s", CODE_BLOCK, `{
+	s := fmt.Sprintf("heheh### EOF \n%sjson\n%s\n%s", fenced_block, `{
 		"date": "2006-01-02T15:04:05+07:00"
-}`, CODE_BLOCK)
+}`, fenced_block)
 	text, _ := separateTextAndMeta([]byte(s))
 	if strings.Contains(text, "EOF") {
 		t.Errorf("should not contain **EOF**, got %s\n", text)
@@ -83,11 +68,3 @@ func TestTrimBasename(t *testing.T) {
 		}
 	}
 }
-
-/*
-func TestNewMarkDown(t *testing.T) {
-	// TODO: just a simple testing... any better way to do?
-	m, _ := NewMarkdown("path/to/md")
-	fmt.Println(m)
-}
-*/

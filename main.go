@@ -10,7 +10,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sort"
 	"strconv"
 )
 
@@ -30,29 +29,33 @@ var (
 
 	staticFs = http.FileServer(http.Dir(env.GEN))
 
-	requests  = make(chan render.Articles) // if chan value is nil, then clients want our data or just new incoming data source
-	responses = make(chan render.Articles)
+	requests       = make(chan struct{})        // clients want our data
+	responses      = make(chan render.Articles) // response to client with the data
+	invalidate     = make(chan struct{})        // like android, calling this perform a redraw(re-render all articles)
+	postInvalidate = make(chan render.Articles) // send the newly rendered articles back to looper
 )
 
 // looper confine all data for safety concurrency
 // NOTE: we just simply return the data we hold, it's okay since it just a blog =.=, no write to the data itsefl now :)
 func looper() {
-	list := render.Traversal(env.Config().ArticleRepo)
-	sort.Sort(list)
-	fmt.Printf("\nTotal article: %d, Happy hackcing :)\n", len(list))
+	a := render.Traversal(env.Config().ArticleRepo)
+	fmt.Printf("\nTotal article: %d, Happy hackcing :)\n", len(a))
 	for {
 		select {
-		case newly := <-requests:
-			if len(newly) == 0 {
-				// clients want our data
-				responses <- list
-			} else {
-				// incoming new data!
-				sort.Sort(newly)
-				list = newly
-			}
+		case <-invalidate:
+			go doInvalidate()
+		case <-requests:
+			responses <- a
+		case newly := <-postInvalidate:
+			a = newly
 		}
 	}
+}
+
+func doInvalidate() {
+	articles := render.Traversal(env.Config().ArticleRepo)
+	log.Printf("hook -> pull -> reload %d articles :) \n", len(articles))
+	postInvalidate <- articles
 }
 
 func main() {
@@ -81,7 +84,7 @@ func main() {
 func api(resp http.ResponseWriter, req *http.Request) {
 	switch req.URL.Path {
 	case "/github/hook": // github webhook
-		github.Hook(resp, req, requests)
+		github.Hook(resp, req, invalidate)
 	}
 }
 
@@ -99,7 +102,7 @@ func inc(resp http.ResponseWriter, req *http.Request) {
 	inc, _ = strconv.Atoi(req.URL.Query().Get("inc"))
 
 	// TODO: seq search, since it's not large
-	requests <- nil
+	requests <- struct{}{}
 	a := <-responses
 	i := -1
 	for j, m := range a {
@@ -133,7 +136,7 @@ func count(resp http.ResponseWriter, req *http.Request) {
 		http.Error(resp, err.Error(), http.StatusMethodNotAllowed)
 		return
 	}
-	requests <- nil
+	requests <- struct{}{}
 	a := <-responses
 	fmt.Fprintf(resp, "%d", len(a))
 }
@@ -167,7 +170,7 @@ func pagination(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	requests <- nil
+	requests <- struct{}{}
 	a := <-responses
 	result := a.Offset(p*size, size)
 	result.Render(resp)
@@ -184,7 +187,7 @@ func home(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	requests <- nil
+	requests <- struct{}{}
 	a := <-responses
 	var out render.Articles
 	if len(a) < DEFAULT_PAGE_SIZE {
