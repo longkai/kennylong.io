@@ -13,6 +13,10 @@ import (
 )
 
 const (
+	def  = iota // render and appear in the article list
+	keep        // render but disappear in the article list
+	skip        // no render
+
 	fenced_block = "```"
 )
 
@@ -22,15 +26,15 @@ var (
 )
 
 type markdownMeta struct {
-	Id         string    `json:"id"`
-	Title      string    `json:"title"`
-	Tags       []string  `json:"tags"`
-	Reserved   bool      `json:"reserved"`
-	Date       time.Time `json:"date"`
-	Weather    string    `json:"weather"`
-	Summary    string    `json:"summary"`
-	Location   string    `json:"location"`
-	Background string    `json:"background"`
+	Id           string    `json:"id"`
+	Title        string    `json:"title"`
+	Tags         []string  `json:"tags"`
+	Date         time.Time `json:"date"`
+	Weather      string    `json:"weather"`
+	Summary      string    `json:"summary"`
+	Location     string    `json:"location"`
+	Background   string    `json:"background"`
+	RenderOption int       `json:"render_option"`
 }
 
 type markdown struct {
@@ -48,7 +52,7 @@ func newMarkdown(src string) (*markdown, error) {
 	title, b := parseTitle(b) // separate title block
 	text, meta := separateTextAndMeta(b)
 	meta.Id = trimBasename(src[len(env.Config().ArticleRepo):])
-	if meta.Title == "" { // if title not provided in json meta
+	if meta.Title == "" { // if title not provided in json meta, use the markdown body if has
 		meta.Title = title
 	}
 	m := new(markdown)

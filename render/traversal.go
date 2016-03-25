@@ -25,6 +25,7 @@ var (
 	}).ParseFiles(env.Template+"/entry.html", env.Template+"/include.html"))
 )
 
+// perform a recursive directory walking, render all *.md to html(if not skipped or kept) to the same directory layout.
 func Traversal(root string) Articles {
 	metas := make(chan markdownMeta)
 	var n sync.WaitGroup
@@ -82,8 +83,8 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
 		return
 	}
-	// if the file is reserved, no render (default is false)
-	if m.Reserved {
+	if m.RenderOption == skip {
+		fmt.Printf("%s is skipped.\n", fname)
 		return
 	}
 	b, err := github.Markdown(m.Text)
@@ -102,10 +103,15 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 		m.Html = template.HTML(b)
 		if err = entryTempl.Execute(f, m); err != nil {
 			fmt.Fprintf(os.Stderr, "write entry template fail, %v\n", err)
-		} else if m.Title != "" {
-			// by default, a non titled article will not appear in the article list...
-			metas <- m.markdownMeta
+		} else {
+			switch m.RenderOption {
+			case def:
+				metas <- m.markdownMeta
+			case keep:
+				fmt.Printf("%s is kept, will not appear in the article list.", fname)
+			}
 		}
+		m.Text, m.Html = "", "" // gc?
 	}
 }
 
