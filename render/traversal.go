@@ -79,39 +79,54 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	}()
 	m, err := newMarkdown(fname)
 	if err != nil {
-		// if render fail, just skip it, same below
+		// if anything fail, just skip it, same below
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
 		return
 	}
-	if m.RenderOption == skip {
+	switch m.RenderOption {
+	default:
+		fmt.Fprintf(os.Stderr, "render option of %s is not valid.", fname)
+		return
+	case skip:
 		fmt.Printf("%s is skipped.\n", fname)
 		return
+	case def:
+	case keep:
+		// see below
 	}
+	// save the file as index.html
+	dest := filepath.Join(env.GEN, m.Id+"/index.html")
+	err = ensureDir(dest)
+	f, err := os.Create(dest)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create dest file %s fail, %v\n", dest, err)
+		return
+	}
+
+	defer func() {
+		f.Close()
+		m.Text, m.Html = "", "" // gc?
+	}()
+
+	// call github api
 	b, err := github.Markdown(m.Text)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
 		return
 	}
-	// save the file as index.html
-	dest := filepath.Join(env.GEN, m.Id+"/index.html")
-	err = ensureDir(dest)
+	// write template to html
+	m.Html = template.HTML(b)
+	if err = entryTempl.Execute(f, m); err != nil {
+		fmt.Fprintf(os.Stderr, "write %s entry template fail, %v\n", fname, err)
+		return
+	}
+
 	// fmt.Printf("%s -> %s\n", fname, dest)
-	if f, err := os.Create(dest); err != nil {
-		fmt.Fprintf(os.Stderr, "create dest file fail, %v\n", err)
-	} else {
-		// write the template
-		m.Html = template.HTML(b)
-		if err = entryTempl.Execute(f, m); err != nil {
-			fmt.Fprintf(os.Stderr, "write entry template fail, %v\n", err)
-		} else {
-			switch m.RenderOption {
-			case def:
-				metas <- m.markdownMeta
-			case keep:
-				fmt.Printf("%s is kept, will not appear in the article list.", fname)
-			}
-		}
-		m.Text, m.Html = "", "" // gc?
+	switch m.RenderOption {
+	case def:
+		metas <- m.markdownMeta
+	case keep:
+		fmt.Printf("%s is kept, will not appear in the article list.", fname)
 	}
 }
 
