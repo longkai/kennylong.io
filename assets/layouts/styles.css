@@ -115,7 +115,7 @@ body .demo-blog {
           */
 }
 .demo-blog .mdl-card__supporting-text strong {
-  font-weight: 400;
+ /* font-weight: 400; */
 }
 .demo-blog .mdl-card__media ~ .mdl-card__supporting-text {
   min-height: 64px;
