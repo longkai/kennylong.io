@@ -39,7 +39,7 @@ var (
 // NOTE: we just simply return the data we hold, it's okay since it just a blog =.=, no write to the data itsefl now :)
 func looper() {
 	a := render.Traversal(env.Config().ArticleRepo)
-	fmt.Printf("\nTotal article: %d, Happy hackcing :)\n", len(a))
+	log.Printf("Total article: %d, Happy hackcing :)\n", len(a))
 	for {
 		select {
 		case <-invalidate:

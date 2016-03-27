@@ -3,10 +3,10 @@ package render
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -79,7 +79,7 @@ func separateTextAndMeta(slice []byte) (string, markdownMeta) {
 	}
 	err := json.Unmarshal(result[1], &meta)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return "", meta
 	}
 	// drop the json code block

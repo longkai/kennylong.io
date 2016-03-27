@@ -2,11 +2,11 @@
 package render
 
 import (
-	"fmt"
 	"github.com/longkai/xiaolongtongxue.com/env"
 	"github.com/longkai/xiaolongtongxue.com/github"
 	"html/template"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -80,15 +80,15 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	m, err := newMarkdown(fname)
 	if err != nil {
 		// if anything fail, just skip it, same below
-		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
+		log.Printf("render md %s fail, %v\n", fname, err)
 		return
 	}
 	switch m.RenderOption {
 	default:
-		fmt.Fprintf(os.Stderr, "render option of %s is not valid.", fname)
+		log.Printf("render option of %s is not valid.", fname)
 		return
 	case skip:
-		fmt.Printf("%s is skipped.\n", fname)
+		log.Printf("%s is skipped.\n", fname)
 		return
 	case def:
 	case keep:
@@ -99,7 +99,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	err = ensureDir(dest)
 	f, err := os.Create(dest)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "create dest file %s fail, %v\n", dest, err)
+		log.Printf("create dest file %s fail, %v\n", dest, err)
 		return
 	}
 
@@ -111,13 +111,13 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	// call github api
 	b, err := github.Markdown(m.Text)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "render md %s fail, %v\n", fname, err)
+		log.Printf("render md %s fail, %v\n", fname, err)
 		return
 	}
 	// write template to html
 	m.Html = template.HTML(b)
 	if err = entryTempl.Execute(f, m); err != nil {
-		fmt.Fprintf(os.Stderr, "write %s entry template fail, %v\n", fname, err)
+		log.Printf("write %s entry template fail, %v\n", fname, err)
 		return
 	}
 
@@ -126,7 +126,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	case def:
 		metas <- m.markdownMeta
 	case keep:
-		fmt.Printf("%s is kept, will not appear in the article list.", fname)
+		log.Printf("%s is kept, will not appear in the article list.", fname)
 	}
 }
 
@@ -142,14 +142,14 @@ func dirents(dir string) []os.FileInfo {
 
 	f, err := os.Open(dir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "open %s fail, %v\n", dir, err)
+		log.Printf("open %s fail, %v\n", dir, err)
 		return nil
 	}
 
 	defer f.Close()
 	entries, err := f.Readdir(0) // 0 -> reads no limit
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Readdir fail, %v\n", err)
+		log.Printf("Readdir fail, %v\n", err)
 	}
 	return entries
 }
