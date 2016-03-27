@@ -85,7 +85,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	}
 	switch m.RenderOption {
 	default:
-		log.Printf("render option of %s is not valid.", fname)
+		log.Printf("render option of %s is not valid.\n", fname)
 		return
 	case skip:
 		log.Printf("%s is skipped.\n", fname)
@@ -126,7 +126,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	case def:
 		metas <- m.markdownMeta
 	case keep:
-		log.Printf("%s is kept, will not appear in the article list.", fname)
+		log.Printf("%s is kept, will not appear in the article list.\n", fname)
 	}
 }
 

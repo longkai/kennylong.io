@@ -79,7 +79,7 @@ func separateTextAndMeta(slice []byte) (string, markdownMeta) {
 	}
 	err := json.Unmarshal(result[1], &meta)
 	if err != nil {
-		log.Println(err)
+		log.Printf("separateTextAndMeta %s fail, %v\n", result[1], err)
 		return "", meta
 	}
 	// drop the json code block
