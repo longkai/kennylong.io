@@ -18,7 +18,7 @@ var (
 	dirSema    = make(chan struct{}, 20) // max concurrent dir travel routine
 	renderSema = make(chan struct{}, 5)  // max render routine
 	entryTempl = template.Must(template.New("entry.html").Funcs(template.FuncMap{
-		"daysAgo":  DaysAgo,
+		"format":   Format,
 		"tags":     Tags,
 		"hasColor": HasColor,
 		"hasImage": HasImage,

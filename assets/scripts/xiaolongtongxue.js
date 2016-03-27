@@ -13,7 +13,7 @@ function ajax(method, url, success, fail) {
   ajax.send();
 }
 
-function sinceNow(s) {
+function daysAgo(s) {
   return Math.floor((new Date().getTime() - new Date(s).getTime()) / (60 * 1000 * 60) / 24);
 }
 

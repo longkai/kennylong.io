@@ -50,7 +50,7 @@
           <div class="minilogo"></div>
           <div>
             <strong>小龙同学</strong>
-            <span>{{.Date | daysAgo}} 天前{{if .Location}}, {{.Location}}{{end}}{{if .Weather}}, {{.Weather}}{{end}}</span>
+            <span id="md_meta"></span>
           </div>
           <div class="section-spacer"></div>
           <!-- TODO: impl it, backend!
@@ -172,6 +172,20 @@
 </div>
 {{template "script"}}
 <script type="application/javascript">
+  var md_meta = document.getElementById('md_meta');
+  if (md_meta) {
+    var date = '{{.Date | format}}';
+    var _location = '{{.Location}}';
+    var weather = '{{.Weather}}';
+    md_meta.textContent = daysAgo(date) + ' 天前';
+    if (_location) {
+      md_meta.textContent += ', ' + _location;
+    }
+    if (weather) {
+      md_meta.textContent += ', ' + weather;
+    }
+  }
+
   var prev = document.getElementById('prev');
   var next = document.getElementById('next');
   var toast = document.getElementById('toast');

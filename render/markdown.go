@@ -105,6 +105,8 @@ func trimBasename(s string) string {
 // helper functions for template usage
 func DaysAgo(t time.Time) int { return int(time.Since(t).Hours() / 24) }
 
+func Format(t time.Time) string { return t.Format(time.RFC1123Z) }
+
 func HasColor(s string) bool {
 	if len(s) == 0 {
 		return false

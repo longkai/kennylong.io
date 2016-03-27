@@ -89,7 +89,7 @@
 </div>
 
 {{template "script"}}
-<script>
+<script type="application/javascript">
   Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media'), function (el) {
     go(el);
   });
@@ -174,7 +174,7 @@
             var author = document.createElement('strong');
             author.textContent = '小龙同学';
             var date = document.createElement('span');
-            date.textContent = sinceNow(a.date) + ' 天前';
+            date.textContent = daysAgo(a.date) + ' 天前';
 
             // tags
             if (a.tags) {
