@@ -122,6 +122,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 	}
 
 	// fmt.Printf("%s -> %s\n", fname, dest)
+	m.Id = strings.Replace(m.Id, string(filepath.Separator), "/", -1) // adjust web path for windows...
 	switch m.RenderOption {
 	case def:
 		metas <- m.markdownMeta
