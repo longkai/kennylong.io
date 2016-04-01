@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,24 +70,19 @@ func Config() Env {
 
 // Ignore file not in the PublishDirs or top level *.md file
 func Ignored(path string) bool {
-	// ignore top level *.md file since it doesn't make any sense, we won't use it as /index.html
-	if strings.HasSuffix(path, ".md") {
-		// find last `/`
-		test := -1
-		for i := len(path) - 1; i >= 0; i-- {
-			if path[i] == '/' {
-				test = i
-				break
-			}
-		}
+	rel, err := filepath.Rel(env.ArticleRepo, path)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
 
-		if test != -1 && path[0:test] == env.ArticleRepo {
-			return true
-		}
+	// ignore top level *.md file since it doesn't make any sense, we won't use it as /index.html
+	if !strings.ContainsRune(rel, filepath.Separator) && strings.HasSuffix(path, ".md") {
+		return true
 	}
 
 	for _, v := range env.PublishDirs {
-		if strings.HasPrefix(path, filepath.Join(env.ArticleRepo, v)) {
+		if strings.HasPrefix(rel, v) {
 			return false
 		}
 	}

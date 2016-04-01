@@ -22,31 +22,23 @@ func TestInitEnv(t *testing.T) {
 }
 
 func TestIgnore(t *testing.T) {
-	cases := []string{
-		env.ArticleRepo + "/aaa",                             // none *.md
-		env.ArticleRepo + "/a.md",                            // a *.md
-		env.ArticleRepo + "/" + env.PublishDirs[0],           // sub dir
-		env.ArticleRepo + "/" + env.PublishDirs[0] + "/c.md", // sub dir' s *.md
-		env.ArticleRepo,                                      // same
-		env.ArticleRepo + "/",                                // same plus a slash
-		"a/b/c/.md",                                          // not in the repo
-		"",                                                   // empty
+	tests := []struct {
+		input string
+		want  bool
+	}{
+		{env.ArticleRepo + "/aaa", true},                              // none *.md
+		{env.ArticleRepo + "/a.md", true},                             // a *.md
+		{env.ArticleRepo + "/" + env.PublishDirs[0], false},           // sub dir
+		{env.ArticleRepo + "/" + env.PublishDirs[0] + "/c.md", false}, // sub dir' s *.md
+		{env.ArticleRepo, true},                                       // same
+		{env.ArticleRepo + "/", true},                                 // same plus a slash
+		{"a/b/c/.md", true},                                           // not in the repo
+		{"", true},                                                    // empty
 	}
 
-	wanted := []bool{
-		true,
-		true,
-		false,
-		false,
-		true,
-		true,
-		true,
-		true,
-	}
-
-	for i, s := range cases {
-		if v := Ignored(cases[i]); v != wanted[i] {
-			t.Errorf("case %s, want %t, got %t\n", s, wanted[i], v)
+	for _, test := range tests {
+		if got := Ignored(test.input); got != test.want {
+			t.Errorf("Ignored(%q) = %v", test.input, got)
 		}
 	}
 }

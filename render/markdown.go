@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -51,7 +52,7 @@ func newMarkdown(src string) (*markdown, error) {
 
 	title, b := parseTitle(b) // separate title block
 	text, meta := separateTextAndMeta(b)
-	meta.Id = trimBasename(src[len(env.Config().ArticleRepo):])
+	meta.Id = trimLastSegment(src[len(env.Config().ArticleRepo):])
 	if meta.Title == "" { // if title not provided in json meta, use the markdown body if has
 		meta.Title = title
 	}
@@ -87,17 +88,15 @@ func separateTextAndMeta(slice []byte) (string, markdownMeta) {
 	return string(slice), meta
 }
 
-// trim the basename of the file
-func trimBasename(s string) string {
-	j := -1
-	for i := len(s) - 1; i >= 0; i-- {
-		if s[i] == '/' {
-			j = i
-			break
-		}
-	}
-	if j != -1 {
-		return s[:j]
+// trim last segment of the file path
+// i.e. a/b/c/d.ext to a/b/c
+func trimLastSegment(s string) string {
+	i := strings.LastIndexFunc(s, func(r rune) bool {
+		return r == filepath.Separator
+	})
+
+	if i != -1 {
+		return s[:i]
 	}
 	return s
 }

@@ -49,22 +49,20 @@ func TestSeparateMetaAndText(t *testing.T) {
 	fmt.Println(text)
 }
 
-func TestTrimBasename(t *testing.T) {
-	cases := []string{
-		"a/a.md",
-		"b/a.c.md",
-		"abc.md",
-		".",
+func TestTrimLastSegment(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"a/a.md", "a"},
+		{"b/a.c.md", "b"},
+		{"abc.md", "abc.md"},
+		{".", "."},
 	}
-	wanted := []string{
-		"a",
-		"b",
-		"abc.md",
-		".",
-	}
-	for i, s := range cases {
-		if v := trimBasename(cases[i]); v != wanted[i] {
-			t.Errorf("case %s, want %s, got %s\n", s, wanted[i], v)
+
+	for _, test := range tests {
+		if got := trimLastSegment(test.input); got != test.want {
+			t.Errorf("trimLastSegment(%q) = %q, want %q\n", test.input, got, test.want)
 		}
 	}
 }
