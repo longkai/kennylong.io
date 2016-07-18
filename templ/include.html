@@ -1,4 +1,4 @@
-{{define "header"}}
+{{define "header" -}}
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="description" content="小龙同学">
@@ -21,22 +21,13 @@
 
 <link rel="shortcut icon" href="/assets/images/favicon.png">
 
-<!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
-<!--
-<link rel="canonical" href="http://www.example.com/">
--->
-
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-<!-- uncomment below then download the fonts css manually and comment above if your network is not block, you may find https://github.com/longkai/gfdl is useful :)
-<link rel="stylesheet" href="/assets/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/fonts/icons.css">
--->
+<link rel="stylesheet" href="//fonts.lug.ustc.edu.cn/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
+<link rel="stylesheet" href="//fonts.lug.ustc.edu.cn/icon?family=Material+Icons">
 <link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css">
 <link rel="stylesheet" href="/assets/layouts/styles.css">
-{{end}}
+{{- end}}
 
-{{define "footer"}}
+{{define "footer" -}}
 <footer class="mdl-mini-footer">
   <div class="mdl-mini-footer--left-section">
     <button class="mdl-mini-footer--social-btn social-btn social-btn__gmail">
@@ -69,9 +60,9 @@
   <div class="mdl-snackbar__text"></div>
   <button type="button" class="mdl-snackbar__action"></button>
 </div>
-{{end}}
+{{- end}}
 
-{{define "script"}}
+{{define "script" -}}
 <script src="/assets/bower_components/material-design-lite/material.min.js"></script>
 <script src="/assets/scripts/xiaolongtongxue.js"></script>
 <script>
@@ -89,4 +80,4 @@
   _gaq.push(['_setDomainName', 'xiaolongtongxue.com']);
   _gaq.push(['_trackPageview']);
 </script>
-{{end}}
+{{- end}}

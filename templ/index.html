@@ -24,21 +24,20 @@
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
-      {{range $i, $a := .}}
-      <div
-          class="mdl-card mdl-cell {{if eq $i 0}}coffee-pic mdl-cell--8-col{{else}}on-the-road-again mdl-cell--12-col{{end}}">
+      {{range $i, $a := . -}}
+      <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media mdl-color-text--grey-50"
-             style="{{if $a.Background | hasColor}}background-color: {{$a.Background}}{{end}}
-             {{if $a.Background | hasImage}}
+             style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
+             {{if $a.Background | hasImage -}}
              background-image: url('{{if $a.Background | relImage}}{{$a.Id}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
-             {{end}};">
+             {{- end}};">
           <h3{{if not $a.Summary}} class="quote"{{end}}><a href="{{$a.Id}}">{{$a.Title}}</a></h3>
         </div>
-        {{if $a.Summary}}
+        {{if $a.Summary -}}
         <div class="mdl-color-text--grey-600 mdl-card__supporting-text">
           {{$a.Summary}}
         </div>
-        {{end}}
+        {{- end}}
         <div class="mdl-card__supporting-text meta mdl-color-text--grey-600">
           <div class="minilogo"></div>
           <div>
@@ -48,7 +47,7 @@
           </div>
         </div>
       </div>
-      {{if eq $i 0}}
+      {{if eq $i 0 -}}
       <div class="mdl-card something-else mdl-cell mdl-cell--8-col mdl-cell--4-col-desktop">
         <button id="code" class="mdl-button mdl-js-ripple-effect mdl-js-button mdl-button--fab mdl-color--accent">
           <i class="material-icons mdl-color-text--white" role="presentation">code</i>
@@ -72,8 +71,8 @@
           </button>
         </div>
       </div>
-      {{end}}
-      {{end}}
+      {{- end}}
+      {{- end}}
       <nav id="nav" class="demo-nav mdl-cell mdl-cell--12-col">
         <div id="progress" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
         <a id="more" class="demo-nav__button" title="show more">

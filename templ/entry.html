@@ -75,11 +75,11 @@
         </article>
         <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
           <div class="tags">
-            {{range $i, $t := .Tags}}
-            {{if gt $i 0}}, {{end}}
+            {{range $i, $t := .Tags -}}
+            {{if gt $i 0 -}}, {{- end}}
             <i class="material-icons" role="presentation">bookmark</i>
             <span class="visuallyhidden">bookmark</span>{{$t}}
-            {{end}}
+            {{- end}}
           </div>
           <!--
           <form>
