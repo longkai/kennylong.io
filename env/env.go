@@ -1,66 +1,58 @@
 package env
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 const (
-	GEN      = "gen" // where puts the gen articles files, in the root of this repo.
+	// Gen where puts the gen articles files, in the root of this repo.
+	Gen = "_gen"
+	// Template where the template located.
 	Template = "templ"
 )
 
+// Env configuration
 type Env struct {
-	HookSecret  string   `json:"hook_secret"`
-	AccessToken string   `json:"access_token"`
-	ArticleRepo string   `json:"article_repo"`
-	PublishDirs []string `json:"publish_dirs"`
+	HookSecret  string   `yaml:"hook_secret"`
+	AccessToken string   `yaml:"access_token"`
+	ArticleRepo string   `yaml:"article_repo"`
+	PublishDirs []string `yaml:"publish_dirs"`
 }
 
 var (
 	env *Env
 )
 
-func init() {
-	// TODO: for simple testing, we hard code here
-	defer func() {
-		if v := recover(); v != nil {
-			fmt.Fprintf(os.Stderr, "**env init() fail, it is okay if you are NOT in testing environment.**\n")
-		}
-	}()
-	InitEnv("../testing_env.json")
+var ensureFrontEndDir = func(dirName string) error {
+	_, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		return os.Mkdir(dirName, 0755)
+	}
+	return nil
 }
 
-func InitEnv(src string) {
+// InitEnv _
+func InitEnv(src string) error {
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
-		panic(fmt.Sprintf("Init env from src %q fail, %v\n", src, err))
+		return err
 	}
-	err = json.Unmarshal(bytes, &env)
+	err = yaml.Unmarshal(bytes, &env)
 	if err != nil {
-		panic(fmt.Sprintf("Unmarshal env json fail, %v\n", err))
+		return err
 	}
 
-	// trim the last `/`
-	if env.ArticleRepo[len(env.ArticleRepo)-1] == filepath.Separator {
-		env.ArticleRepo = env.ArticleRepo[:len(env.ArticleRepo)-1]
-	}
-
-	// ensure front dir exist
-	_, err = os.Stat(GEN)
-	if os.IsNotExist(err) {
-		err = os.Mkdir(GEN, 0755)
-		if err != nil {
-			panic(fmt.Sprintf("Mkdir %s fail, %v\n", GEN))
-		}
-	}
+	// ensure front-end dir exist
+	return ensureFrontEndDir(Gen)
 }
 
+// Config get config
 func Config() Env {
 	if env == nil {
 		panic(fmt.Sprintf("plz call `InitEnv(string)` first"))
@@ -68,11 +60,10 @@ func Config() Env {
 	return *env
 }
 
-// Ignore file not in the PublishDirs or top level *.md file
+// Ignored file not in the PublishDirs or top level *.md file
 func Ignored(path string) bool {
 	rel, err := filepath.Rel(env.ArticleRepo, path)
 	if err != nil {
-		log.Println(err)
 		return true
 	}
 

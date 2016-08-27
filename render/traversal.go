@@ -2,8 +2,6 @@
 package render
 
 import (
-	"github.com/longkai/xiaolongtongxue.com/env"
-	"github.com/longkai/xiaolongtongxue.com/github"
 	"html/template"
 	"io"
 	"log"
@@ -12,6 +10,9 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/longkai/xiaolongtongxue.com/env"
+	"github.com/longkai/xiaolongtongxue.com/github"
 )
 
 var (
@@ -64,7 +65,7 @@ func doTraversal(dir string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 			}
 		default:
 			// static file, copy it
-			copyFile(fname, filepath.Join(env.GEN, fname[len(env.Config().ArticleRepo):]))
+			copyFile(fname, filepath.Join(env.Gen, fname[len(env.Config().ArticleRepo):]))
 		}
 	}
 }
@@ -95,7 +96,7 @@ func doRender(fname string, n *sync.WaitGroup, metas chan<- markdownMeta) {
 		// see below
 	}
 	// save the file as index.html
-	dest := filepath.Join(env.GEN, m.Id+"/index.html")
+	dest := filepath.Join(env.Gen, m.Id+"/index.html")
 	err = ensureDir(dest)
 	f, err := os.Create(dest)
 	if err != nil {

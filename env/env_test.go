@@ -1,27 +1,32 @@
 package env
 
-import (
-	"path/filepath"
-	"strings"
-	"testing"
-)
+import "testing"
 
 func TestInitEnv(t *testing.T) {
-	defer func() {
-		if v := recover(); v != nil {
-			t.Errorf("Init env fail, %v\n", v)
-		}
-	}()
+	saved := ensureFrontEndDir
+	defer func() { ensureFrontEndDir = saved }()
 
-	InitEnv("../testing_env.json")
-	c := Config()
+	// stub
+	ensureFrontEndDir = func(s string) error { return nil }
 
-	if strings.HasSuffix(c.AccessToken, string(filepath.Separator)) {
-		t.Errorf("repo path should not has Separator.\n")
+	src := "./testdata/env.yaml"
+
+	if err := InitEnv(src); err != nil {
+		t.Errorf("InitEnv(%q) = %v\n", err)
+	}
+
+	if env == nil {
+		t.Errorf("InitEnv(%q), env = nil\n", src)
 	}
 }
 
 func TestIgnore(t *testing.T) {
+	saved := env
+	defer func() { env = saved }()
+
+	// stub
+	env = &Env{AccessToken: "blah", ArticleRepo: "/a/b/c/", HookSecret: "sec", PublishDirs: []string{"1", "2"}}
+
 	tests := []struct {
 		input string
 		want  bool

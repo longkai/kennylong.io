@@ -23,13 +23,12 @@ _testmain.go
 *.test
 *.prof
 
+.DS_Store
+
 # idea support
 .idea/
 *.iml
 
-# self retain
-testing_env.json
-
-gen/
+_gen/
 assets/fonts/
 bower_components/

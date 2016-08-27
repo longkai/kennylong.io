@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/longkai/xiaolongtongxue.com/env"
-	"github.com/longkai/xiaolongtongxue.com/github"
-	"github.com/longkai/xiaolongtongxue.com/render"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/longkai/xiaolongtongxue.com/env"
+	"github.com/longkai/xiaolongtongxue.com/github"
+	"github.com/longkai/xiaolongtongxue.com/render"
 )
 
 const (
@@ -27,7 +28,7 @@ var (
 		"relImage": render.IsRelImage,
 	}).ParseFiles(env.Template+"/index.html", env.Template+"/include.html"))
 
-	staticFs = http.FileServer(http.Dir(env.GEN))
+	staticFs = http.FileServer(http.Dir(env.Gen))
 
 	requests       = make(chan struct{})        // clients want our data
 	responses      = make(chan render.Articles) // response to client with the data
@@ -60,7 +61,7 @@ func doInvalidate() {
 
 func main() {
 	port := flag.Int("port", 1217, "http port number")
-	conf := flag.String("conf", "testing_env.json", "config file path")
+	conf := flag.String("conf", "env.yaml", "config file path")
 	flag.Parse()
 	env.InitEnv(*conf)
 
