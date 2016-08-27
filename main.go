@@ -63,7 +63,9 @@ func main() {
 	port := flag.Int("port", 1217, "http port number")
 	conf := flag.String("conf", "env.yaml", "config file path")
 	flag.Parse()
-	env.InitEnv(*conf)
+	if err := env.InitEnv(*conf); err != nil {
+		log.Fatalln(err)
+	}
 
 	go looper()
 
