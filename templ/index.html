@@ -243,6 +243,9 @@
     if (!target) {
       return;
     }
+    if (!target.startsWith('/')) {
+      target = '/' + target
+    }
     el.addEventListener('click', function () {
       window.open(window.location.protocol + '//' + window.location.host + target, '_blank');
     });
