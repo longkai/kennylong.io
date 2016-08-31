@@ -19,23 +19,27 @@ func TestNormalParse(t *testing.T) {
 
 	wants := struct {
 		title string
-		body  []byte
+		bodys [][]byte
 		link  []byte
-		err   error
 	}{
-		`Title`, []byte(`Body`), []byte(`https://`), nil,
+		`标题`, [][]byte{
+			[]byte(`Body`),
+			[]byte(`header2`),
+		}, []byte(`https://`),
 	}
 
 	title, body, json, err := parse(f)
 
-	if err != wants.err {
-		log.Fatal(err)
+	if err != nil {
+		t.Errorf("parse(%q) fail: %v\n", err)
 	}
 	if !strings.Contains(title, wants.title) {
 		t.Errorf("title: strings.Contains(%q, %q) = false\n", title, wants.title)
 	}
-	if !bytes.Contains(body, wants.body) {
-		t.Errorf("body: bytes.Contains(%s, %s) = false\n", body, wants.body)
+	for _, b := range wants.bodys {
+		if !bytes.Contains(body, b) {
+			t.Errorf("body: bytes.Contains(%s, %s) = false\n", body, b)
+		}
 	}
 	if !bytes.Contains(body, wants.link) {
 		t.Errorf("body: bytes.Contains(%s, %s) = false\n", body, wants.link)
@@ -77,51 +81,5 @@ body2
 	m := map[string]interface{}{}
 	if err := j.Unmarshal(json, &m); err != nil {
 		t.Errorf("json.Unmarshal(%s) fail: %v\n", err)
-	}
-}
-
-func TestParseNoJSON(t *testing.T) {
-	src := `./testdata/no_json.md`
-	f, err := os.Open(src)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	wantBody, wantLink, wantJSON := `body`, `https://`, ``
-	_, body, json, err := parse(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if !bytes.Contains(body, []byte(wantBody)) {
-		t.Errorf("bytes.Contains(%s, %s) = false\n", body, wantBody)
-	}
-
-	if !bytes.Contains(body, []byte(wantLink)) {
-		t.Errorf("bytes.Contains(%s, %s) = false\n", body, wantLink)
-	}
-
-	if string(json) != wantJSON {
-		t.Errorf("parse(%q), got json: %s, want %s\n", src, json, wantJSON)
-	}
-}
-
-func TestReverse(t *testing.T) {
-	tests := []struct {
-		input []byte
-		want  string
-	}{
-		{[]byte(""), ""},
-		{[]byte("a"), "a"},
-		{[]byte("abc"), "cba"},
-		{[]byte("abbc"), "cbba"},
-	}
-
-	for _, test := range tests {
-		tmp := test.input
-		if reverse(test.input); string(test.input) != test.want {
-			t.Errorf("reverse(%q) = %q, want %q\n", tmp, string(test.input), test.want)
-		}
 	}
 }
