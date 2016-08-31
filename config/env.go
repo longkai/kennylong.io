@@ -1,7 +1,6 @@
-package env
+package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -17,8 +16,8 @@ const (
 	Template = "templ"
 )
 
-// Env configuration
-type Env struct {
+// Configuration configuration
+type Configuration struct {
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
 	ArticleRepo string   `yaml:"article_repo"`
@@ -26,15 +25,15 @@ type Env struct {
 }
 
 var (
-	env *Env
+	// Env global environment
+	Env *Configuration
 )
 
 var ensureFrontEndDir = func(dirName string) error {
-	_, err := os.Stat(dirName)
-	if os.IsNotExist(err) {
-		return os.Mkdir(dirName, 0755)
+	if _, err := os.Stat(dirName); err == nil {
+		return nil
 	}
-	return nil
+	return os.Mkdir(dirName, 0755)
 }
 
 // InitEnv _
@@ -43,7 +42,8 @@ func InitEnv(src string) error {
 	if err != nil {
 		return err
 	}
-	err = yaml.Unmarshal(bytes, &env)
+	Env = new(Configuration)
+	err = yaml.Unmarshal(bytes, Env)
 	if err != nil {
 		return err
 	}
@@ -52,17 +52,9 @@ func InitEnv(src string) error {
 	return ensureFrontEndDir(Gen)
 }
 
-// Config get config
-func Config() Env {
-	if env == nil {
-		panic(fmt.Sprintf("plz call `InitEnv(string)` first"))
-	}
-	return *env
-}
-
 // Ignored file not in the PublishDirs or top level *.md file
 func Ignored(path string) bool {
-	rel, err := filepath.Rel(env.ArticleRepo, path)
+	rel, err := filepath.Rel(Env.ArticleRepo, path)
 	if err != nil {
 		return true
 	}
@@ -72,7 +64,7 @@ func Ignored(path string) bool {
 		return true
 	}
 
-	for _, v := range env.PublishDirs {
+	for _, v := range Env.PublishDirs {
 		if strings.HasPrefix(rel, v) {
 			return false
 		}
