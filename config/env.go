@@ -4,21 +4,37 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"regexp"
+
 	"gopkg.in/yaml.v2"
 )
 
 // Configuration configuration
 type Configuration struct {
 	Repo        string   `yaml:"repo"`
-	Ignored     []string `yaml:"ignored"`
+	Ignores     []string `yaml:"ignores"` // regexp
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
 }
 
 var (
 	// Env global environment
-	Env *Configuration
+	Env     *Configuration
+	regexps []*regexp.Regexp
 )
+
+var adjustEnv = func() {
+	// adjuest for simply handling path stuffs
+	if !strings.HasSuffix(Env.Repo, "/") {
+		Env.Repo += "/"
+	}
+
+	regexps = make([]*regexp.Regexp, 0, len(Env.Ignores))
+	regexps = append(regexps, regexp.MustCompile(`/\.[^/]+$`)) // ignore hidden file/dir
+	for _, v := range Env.Ignores {
+		regexps = append(regexps, regexp.MustCompile(v))
+	}
+}
 
 // InitEnv _
 func InitEnv(src string) error {
@@ -30,27 +46,17 @@ func InitEnv(src string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-
-	// adjuest for simply handling stuffs
-	if !strings.HasSuffix(Env.Repo, "/") {
-		Env.Repo += "/"
-	}
+	adjustEnv()
 	return nil
 }
 
-// IsIgnored the abs path if has the same prefix
-func IsIgnored(path string) bool {
-	path = path[len(Env.Repo):]
-	// root dir *.md are igored by default
-	if !strings.Contains(path, "/") && strings.HasSuffix(path, ".md") {
-		return true
-	}
-
-	for _, v := range Env.Ignored {
-		if strings.Contains(path, v) {
+// Ignored the regexp matches
+func Ignored(path string) bool {
+	path = path[len(Env.Repo)-1:] // keep leading `/`
+	for _, re := range regexps {
+		if re.MatchString(path) {
 			return true
 		}
 	}
-
 	return false
 }

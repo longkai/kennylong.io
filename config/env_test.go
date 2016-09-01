@@ -3,6 +3,12 @@ package config
 import "testing"
 
 func TestInitEnv(t *testing.T) {
+	saved1, saved2 := Env, regexps
+	defer func() {
+		Env = saved1
+		regexps = saved2
+	}()
+
 	src := "./testdata/env.yaml"
 
 	if err := InitEnv(src); err != nil {
@@ -12,34 +18,59 @@ func TestInitEnv(t *testing.T) {
 	if Env == nil {
 		t.Errorf("InitEnv(%q), Env = nil\n", src)
 	}
+
+	// testify defauly ignore behavious
+	tests := []struct {
+		tag   string
+		input string
+		want  bool
+	}{
+		{"RootHidden", ".git", true},
+		{"CustomizedHidden", ".md", true},
+		{"NormalHidden", "a/c/.c", true},
+		{"Normal", "a/b/c.c", false},
+		{"Normal", "a/b/c.md", false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.tag, func(t *testing.T) {
+			input := Env.Repo + test.input
+			if got := Ignored(input); got != test.want {
+				t.Errorf("Ignored(%q) = %v", input, got)
+			}
+		})
+	}
 }
 
 func TestIgnore(t *testing.T) {
-	saved := Env
-	defer func() { Env = saved }()
+	saved1, saved2 := Env, regexps
+	defer func() {
+		Env = saved1
+		regexps = saved2
+	}()
 
 	// stub
-	Env = &Configuration{Repo: "/a/b/c/", Ignored: []string{"ignore", "ignore.txt"}}
-	t.Log(Env)
+	Env = &Configuration{Repo: "/a/b/c/", Ignores: []string{`/[^/]*\.c$`, `.*/ignore/.*`}}
+	adjustEnv()
 
 	tests := []struct {
 		tag   string
 		input string
 		want  bool
 	}{
-		{"rootFile", "file.md", true},
-		{"rootDir", "file", false},
-		{"ignoredFile", "a/ignore.txt", true},
-		{"ingoreDir", "x/y/z/ignore", true},
-		{"normalFile", "x/y/z/balh.txt", false},
-		{"normalDir", "x/y/z", false},
+		{"Normal", "path/to/sth", false},
+		{"RootExt", "blah.c", true},
+		{"RootHiddenFile", ".blah.c", true},
+		{"RootHiddenDir", ".blah", true},
+		{"HiddenFile", "x/y/.z", true},
+		{"IgnoreDir", "ignore/a/b/c", true},
 	}
 
 	for _, test := range tests {
 		t.Run(test.tag, func(t *testing.T) {
 			input := Env.Repo + test.input
-			if got := IsIgnored(input); got != test.want {
-				t.Errorf("IsIgnored(%q) = %v", input, got)
+			if got := Ignored(input); got != test.want {
+				t.Errorf("Ignored(%q) = %v", input, got)
 			}
 		})
 	}
