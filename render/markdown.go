@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
-	"log"
 	"strings"
 	"time"
 
@@ -39,9 +38,6 @@ var parseJSON = func(in io.Reader, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if len(b) == 0 {
-		return nil
-	}
 	return json.Unmarshal(b, v)
 }
 
@@ -69,8 +65,6 @@ func parseMd(in io.Reader) (*Meta, error) {
 	m := new(Meta)
 	m.Title = title
 	m.body = body
-	if err = parseJSON(bytes.NewReader(_json), m); err != nil {
-		log.Print(err)
-	}
-	return m, nil
+	err = parseJSON(bytes.NewReader(_json), m)
+	return m, err
 }
