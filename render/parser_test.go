@@ -2,11 +2,12 @@ package render
 
 import (
 	"bytes"
-	j "encoding/json"
 	"log"
 	"os"
 	"strings"
 	"testing"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 func TestNormalParse(t *testing.T) {
@@ -28,7 +29,7 @@ func TestNormalParse(t *testing.T) {
 		}, []byte(`https://`),
 	}
 
-	title, body, json, err := parse(f)
+	title, body, _yaml, err := parse(f)
 
 	if err != nil {
 		t.Errorf("parse(%q) fail: %v\n", err)
@@ -46,8 +47,8 @@ func TestNormalParse(t *testing.T) {
 	}
 
 	m := map[string]interface{}{}
-	if err := j.Unmarshal(json, &m); err != nil {
-		t.Errorf("json.Unmarshal(%s) fail: %v\n", err)
+	if err := yaml.Unmarshal(_yaml, &m); err != nil {
+		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", err)
 	}
 }
 
@@ -58,8 +59,8 @@ body1
 body2
 
 ### EOF
-` + "```json" +
-		`{"key": "val"}` + "```" +
+` + "```yaml" +
+		`key: val` + "```" +
 		`
 [1]: https://xiaolongtongxue.com
 [anchor]: https://lliant.com`
@@ -68,7 +69,7 @@ body2
 		t.Errorf("MatchString(%q) = false\n", md)
 	}
 
-	title, _, json, err := parse(strings.NewReader(md))
+	title, _, _yaml, err := parse(strings.NewReader(md))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,7 +80,7 @@ body2
 	}
 
 	m := map[string]interface{}{}
-	if err := j.Unmarshal(json, &m); err != nil {
-		t.Errorf("json.Unmarshal(%s) fail: %v\n", err)
+	if err := yaml.Unmarshal(_yaml, &m); err != nil {
+		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", err)
 	}
 }

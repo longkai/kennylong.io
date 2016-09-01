@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	re = regexp.MustCompile("\\s*(?:#+\\s*)?(?P<title>\\S[\\S ]*\\S)?(?:\\s*[-=]+\\s*)?(?P<body>[\\S\\s]+?)(#+\\s*EOF\\s+```json\\s*(?P<json>[\\S\\s]+)```)(?P<links>[\\S\\s]*)")
+	re = regexp.MustCompile("\\s*(?:#+\\s*)?(?P<title>\\S[\\S ]*\\S)?(?:\\s*[-=]+\\s*)?(?P<body>[\\S\\s]+?)(#+\\s*EOF\\s+```yaml\\s*(?P<yaml>[\\S\\s]+)```)(?P<links>[\\S\\s]*)")
 )
 
-// parse parsing the markdown then extracting the metas. If no title matches, the first non-blank line will be used as title. **Note title and JSON(required) will be stripped from the body**.
-func parse(in io.Reader) (title string, body, json []byte, err error) {
+// parse parsing the markdown then extracting the metas. If no title matches, the first non-blank line will be used as title. **Note title and YAML(required) will be stripped from the body**.
+func parse(in io.Reader) (title string, body, yaml []byte, err error) {
 	b, err := ioutil.ReadAll(in)
 	if err != nil {
 		return
@@ -33,7 +33,7 @@ func parse(in io.Reader) (title string, body, json []byte, err error) {
 	reverse(tail[lo2-lo1:])
 	reverse(tail)
 
-	json = tail[hi2-hi1+lo2-hi1+indices[2*4]-lo1 : len(tail)-hi1+indices[2*4+1]] // <json> strip from wrapper
+	yaml = tail[hi2-hi1+lo2-hi1+indices[2*4]-lo1 : len(tail)-hi1+indices[2*4+1]] // <yaml> strip from wrapper
 	body = b[indices[2*2] : indices[2*2+1]+hi2-lo2]                              // <body> + <links>
 	return
 }

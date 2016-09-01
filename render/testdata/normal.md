@@ -10,10 +10,8 @@ header1
 header2
 
 ### EOF
-```json
-{
-"key": "val"
-}
+```yaml
+key: val
 ```
 
 [1]: https://xiaolongtongxue.com

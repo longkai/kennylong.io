@@ -2,28 +2,29 @@ package render
 
 import (
 	"bytes"
-	"encoding/json"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"strings"
 	"time"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/longkai/xiaolongtongxue.com/config"
 )
 
 // Meta metadata for the markdown.
 type Meta struct {
-	ID           string
-	body         []byte    // TODO: avoid this field?
-	Title        string    `json:"title"`
-	Tags         []string  `json:"tags"`
-	Date         time.Time `json:"date"`
-	Weather      string    `json:"weather"`
-	Summary      string    `json:"summary"`
-	Location     string    `json:"location"`
-	Background   string    `json:"background"`
-	RenderOption int       `json:"render_option"`
+	ID         string
+	body       []byte    // TODO: avoid this field?
+	Title      string    `yaml:"title"`
+	Tags       []string  `yaml:"tags"`
+	Date       time.Time `yaml:"date"`
+	Weather    string    `yaml:"weather"`
+	Summary    string    `yaml:"summary"`
+	Location   string    `yaml:"location"`
+	Background string    `yaml:"background"`
+	Hide       bool      `yaml:"hide"`
 }
 
 // Markdown a rendered *md file.
@@ -33,12 +34,12 @@ type Markdown struct {
 	Body       template.HTML
 }
 
-var parseJSON = func(in io.Reader, v interface{}) error {
+var parseYAML = func(in io.Reader, v interface{}) error {
 	b, err := ioutil.ReadAll(in)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(b, v)
+	return yaml.Unmarshal(b, v)
 }
 
 func parseID(path string) string {
@@ -57,7 +58,7 @@ func parseID(path string) string {
 }
 
 func parseMd(in io.Reader) (*Meta, error) {
-	title, body, _json, err := parse(in)
+	title, body, _yaml, err := parse(in)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +66,6 @@ func parseMd(in io.Reader) (*Meta, error) {
 	m := new(Meta)
 	m.Title = title
 	m.body = body
-	err = parseJSON(bytes.NewReader(_json), m)
+	err = parseYAML(bytes.NewReader(_yaml), m)
 	return m, err
 }
