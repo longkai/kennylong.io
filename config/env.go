@@ -2,7 +2,6 @@ package config
 
 import (
 	"io/ioutil"
-	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -10,10 +9,10 @@ import (
 
 // Configuration configuration
 type Configuration struct {
+	Repo        string   `yaml:"repo"`
+	Ignored     []string `yaml:"ignored"`
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
-	ArticleRepo string   `yaml:"article_repo"`
-	PublishDirs []string `yaml:"publish_dirs"`
 }
 
 var (
@@ -28,29 +27,30 @@ func InitEnv(src string) error {
 		return err
 	}
 	Env = new(Configuration)
-	err = yaml.Unmarshal(bytes, Env)
-	if err != nil {
+	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
+	}
+
+	// adjuest for simply handling stuffs
+	if !strings.HasSuffix(Env.Repo, "/") {
+		Env.Repo += "/"
 	}
 	return nil
 }
 
-// Ignored file not in the PublishDirs or top level *.md file
-func Ignored(path string) bool {
-	rel, err := filepath.Rel(Env.ArticleRepo, path)
-	if err != nil {
+// IsIgnored the abs path if has the same prefix
+func IsIgnored(path string) bool {
+	path = path[len(Env.Repo):]
+	// root dir *.md are igored by default
+	if !strings.Contains(path, "/") && strings.HasSuffix(path, ".md") {
 		return true
 	}
 
-	// ignore top level *.md file since it doesn't make any sense, we won't use it as /index.html
-	if !strings.ContainsRune(rel, filepath.Separator) && strings.HasSuffix(path, ".md") {
-		return true
-	}
-
-	for _, v := range Env.PublishDirs {
-		if strings.HasPrefix(rel, v) {
-			return false
+	for _, v := range Env.Ignored {
+		if strings.Contains(path, v) {
+			return true
 		}
 	}
-	return true
+
+	return false
 }

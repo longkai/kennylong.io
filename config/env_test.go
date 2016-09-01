@@ -19,25 +19,28 @@ func TestIgnore(t *testing.T) {
 	defer func() { Env = saved }()
 
 	// stub
-	Env = &Configuration{AccessToken: "blah", ArticleRepo: "/a/b/c/", HookSecret: "sec", PublishDirs: []string{"1", "2"}}
+	Env = &Configuration{Repo: "/a/b/c/", Ignored: []string{"ignore", "ignore.txt"}}
+	t.Log(Env)
 
 	tests := []struct {
+		tag   string
 		input string
 		want  bool
 	}{
-		{Env.ArticleRepo + "/aaa", true},                              // none *.md
-		{Env.ArticleRepo + "/a.md", true},                             // a *.md
-		{Env.ArticleRepo + "/" + Env.PublishDirs[0], false},           // sub dir
-		{Env.ArticleRepo + "/" + Env.PublishDirs[0] + "/c.md", false}, // sub dir' s *.md
-		{Env.ArticleRepo, true},                                       // same
-		{Env.ArticleRepo + "/", true},                                 // same plus a slash
-		{"a/b/c/.md", true},                                           // not in the repo
-		{"", true},                                                    // empty
+		{"rootFile", "file.md", true},
+		{"rootDir", "file", false},
+		{"ignoredFile", "a/ignore.txt", true},
+		{"ingoreDir", "x/y/z/ignore", true},
+		{"normalFile", "x/y/z/balh.txt", false},
+		{"normalDir", "x/y/z", false},
 	}
 
 	for _, test := range tests {
-		if got := Ignored(test.input); got != test.want {
-			t.Errorf("Ignored(%q) = %v", test.input, got)
-		}
+		t.Run(test.tag, func(t *testing.T) {
+			input := Env.Repo + test.input
+			if got := IsIgnored(input); got != test.want {
+				t.Errorf("IsIgnored(%q) = %v", input, got)
+			}
+		})
 	}
 }
