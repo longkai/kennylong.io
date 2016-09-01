@@ -2,18 +2,10 @@ package config
 
 import (
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	// Gen where puts the gen articles files, in the root of this repo.
-	Gen = "_gen"
-	// Template where the template located.
-	Template = "templ"
 )
 
 // Configuration configuration
@@ -29,13 +21,6 @@ var (
 	Env *Configuration
 )
 
-var ensureFrontEndDir = func(dirName string) error {
-	if _, err := os.Stat(dirName); err == nil {
-		return nil
-	}
-	return os.Mkdir(dirName, 0755)
-}
-
 // InitEnv _
 func InitEnv(src string) error {
 	bytes, err := ioutil.ReadFile(src)
@@ -47,9 +32,7 @@ func InitEnv(src string) error {
 	if err != nil {
 		return err
 	}
-
-	// ensure front-end dir exist
-	return ensureFrontEndDir(Gen)
+	return nil
 }
 
 // Ignored file not in the PublishDirs or top level *.md file

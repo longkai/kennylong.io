@@ -3,12 +3,6 @@ package config
 import "testing"
 
 func TestInitEnv(t *testing.T) {
-	saved := ensureFrontEndDir
-	defer func() { ensureFrontEndDir = saved }()
-
-	// stub
-	ensureFrontEndDir = func(s string) error { return nil }
-
 	src := "./testdata/env.yaml"
 
 	if err := InitEnv(src); err != nil {

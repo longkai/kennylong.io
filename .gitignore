@@ -29,6 +29,5 @@ _testmain.go
 .idea/
 *.iml
 
-_gen/
 assets/fonts/
 bower_components/
