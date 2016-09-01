@@ -27,15 +27,15 @@ func Markdown(in io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "text/plain")
+	req.Header.Add("Content-Type", "text/plain; charset=utf-8")
 	req.Header.Add("Authorization", provideToken())
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Markdown API StatusCode %d", resp.StatusCode)
 	}
-	defer resp.Body.Close()
 	return ioutil.ReadAll(resp.Body)
 }

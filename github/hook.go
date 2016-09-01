@@ -5,12 +5,13 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
-	"github.com/longkai/xiaolongtongxue.com/env"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
+
+	"github.com/longkai/xiaolongtongxue.com/config"
 )
 
 func Hook(resp http.ResponseWriter, req *http.Request, invalidate chan<- struct{}) {
@@ -35,7 +36,7 @@ func Hook(resp http.ResponseWriter, req *http.Request, invalidate chan<- struct{
 
 func pull(invalidate chan<- struct{}) {
 	log.Println("executing shell command...")
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd %s; git pull;", env.Config().ArticleRepo))
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd %s; git pull;", config.Env.ArticleRepo))
 	b, err := cmd.Output()
 	if err != nil {
 		log.Printf("git pull fail, %v\n", err)
@@ -58,7 +59,7 @@ func handleSecurity(reader io.Reader, signature string) error {
 }
 
 func checkMAC(message []byte, messageMAC string) bool {
-	mac := hmac.New(sha1.New, []byte(env.Config().HookSecret))
+	mac := hmac.New(sha1.New, []byte(config.Env.HookSecret))
 	mac.Write(message)
 	expectedMAC := mac.Sum(nil)
 	return "sha1="+hex.EncodeToString(expectedMAC) == messageMAC
