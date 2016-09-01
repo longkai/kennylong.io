@@ -92,13 +92,6 @@ func (s *Sakura) post(v interface{}) {
 
 func (s *Sakura) ls(req listrequest) {
 	l := []interface{}{}
-	if len(s.index) == 0 {
-		go func() {
-			req.resp <- l
-		}()
-		return
-	}
-
 	if req.key == "" {
 		// from the max down to size
 		it := s.list.SeekToLast()
@@ -122,7 +115,7 @@ func (s *Sakura) ls(req listrequest) {
 	}
 	it := s.list.Seek(index)
 	defer it.Close()
-	for i := 0; i < req.size && it.Next(); i++ {
+	for i := 0; i < req.size && it.Previous(); i++ {
 		l = append(l, it.Value())
 	}
 	// deliver
@@ -211,18 +204,13 @@ func (s *Sakura) Meet(sth string) {
 	}
 	defer f.Close()
 
-	m, err := s.Md(f)
+	m, err := parseMd(f)
 	if err != nil {
 		log.Printf("parse %q fail: %v", sth, err)
 		return
 	}
 	m.ID = parseID(sth)
 	s.requests.post <- m
-}
-
-// Md create a new md meta.
-func (s *Sakura) Md(in io.Reader) (*Meta, error) {
-	return parseMd(in)
 }
 
 // Ls markdown list.

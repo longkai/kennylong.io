@@ -15,16 +15,16 @@ import (
 
 // Meta metadata for the markdown.
 type Meta struct {
-	ID         string
+	ID         string    `json:"id"`
+	Title      string    `json:"title"`
+	Tags       []string  `json:"tags"`
+	Date       time.Time `json:"date"`
+	Weather    string    `json:"weather"`
+	Summary    string    `json:"summary"`
+	Location   string    `json:"location"`
+	Background string    `json:"background"`
+	hide       bool      `json:"hide"`
 	body       []byte    // TODO: avoid this field?
-	Title      string    `yaml:"title"`
-	Tags       []string  `yaml:"tags"`
-	Date       time.Time `yaml:"date"`
-	Weather    string    `yaml:"weather"`
-	Summary    string    `yaml:"summary"`
-	Location   string    `yaml:"location"`
-	Background string    `yaml:"background"`
-	Hide       bool      `yaml:"hide"`
 }
 
 // Markdown a rendered *md file.

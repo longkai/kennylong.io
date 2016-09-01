@@ -29,9 +29,9 @@
         <div class="mdl-card__media mdl-color-text--grey-50"
              style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
              {{if $a.Background | hasImage -}}
-             background-image: url('{{if $a.Background | relImage}}{{$a.Id}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
+             background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
              {{- end}};">
-          <h3{{if not $a.Summary}} class="quote"{{end}}><a href="{{$a.Id}}">{{$a.Title}}</a></h3>
+          <h3{{if not $a.Summary}} class="quote"{{end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
         <div class="mdl-color-text--grey-600 mdl-card__supporting-text">
@@ -93,9 +93,7 @@
     go(el);
   });
 
-  var p = 1;
-  var size = 7;
-  var lastLength = -1;
+  var hasMore = true;
 
   var grid = document.getElementById('grid');
   var nav = document.getElementById('nav');
@@ -118,7 +116,7 @@
   progress.style.display = 'none';
 
   more.addEventListener('click', function () {
-    if (lastLength != -1 && lastLength < size) {
+    if (!hasMore) {
       toast.MaterialSnackbar.showSnackbar({message: '没有更多啦'});
       return;
     }
@@ -128,11 +126,10 @@
 
     ajax(
         'GET',
-        '/pagination?p=' + p + '&size=' + size,
+        '/ls/' + lastKey(),
         function (data) {
           console.log(data);
-          lastLength = data.length;
-          p++;
+          hasMore = data.length != 0;
 
           // do append
           for (var i = 0; i < data.length; i++) {
@@ -219,6 +216,13 @@
         }
     );
   });
+
+  function lastKey() {
+    e = nav.previousElementSibling;
+    key = e.getElementsByTagName('a')[0].href.substring(window.location.href.length-1);
+    console.log(key);
+    return key;
+  }
 
   function hasColor(s) {
     if (s) {
