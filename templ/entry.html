@@ -70,7 +70,7 @@
         </div>
         <article class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
           <!-- content start -->
-          {{.Html}}
+          {{.Body}}
           <!-- content end -->
         </article>
         <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
@@ -141,13 +141,11 @@
           </div>
           -->
         </div>
-        <div id="progress" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
       </div>
 
       <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
-        <a class="demo-nav__button">
+        <a {{if .Prev}}href="{{.Prev}}"{{end}} class="demo-nav__button">
           <button
-              id="prev" me="{{.Id}}"
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
             <i class="material-icons">arrow_back</i>
@@ -155,10 +153,9 @@
           上一篇
         </a>
         <div class="section-spacer"></div>
-        <a class="demo-nav__button">
+        <a {{if .Next}}href="{{.Next}}"{{end}} class="demo-nav__button">
           下一篇
           <button
-              id="next" me="{{.Id}}"
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
             <i class="material-icons">arrow_forward</i>
@@ -186,15 +183,6 @@
     }
   }
 
-  var prev = document.getElementById('prev');
-  var next = document.getElementById('next');
-  var toast = document.getElementById('toast');
-  var progress = document.getElementById('progress');
-
-  // hide progress first
-  progress.style.width = '100%';
-  progress.style.display = 'none';
-
   if (window.history.length > 1) {
     document.getElementById('back').addEventListener('click', function () {
       window.history.back();
@@ -206,50 +194,6 @@
   document.getElementById('home').addEventListener('click', function () {
     window.open(window.location.protocol + '//' + window.location.host, "_self");
   });
-
-  prev.addEventListener('click', function () {
-    var me = prev.getAttribute('me');
-    go(me, -1);
-  });
-
-  next.addEventListener('click', function () {
-    var me = next.getAttribute('me');
-    go(me, 1);
-  });
-
-  function go(me, inc) {
-    toggleProgress(true);
-    ajax(
-        'GET',
-        '/articles/inc?inc=' + inc + '&me=' + me,
-        function (m) {
-          console.log(m);
-          toggleProgress(false);
-          window.open(window.location.protocol + '//' + window.location.host + m.id, '_self');
-        },
-        function (statusCode) {
-          console.log(statusCode);
-          toggleProgress(false);
-          var msg;
-          if (statusCode == 404) {
-            if (inc > 0) {
-              msg = '没有下一篇了';
-            } else {
-              msg = '没有上一篇了';
-            }
-          } else {
-            msg = '出错了: ' + statusCode;
-          }
-          toast.MaterialSnackbar.showSnackbar({message: msg});
-        }
-    );
-  }
-
-  function toggleProgress(show) {
-    progress.style.display = show ? 'block' : 'none';
-    prev.disabled = show;
-    next.disabled = show;
-  }
 </script>
 </body>
 </html>
