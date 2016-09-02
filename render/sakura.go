@@ -25,7 +25,7 @@ func (t timestamp) LessThan(other skiplist.Ordered) bool {
 
 type entry struct {
 	val   interface{}
-	err   error
+	err   error // TODO: retey?
 	ready chan struct{}
 }
 
@@ -148,7 +148,7 @@ func (s *Sakura) get(req request) {
 		return
 	}
 	v, _ := s.list.Get(index)
-	var prev, next string
+	var newer, older string
 	// if it hide from the list, only show will directly http get access
 	if !v.(*Meta).Hide {
 		it := s.list.Seek(index)
@@ -159,7 +159,7 @@ func (s *Sakura) get(req request) {
 			step++
 			v := it.Value()
 			if !v.(*Meta).Hide {
-				next = it.Value().(*Meta).ID
+				older = v.(*Meta).ID
 				break
 			}
 		}
@@ -171,7 +171,8 @@ func (s *Sakura) get(req request) {
 		for it.Next() {
 			v := it.Value()
 			if !v.(*Meta).Hide {
-				prev = v.(*Meta).ID
+				newer = v.(*Meta).ID
+				break
 			}
 		}
 	}
@@ -190,7 +191,7 @@ func (s *Sakura) get(req request) {
 		if e.err != nil {
 			req.resp <- e.err
 		} else {
-			req.resp <- &Markdown{Meta: *v.(*Meta), Next: next, Prev: prev, Body: template.HTML(e.val.([]byte))} // TODO: cache the HTML better?
+			req.resp <- &Markdown{Meta: *v.(*Meta), Older: older, Newer: newer, Body: template.HTML(e.val.([]byte))} // TODO: cache the HTML better?
 		}
 	}()
 }

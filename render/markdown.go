@@ -30,8 +30,8 @@ type Meta struct {
 // Markdown a rendered *md file.
 type Markdown struct {
 	Meta
-	Prev, Next string
-	Body       template.HTML
+	Older, Newer string
+	Body         template.HTML
 }
 
 var parseYAML = func(in io.Reader, v interface{}) error {
