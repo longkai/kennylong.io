@@ -5,8 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/longkai/xiaolongtongxue.com/config"
 )
 
 const (
@@ -17,10 +15,6 @@ var provideURL = func(path string) string {
 	return endpoint + path
 }
 
-var provideToken = func() string {
-	return fmt.Sprintf("token %s", config.Env.AccessToken)
-}
-
 // Markdown makrdownify plain text to html with Github API.
 func Markdown(in io.Reader) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, provideURL("/markdown/raw"), in)
@@ -28,7 +22,7 @@ func Markdown(in io.Reader) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "text/plain; charset=utf-8")
-	req.Header.Add("Authorization", provideToken())
+	req.Header.Add("Authorization", fmt.Sprintf("token %s", token))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err

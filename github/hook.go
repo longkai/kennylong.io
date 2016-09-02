@@ -9,45 +9,62 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os/exec"
 
-	"github.com/longkai/xiaolongtongxue.com/config"
+	"github.com/longkai/xiaolongtongxue.com/git"
 )
 
-func Hook(resp http.ResponseWriter, req *http.Request, invalidate chan<- struct{}) {
-	event := req.Header.Get("X-GitHub-Event")
-	signature := req.Header.Get("X-Hub-Signature")
-	delivery := req.Header.Get("X-GitHub-Delivery")
-	// handle security problem
-	defer req.Body.Close()
-	if err := handleSecurity(req.Body, signature); err != nil {
-		http.Error(resp, err.Error(), http.StatusInternalServerError)
+// Callback after pull and diff success.
+type Callback func(adds, mods, dels []string)
+
+var (
+	repo     string
+	token    string
+	secret   string
+	callback Callback
+)
+
+// Init Github service
+func Init(hookURL string, repo string, secret string, token string, cb Callback) {
+	repo, secret, callback = repo, secret, cb
+	http.HandleFunc(hookURL, hook)
+}
+
+// Hook github webhook service.
+func hook(w http.ResponseWriter, r *http.Request) {
+	event := r.Header.Get("X-GitHub-Event")
+	signature := r.Header.Get("X-Hub-Signature")
+	delivery := r.Header.Get("X-GitHub-Delivery")
+	// handle security
+	defer r.Body.Close()
+	if err := handleSecurity(r.Body, signature); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
-	log.Printf("receive github webhook, event: %q, delivery: %q, signature: %q\n", event, delivery, signature)
+	log.Printf("receive github webhook, event: %q, delivery: %q, signature: %q", event, delivery, signature)
+
 	if event == "push" {
-		// NOTE: we do a simple job, each time we receive a push hook, just pull the master brach, then render again
-		go pull(invalidate)
+		go handleHook()
 	}
 	// send pong message back to Github
-	fmt.Fprint(resp, "thx :)")
+	fmt.Fprint(w, "thx :)")
 }
 
-func pull(invalidate chan<- struct{}) {
-	log.Println("executing shell command...")
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd %s; git pull;", config.Env.ArticleRepo))
-	b, err := cmd.Output()
+var handleHook = func() {
+	err := git.Pull(repo)
 	if err != nil {
-		log.Printf("git pull fail, %v\n", err)
+		log.Printf("git pull fail: %v", err)
 		return
 	}
-	fmt.Printf("%s\n", b)
-	// request render again :)
-	invalidate <- struct{}{}
+	a, m, d, err := git.Diff(repo)
+	if err != nil {
+		log.Printf("`git diff` fail: %v", err)
+		return
+	}
+	callback(a, m, d)
 }
 
-func handleSecurity(reader io.Reader, signature string) error {
+var handleSecurity = func(reader io.Reader, signature string) error {
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
@@ -58,8 +75,8 @@ func handleSecurity(reader io.Reader, signature string) error {
 	return nil
 }
 
-func checkMAC(message []byte, messageMAC string) bool {
-	mac := hmac.New(sha1.New, []byte(config.Env.HookSecret))
+var checkMAC = func(message []byte, messageMAC string) bool {
+	mac := hmac.New(sha1.New, []byte(secret))
 	mac.Write(message)
 	expectedMAC := mac.Sum(nil)
 	return "sha1="+hex.EncodeToString(expectedMAC) == messageMAC
