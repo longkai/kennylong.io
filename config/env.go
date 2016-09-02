@@ -2,7 +2,11 @@ package config
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"strings"
+	"sync"
+
+	"github.com/longkai/xiaolongtongxue.com/helper"
 
 	"regexp"
 
@@ -19,8 +23,11 @@ type Configuration struct {
 
 var (
 	// Env global environment
-	Env     *Configuration
+	Env *Configuration
+
 	regexps []*regexp.Regexp
+	mu      sync.Mutex // guards roots
+	roots   map[string]struct{}
 )
 
 var adjustEnv = func() {
@@ -34,10 +41,20 @@ var adjustEnv = func() {
 	for _, v := range Env.Ignores {
 		regexps = append(regexps, regexp.MustCompile(v))
 	}
+
+	// store root dirs
+	mu.Lock()
+	defer mu.Unlock()
+	for _, e := range helper.Dirents(Env.Repo) {
+		name := e.Name()
+		if !Ignored(filepath.Join(Env.Repo, name)) {
+			roots[name] = struct{}{}
+		}
+	}
 }
 
-// InitEnv _
-func InitEnv(src string) error {
+// Init configuration, must call it only once.
+func Init(src string) error {
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -46,6 +63,7 @@ func InitEnv(src string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
+	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
 }
@@ -59,4 +77,39 @@ func Ignored(path string) bool {
 		}
 	}
 	return false
+}
+
+// Roots return repo root dirs.
+func Roots() []string {
+	mu.Lock()
+	defer mu.Unlock()
+	list := make([]string, 0, len(roots))
+	for k := range roots {
+		list = append(list, k)
+	}
+	return list
+}
+
+// Root testify the path is in a new root dir, otherwise return ""
+func Root(path string) string {
+	if Ignored(path) {
+		return ""
+	}
+
+	path = path[len(Env.Repo):] // without leading `/`
+	for i := 0; i < len(path); i++ {
+		if path[i] == '/' {
+			path = path[:i]
+			break
+		}
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	if _, ok := roots[path]; ok {
+		return ""
+	}
+
+	roots[path] = struct{}{}
+	return path
 }

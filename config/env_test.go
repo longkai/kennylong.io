@@ -2,7 +2,7 @@ package config
 
 import "testing"
 
-func TestInitEnv(t *testing.T) {
+func TestInit(t *testing.T) {
 	saved1, saved2 := Env, regexps
 	defer func() {
 		Env = saved1
@@ -11,12 +11,12 @@ func TestInitEnv(t *testing.T) {
 
 	src := "./testdata/env.yaml"
 
-	if err := InitEnv(src); err != nil {
-		t.Errorf("InitEnv(%q) = %v\n", err)
+	if err := Init(src); err != nil {
+		t.Errorf("Init(%q) = %v\n", err)
 	}
 
 	if Env == nil {
-		t.Errorf("InitEnv(%q), Env = nil\n", src)
+		t.Errorf("Init(%q), Env = nil\n", src)
 	}
 
 	// testify defauly ignore behavious
@@ -71,6 +71,34 @@ func TestIgnore(t *testing.T) {
 			input := Env.Repo + test.input
 			if got := Ignored(input); got != test.want {
 				t.Errorf("Ignored(%q) = %v", input, got)
+			}
+		})
+	}
+}
+
+func TestRoot(t *testing.T) {
+	_env, _roots := Env, roots
+	defer func() { Env, roots = _env, _roots }()
+
+	// stub
+	Env = &Configuration{Repo: "/a/b/c/", Ignores: []string{`/[^/]*\.c$`, `.*/ignore/.*`}}
+	adjustEnv()
+	roots = map[string]struct{}{"exist": struct{}{}}
+
+	tests := []struct {
+		tag, input, want string
+	}{
+		{`Normal`, `path/to/sth`, `path`},
+		{`Exist`, `exist/to/sth`, ``},
+		{`Ignored`, `ignore/to/sth`, ``},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.tag, func(t *testing.T) {
+			path := Env.Repo + test.input
+			if got := Root(path); got != test.want {
+				t.Errorf("Root(%q) = %q, want %q", path, got, test.want)
 			}
 		})
 	}
