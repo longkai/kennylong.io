@@ -23,7 +23,7 @@ var (
 // Diff `git diff --name-status HEAD~ HEAD`
 func Diff(repo string) (adds, mods, dels []string, err error) {
 	script := fmt.Sprintf("cd %s && git diff --name-status HEAD~ HEAD", repo)
-	log.Printf("run shell script: %q", script)
+	log.Printf("exec script:\n %q", script)
 	cmd := exec.Command("/bin/sh", "-c", script)
 	b, err := cmd.Output()
 	if err != nil {
@@ -31,6 +31,20 @@ func Diff(repo string) (adds, mods, dels []string, err error) {
 	}
 	adds, mods, dels = diff(bytes.NewReader(b))
 	return
+}
+
+// Pull `git pull`
+func Pull(repo string) error {
+	script := fmt.Sprintf("cd %s && git pull;", repo)
+	log.Printf("exec sciprt:\n %q", script)
+	cmd := exec.Command("/bin/sh", "-c", script)
+	b, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	// print output
+	fmt.Printf("%s\n", b)
+	return nil
 }
 
 func diff(in io.Reader) (adds, mods, dels []string) {
