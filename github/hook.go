@@ -24,8 +24,8 @@ var (
 )
 
 // Init Github service
-func Init(hookURL string, repo string, secret string, token string, cb Callback) {
-	repo, secret, callback = repo, secret, cb
+func Init(hookURL string, _repo string, _secret string, _token string, cb Callback) {
+	repo, secret, token, callback = _repo, _secret, _token, cb
 	http.HandleFunc(hookURL, hook)
 }
 
