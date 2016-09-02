@@ -89,6 +89,41 @@
 
 {{template "script"}}
 <script type="application/javascript">
+  var path = window.location.pathname;
+  var layout = document.getElementsByClassName('mdl-layout__content')[0];
+  var grid = document.getElementById('grid');
+
+  var items;
+
+  window.onload = function() {
+    // load data...
+    var essays = sessionStorage['essays'];
+    if (essays) {
+      console.log('get back items ' + essays);
+      items = JSON.parse(essays);
+      appendEssays(items);
+    }
+
+    var lastPos = sessionStorage[path];
+    if (lastPos) {
+      console.log("get back " + lastPos);
+      layout.scrollTop -= lastPos;
+    } else {
+      console.log("first load");
+    }
+  };
+
+  window.onunload = function() {
+    var pos = grid.getBoundingClientRect().top - 230;
+    console.log('saving pos for ' + path + ' ' + pos);
+    sessionStorage[path] = pos;
+
+    if (items) {
+      console.log('saving items: ' + items);
+      sessionStorage['essays'] = JSON.stringify(items);
+    }
+  };
+
   Array.prototype.forEach.call(document.querySelectorAll('.banner, .summary'), function (el) {
     el.style.cursor = 'pointer';
     go(el);
@@ -96,7 +131,6 @@
 
   var hasMore = true;
 
-  var grid = document.getElementById('grid');
   var nav = document.getElementById('nav');
   var more = document.getElementById('more');
   var progress = document.getElementById('progress');
@@ -133,82 +167,13 @@
           hasMore = data.length != 0;
 
           // do append
-          for (var i = 0; i < data.length; i++) {
-            var a = data[i];
-
-            var card = document.createElement('div');
-            card.className = 'mdl-card mdl-cell on-the-road-again mdl-cell--12-col';
-
-            var cardMedia = document.createElement('div');
-            cardMedia.className = 'mdl-card__media banner mdl-color-text--grey-50';
-            if (hasColor(a.background)) {
-              cardMedia.style.backgroundColor = a.background;
-            } else if (hasImage(a.background)) {
-              cardMedia.style.backgroundImage = 'url("' + background(a) + '")';
-            }
-
-            var h3 = document.createElement('h3');
-            if (a.summary) {
-              h3.className = 'quote';
-            }
-            var title = document.createElement('a');
-            title.setAttribute('href', a.id);
-            title.textContent = a.title;
-
-            h3.appendChild(title);
-            cardMedia.appendChild(h3);
-
-            go(cardMedia); // handle click event
-
-            // text field
-            var meta = document.createElement('div');
-            meta.className = 'mdl-card__supporting-text meta mdl-color-text--grey-600';
-            var avatar = document.createElement('div');
-            avatar.className = 'minilogo';
-            meta.appendChild(avatar);
-
-            var div = document.createElement('div');
-            var author = document.createElement('strong');
-            author.textContent = '小龙同学';
-            var date = document.createElement('span');
-            date.textContent = daysAgo(a.date) + ' 天前';
-
-            // tags
-            if (a.tags) {
-              date.textContent += ' 在 ';
-              for (var j = 0; j < a.tags.length; j++) {
-                date.textContent += '#' + a.tags[j];
-                if (j != a.tags.length - 1) {
-                  date.textContent += ', ';
-                }
-              }
-            }
-
-            div.appendChild(author);
-            div.appendChild(date);
-
-            meta.appendChild(div);
-
-            // add to card
-            card.appendChild(cardMedia);
-            // check has summary
-            if (a.summary) {
-              var summary = document.createElement('div');
-              summary.className = 'mdl-color-text--grey-600 mdl-card__supporting-text';
-              summary.style.cursor = 'pointer';
-              summary.setAttribute('href', a.id);
-              summary.textContent = a.summary;
-
-              go(summary);
-              card.appendChild(summary);
-            }
-            card.appendChild(meta);
-
-            // insert to page
-            componentHandler.upgradeElement(card);
-            grid.insertBefore(card, nav);
+          appendEssays(data);
+          if (items) {
+            items = items.concat(data);
+          } else {
+            items = data;
           }
-
+          
           more.style.display = 'block';
           progress.style.display = 'none';
         },
@@ -220,6 +185,84 @@
         }
     );
   });
+
+function appendEssays(data) {
+  for (var i = 0; i < data.length; i++) {
+    var a = data[i];
+
+    var card = document.createElement('div');
+    card.className = 'mdl-card mdl-cell on-the-road-again mdl-cell--12-col';
+
+    var cardMedia = document.createElement('div');
+    cardMedia.className = 'mdl-card__media banner mdl-color-text--grey-50';
+    if (hasColor(a.background)) {
+      cardMedia.style.backgroundColor = a.background;
+    } else if (hasImage(a.background)) {
+      cardMedia.style.backgroundImage = 'url("' + background(a) + '")';
+    }
+
+    var h3 = document.createElement('h3');
+    if (a.summary) {
+      h3.className = 'quote';
+    }
+    var title = document.createElement('a');
+    title.setAttribute('href', a.id);
+    title.textContent = a.title;
+
+    h3.appendChild(title);
+    cardMedia.appendChild(h3);
+
+    go(cardMedia); // handle click event
+
+    // text field
+    var meta = document.createElement('div');
+    meta.className = 'mdl-card__supporting-text meta mdl-color-text--grey-600';
+    var avatar = document.createElement('div');
+    avatar.className = 'minilogo';
+    meta.appendChild(avatar);
+
+    var div = document.createElement('div');
+    var author = document.createElement('strong');
+    author.textContent = '小龙同学';
+    var date = document.createElement('span');
+    date.textContent = daysAgo(a.date) + ' 天前';
+
+    // tags
+    if (a.tags) {
+      date.textContent += ' 在 ';
+      for (var j = 0; j < a.tags.length; j++) {
+        date.textContent += '#' + a.tags[j];
+        if (j != a.tags.length - 1) {
+          date.textContent += ', ';
+        }
+      }
+    }
+
+    div.appendChild(author);
+    div.appendChild(date);
+
+    meta.appendChild(div);
+
+    // add to card
+    card.appendChild(cardMedia);
+    // check has summary
+    if (a.summary) {
+      var summary = document.createElement('div');
+      summary.className = 'mdl-color-text--grey-600 mdl-card__supporting-text';
+      summary.style.cursor = 'pointer';
+      summary.setAttribute('href', a.id);
+      summary.textContent = a.summary;
+
+      go(summary);
+      card.appendChild(summary);
+    }
+    card.appendChild(meta);
+
+    // insert to page
+    componentHandler.upgradeElement(card);
+    grid.insertBefore(card, nav);
+  }
+}
 
   function lastKey() {
     e = nav.previousElementSibling;
@@ -257,7 +300,7 @@
       target = '/' + target
     }
     el.addEventListener('click', function () {
-      window.open(window.location.protocol + '//' + window.location.host + target, '_blank');
+      window.open(window.location.protocol + '//' + window.location.host + target, '_self');
     });
   }
 
