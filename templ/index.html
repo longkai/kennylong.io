@@ -25,16 +25,16 @@
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := . -}}
-      <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
+      <div class="mdl-card mdl-cell banner {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media mdl-color-text--grey-50"
              style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
              {{if $a.Background | hasImage -}}
              background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
              {{- end}};">
-          <h3{{if not $a.Summary}} class="quote"{{end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
+          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 mdl-card__supporting-text">
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text">
           {{$a.Summary}}
         </div>
         {{- end}}
@@ -42,7 +42,7 @@
           <div class="minilogo"></div>
           <div>
             <strong>小龙同学</strong>
-            <span>{{$a.Date | daysAgo}} 天前 {{if $a.Tags}} 在 {{$a.Tags | tags}}{{end}}
+            <span>{{$a.Date | daysAgo}} 天前 {{if $a.Tags -}} 在 {{$a.Tags | tags}}{{- end}}
             </span>
           </div>
         </div>
@@ -89,7 +89,8 @@
 
 {{template "script"}}
 <script type="application/javascript">
-  Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media'), function (el) {
+  Array.prototype.forEach.call(document.querySelectorAll('.banner, .summary'), function (el) {
+    el.style.cursor = 'pointer';
     go(el);
   });
 
@@ -139,7 +140,7 @@
             card.className = 'mdl-card mdl-cell on-the-road-again mdl-cell--12-col';
 
             var cardMedia = document.createElement('div');
-            cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
+            cardMedia.className = 'mdl-card__media banner mdl-color-text--grey-50';
             if (hasColor(a.background)) {
               cardMedia.style.backgroundColor = a.background;
             } else if (hasImage(a.background)) {
@@ -194,8 +195,11 @@
             if (a.summary) {
               var summary = document.createElement('div');
               summary.className = 'mdl-color-text--grey-600 mdl-card__supporting-text';
+              summary.style.cursor = 'pointer';
+              summary.setAttribute('href', a.id);
               summary.textContent = a.summary;
 
+              go(summary);
               card.appendChild(summary);
             }
             card.appendChild(meta);
@@ -240,10 +244,12 @@
 
   function go(el) {
     var link = el.querySelector('a');
+    var target = '';
     if (!link) {
-      return;
+      target = el.getAttribute('href');
+    } else {
+      target = link.getAttribute('href');
     }
-    var target = link.getAttribute('href');
     if (!target) {
       return;
     }
