@@ -11,7 +11,7 @@ func TestParseID(t *testing.T) {
 	defer func() { config.Env = saved }()
 	// stub
 	base := "/path/to/repo"
-	config.Env = &config.Configuration{ArticleRepo: base}
+	config.Env = &config.Configuration{Repo: base}
 	tests := []struct {
 		input, want string
 	}{
@@ -30,6 +30,6 @@ func TestParseID(t *testing.T) {
 	}
 
 	t.Run("WithoutSuffix", f)
-	config.Env.ArticleRepo += "/"
+	config.Env.Repo += "/"
 	t.Run("WithSuffix", f)
 }

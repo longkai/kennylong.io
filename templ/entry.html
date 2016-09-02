@@ -143,6 +143,7 @@
         </div>
       </div>
 
+      {{if not .Hide -}}
       <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
         <a {{if .Prev}}href="{{.Prev}}"{{end}} class="demo-nav__button">
           <button
@@ -162,6 +163,7 @@
           </button>
         </a>
       </nav>
+      {{- end}}
     </div>
     {{template "footer"}}
   </main>

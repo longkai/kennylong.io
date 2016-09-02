@@ -5,11 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/ryszard/goskiplist/skiplist"
@@ -58,6 +54,7 @@ type requests struct {
 // Sakura render engine.
 type Sakura struct {
 	Render
+	Traveller
 	requests
 	list  *skiplist.SkipList
 	index map[string]timestamp
@@ -92,36 +89,39 @@ func (s *Sakura) post(v interface{}) {
 
 func (s *Sakura) ls(req listrequest) {
 	l := []interface{}{}
+	f := func(it skiplist.Iterator, size int) {
+		for i := 0; i < size && it.Previous(); {
+			v := it.Value()
+			// drop those who is hide
+			if !v.(*Meta).Hide {
+				l = append(l, it.Value())
+				i++
+			}
+		}
+	}
+
+	deliver := func(v interface{}) { req.resp <- v }
+
 	if req.key == "" {
 		// from the max down to size
 		it := s.list.SeekToLast()
 		defer it.Close()
 		l = append(l, it.Value())
-		for i := 1; i < req.size && it.Previous(); i++ {
-			l = append(l, it.Value())
-		}
-		go func() {
-			req.resp <- l
-		}()
+		f(it, req.size-1)
+		go deliver(l)
 		return
 	}
 
 	index, ok := s.index[req.key]
 	if !ok {
-		go func() {
-			req.resp <- fmt.Errorf("key %q not found", req.key)
-		}()
+		go deliver(fmt.Errorf("key %q not found", req.key))
 		return
 	}
 	it := s.list.Seek(index)
 	defer it.Close()
-	for i := 0; i < req.size && it.Previous(); i++ {
-		l = append(l, it.Value())
-	}
+	f(it, req.size)
 	// deliver
-	go func() {
-		req.resp <- l
-	}()
+	go deliver(l)
 }
 
 func (s *Sakura) get(req request) {
@@ -134,15 +134,31 @@ func (s *Sakura) get(req request) {
 	}
 	v, _ := s.list.Get(index)
 	var prev, next string
-	it := s.list.Seek(index)
-	defer it.Close()
-	// Note it's time asc order
-	if it.Previous() {
-		next = it.Value().(*Meta).ID
-		it.Next() // go back
-	}
-	if it.Next() {
-		prev = it.Value().(*Meta).ID
+	// if it hide from the list, only show will directly http get access
+	if !v.(*Meta).Hide {
+		it := s.list.Seek(index)
+		defer it.Close()
+		var step int
+		// Note it's time asc order
+		for it.Previous() {
+			step++
+			v := it.Value()
+			if !v.(*Meta).Hide {
+				next = it.Value().(*Meta).ID
+				break
+			}
+		}
+		// go back oringianl pos
+		for step > 0 {
+			it.Next()
+			step--
+		}
+		for it.Next() {
+			v := it.Value()
+			if !v.(*Meta).Hide {
+				prev = v.(*Meta).ID
+			}
+		}
 	}
 
 	e := s.cache[req.key]
@@ -162,55 +178,6 @@ func (s *Sakura) get(req request) {
 			req.resp <- &Markdown{Meta: *v.(*Meta), Next: next, Prev: prev, Body: template.HTML(e.val.([]byte))} // TODO: cache the HTML better?
 		}
 	}()
-}
-
-func (s *Sakura) travel(dir string) {
-	dirSema <- struct{}{}
-	defer func() { <-dirSema }()
-
-	for _, e := range dirents(dir) {
-		if s.Fun(dir, e) {
-			go s.Meet(filepath.Join(dir, e.Name()))
-		}
-	}
-}
-
-// Fun is it?
-func (s *Sakura) Fun(place string, sth os.FileInfo) bool {
-	name := sth.Name()
-	switch {
-	default:
-		// normal files, no actions done here
-		return false
-	case strings.HasPrefix(name, "."):
-		// ignore hidden stuffs
-		return false
-	case sth.IsDir():
-		// have no idea, so we need to look agian
-		go s.travel(filepath.Join(place, name))
-		return false
-	case strings.HasSuffix(strings.ToLower(name), ".md"):
-		// interesting :)
-		return true
-	}
-}
-
-// Meet sth. interesting.
-func (s *Sakura) Meet(sth string) {
-	f, err := os.Open(sth)
-	if err != nil {
-		log.Printf("open %q fail: %v", sth, err)
-		return
-	}
-	defer f.Close()
-
-	m, err := parseMd(f)
-	if err != nil {
-		log.Printf("parse %q fail: %v", sth, err)
-		return
-	}
-	m.ID = parseID(sth)
-	s.requests.post <- m
 }
 
 // Ls markdown list.
@@ -237,7 +204,7 @@ func (s *Sakura) Get(key string) (interface{}, error) {
 
 // Post markdowns for the given directory.
 func (s *Sakura) Post(dir string) (interface{}, error) {
-	go s.travel(dir)
+	go s.Traveller.Travel(dir)
 	return nil, nil
 }
 
@@ -264,23 +231,9 @@ func NewSakura() Engine {
 			post: make(chan interface{}),
 			put:  make(chan request),
 		},
-		Render: func(in io.Reader) (interface{}, error) {
-			return github.Markdown(in)
-		},
+		Render: func(in io.Reader) (interface{}, error) { return github.Markdown(in) },
 	}
+	s.Traveller = &Hiker{func(v interface{}) { s.requests.post <- v }}
 	go s.loop()
 	return s
-}
-
-// dirSema is a counting demaphore for limiting concurrency in dirents.
-var dirSema = make(chan struct{}, 20)
-
-// dirents lists the entries of directory dir.
-func dirents(dir string) []os.FileInfo {
-	entries, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
-	return entries
 }

@@ -23,7 +23,7 @@ type Meta struct {
 	Summary    string    `json:"summary"`
 	Location   string    `json:"location"`
 	Background string    `json:"background"`
-	hide       bool      `json:"hide"`
+	Hide       bool      `json:"hide"` //  hide from the list, but still can get will url
 	body       []byte    // TODO: avoid this field?
 }
 
@@ -43,7 +43,7 @@ var parseYAML = func(in io.Reader, v interface{}) error {
 }
 
 func parseID(path string) string {
-	base := config.Env.ArticleRepo
+	base := config.Env.Repo
 	if !strings.HasPrefix(path, base) {
 		return ""
 	}
