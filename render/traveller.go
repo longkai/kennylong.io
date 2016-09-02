@@ -14,7 +14,8 @@ import (
 type Traveller interface {
 	// Travel a place to find someting interesting.
 	Travel(place string)
-
+	// Into if and only if sth is interesting.
+	Into(sth string) bool
 	// Meet meet with sth if it's really interesting.
 	Meet(sth string)
 }
@@ -32,10 +33,16 @@ func (h *Hiker) Travel(place string) {
 		case config.Ignored(sth):
 		case e.IsDir():
 			go h.Travel(sth)
-		case strings.HasSuffix(sth, ".md"): // TODO: support more ext?
+		case h.Into(sth):
 			go h.Meet(sth)
 		}
 	}
+}
+
+// Into if and only if sth is interesting.
+func (h *Hiker) Into(sth string) bool {
+	// TODO: support more ext?
+	return !config.Ignored(sth) && strings.HasSuffix(sth, `.md`)
 }
 
 // Meet with sth if it's really interesting the traveller will call you.

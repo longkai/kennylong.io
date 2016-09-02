@@ -12,4 +12,6 @@ type Engine interface {
 	Put(key string) (interface{}, error)
 	// Del an entry.
 	Del(key string) (interface{}, error)
+	// Revalidate the given entries.
+	Revalidate(adds, mods, dels []string) error
 }

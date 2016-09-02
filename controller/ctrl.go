@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/longkai/xiaolongtongxue.com/config"
+	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/longkai/xiaolongtongxue.com/render"
 )
 
@@ -39,18 +42,42 @@ var (
 // Ctrl main controller.
 func Ctrl() {
 	sakura = render.NewSakura()
-	staticFs = http.FileServer(http.Dir(config.Env.ArticleRepo))
-	sakura.Post(config.Env.ArticleRepo)
+	staticFs = http.FileServer(http.Dir(config.Env.Repo))
+	sakura.Post(config.Env.Repo)
 
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+	github.Init(`/api/github/hook`, config.Env.Repo, config.Env.HookSecret, config.Env.AccessToken, revalidate)
+	for _, v := range config.Roots() {
+		installHanlder(v)
+	}
+
 	http.HandleFunc("/", home)
 	http.HandleFunc("/ls/", ls)
-	for _, dir := range config.Env.PublishDirs {
-		http.Handle(fmt.Sprintf("/%s/", dir), http.HandlerFunc(entry))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+}
+
+var installHanlder = func(p string) {
+	p = fmt.Sprintf("/%s/", p)
+	log.Printf("mapping url %s*", p)
+	http.HandleFunc(p, entry)
+}
+
+var revalidate = func(a, m, d []string) {
+	for i := range a {
+		if v := config.Root(filepath.Join(config.Env.Repo, a[i])); v != "" {
+			installHanlder(v)
+		}
+	}
+	if err := sakura.Revalidate(a, m, d); err != nil {
+		log.Printf("revalidate fail: %v", err)
 	}
 }
 
-func home(w http.ResponseWriter, req *http.Request) {
+func home(w http.ResponseWriter, r *http.Request) {
+	if r.RequestURI != "/" {
+		http.Error(w, "404 page not found", http.StatusNotFound)
+		return
+	}
+
 	v, err := sakura.Ls("", pageSize)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -61,13 +88,13 @@ func home(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func entry(w http.ResponseWriter, req *http.Request) {
-	if !strings.HasSuffix(req.RequestURI, "/") {
-		staticFs.ServeHTTP(w, req)
+func entry(w http.ResponseWriter, r *http.Request) {
+	if !strings.HasSuffix(r.RequestURI, "/") {
+		staticFs.ServeHTTP(w, r)
 		return
 	}
 
-	v, err := sakura.Get(req.RequestURI)
+	v, err := sakura.Get(r.RequestURI)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -77,10 +104,10 @@ func entry(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func ls(w http.ResponseWriter, req *http.Request) {
-	key := req.RequestURI[len("/ls"):]
+func ls(w http.ResponseWriter, r *http.Request) {
+	key := r.RequestURI[len("/ls"):]
 	if len(key) <= 1 { // `/` is not allowed
-		http.Error(w, fmt.Sprintf("RequestURI %q, last segment not found", req.RequestURI), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("RequestURI %q, last segment not found", r.RequestURI), http.StatusBadRequest)
 		return
 	}
 	v, err := sakura.Ls(key, pageSize)

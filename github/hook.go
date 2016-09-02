@@ -53,7 +53,7 @@ func hook(w http.ResponseWriter, r *http.Request) {
 var handleHook = func() {
 	err := git.Pull(repo)
 	if err != nil {
-		log.Printf("git pull fail: %v", err)
+		log.Printf("`git pull` fail: %v", err)
 		return
 	}
 	a, m, d, err := git.Diff(repo)

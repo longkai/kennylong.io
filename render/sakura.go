@@ -6,7 +6,9 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"path/filepath"
 
+	"github.com/longkai/xiaolongtongxue.com/config"
 	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/ryszard/goskiplist/skiplist"
 )
@@ -70,8 +72,21 @@ func (s *Sakura) loop() {
 			s.get(req)
 		case v := <-s.requests.post:
 			s.post(v)
+		case req := <-s.requests.del:
+			s.del(req)
 		}
 	}
+}
+
+func (s *Sakura) del(req request) {
+	// sync
+	delete(s.cache, req.key)
+	ts := s.index[req.key]
+	delete(s.index, req.key)
+	_, ok := s.list.Delete(ts)
+	log.Printf("del %q: %t, total %d", req.key, ok, len(s.index))
+	// deliver
+	go func() { req.resp <- ok }()
 }
 
 func (s *Sakura) post(v interface{}) {
@@ -193,6 +208,7 @@ func (s *Sakura) Ls(key string, size int) (interface{}, error) {
 
 // Get markdown detail.
 func (s *Sakura) Get(key string) (interface{}, error) {
+	log.Printf("Get(%q)", key)
 	resp := make(chan interface{})
 	s.requests.get <- request{key, resp}
 	v := <-resp
@@ -204,18 +220,56 @@ func (s *Sakura) Get(key string) (interface{}, error) {
 
 // Post markdowns for the given directory.
 func (s *Sakura) Post(dir string) (interface{}, error) {
+	log.Printf("Post(%q)", dir)
 	go s.Traveller.Travel(dir)
 	return nil, nil
 }
 
 // Put revalidate a markdown.
 func (s *Sakura) Put(key string) (interface{}, error) {
+	// if puts, del then post again since we don't know what has changes...
+	log.Printf("Put(%q)", key)
+	if _, err := s.Del(key); err != nil {
+		log.Printf("del %q fail %v, exiting mod", key, err)
+		return nil, err
+	}
+	// then post again
+	s.Post(filepath.Join(config.Env.Repo, key))
 	return nil, nil
 }
 
 // Del invalidate a markdown.
-func (s Sakura) Del(key string) (interface{}, error) {
-	return nil, nil
+func (s *Sakura) Del(key string) (interface{}, error) {
+	log.Printf("Del(%q)", key)
+	resp := make(chan interface{})
+	s.requests.del <- request{key, resp}
+	v := <-resp
+	if err, ok := v.(error); ok {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Revalidate the given entries.
+func (s *Sakura) Revalidate(adds, mods, dels []string) error {
+	log.Printf("Revalidate(%s, %s, %s)", adds, mods, dels)
+	base := config.Env.Repo
+	handle := func(a []string, f func(s string)) {
+		for _, v := range a {
+			sth := filepath.Join(base, v)
+			// git only tracks files
+			if s.Traveller.Into(sth) {
+				f(sth)
+			}
+		}
+	}
+
+	handle(adds, func(sth string) { go s.Traveller.Meet(sth) })
+	handle(mods, func(sth string) { go s.Put(parseID(sth)) })
+	handle(dels, func(sth string) { go s.Del(parseID(sth)) })
+
+	// always no error, since we can do nothing but logging
+	return nil
 }
 
 // NewSakura _
