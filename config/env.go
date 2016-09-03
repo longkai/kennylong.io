@@ -15,6 +15,7 @@ import (
 
 // Configuration configuration
 type Configuration struct {
+	Port        int      `yaml:"port"`
 	Repo        string   `yaml:"repo"`
 	Ignores     []string `yaml:"ignores"` // regexp
 	HookSecret  string   `yaml:"hook_secret"`

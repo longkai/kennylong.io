@@ -1,25 +1,23 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/longkai/xiaolongtongxue.com/config"
 	"github.com/longkai/xiaolongtongxue.com/controller"
 )
 
-var (
-	port = flag.Int(`port`, 1217, `HTTP listen port`)
-	conf = flag.String(`conf`, `env.yaml`, `configuration file`)
-)
-
 func main() {
-	flag.Parse()
-	if err := config.Init(*conf); err != nil {
-		log.Fatal(err)
+	var env = `env.yaml` // def location
+	if len(os.Args) > 1 {
+		env = os.Args[1]
+	}
+	if err := config.Init(env); err != nil {
+		log.Fatalf("config.Init(%q) fail: %v", env, err)
 	}
 	controller.Ctrl()
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Env.Port), nil))
 }
