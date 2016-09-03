@@ -28,24 +28,23 @@ var (
 		`relImage`: render.IsRelImage,
 	}).ParseGlob(`templ/*`))
 
-	sakura   render.Engine
-	staticFs http.Handler
+	repo   string
+	sakura render.Engine
 )
 
 // Ctrl main controller.
 func Ctrl() {
+	repo = config.Env.Repo
 	sakura = render.NewSakura()
-	staticFs = http.FileServer(http.Dir(config.Env.Repo))
 	sakura.Post(config.Env.Repo)
+	initFS("")
 
-	github.Init(`/api/github/hook`, config.Env.Repo, config.Env.HookSecret, config.Env.AccessToken, revalidate)
+	github.Init(`/api/github/hook`, repo, config.Env.HookSecret, config.Env.AccessToken, revalidate)
+	http.HandleFunc("/", home)
+	http.HandleFunc("/ls/", ls)
 	for _, v := range config.Roots() {
 		installHanlder(v)
 	}
-
-	http.HandleFunc("/", home)
-	http.HandleFunc("/ls/", ls)
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 }
 
 var installHanlder = func(p string) {
@@ -56,7 +55,7 @@ var installHanlder = func(p string) {
 
 var revalidate = func(a, m, d []string) {
 	for i := range a {
-		if v := config.Root(filepath.Join(config.Env.Repo, a[i])); v != "" {
+		if v := config.Root(filepath.Join(repo, a[i])); v != "" {
 			installHanlder(v)
 		}
 	}
@@ -67,7 +66,7 @@ var revalidate = func(a, m, d []string) {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI != "/" {
-		http.Error(w, "404 page not found", http.StatusNotFound)
+		http.NotFound(w, r)
 		return
 	}
 
@@ -87,7 +86,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func entry(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasSuffix(r.RequestURI, "/") {
-		staticFs.ServeHTTP(w, r)
+		cdn(w, r)
 		return
 	}
 

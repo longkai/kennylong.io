@@ -53,7 +53,8 @@ var adjustEnv = func() {
 	}
 
 	regexps = make([]*regexp.Regexp, 0, len(Env.Ignores))
-	regexps = append(regexps, regexp.MustCompile(`/\.[^/]+$`)) // ignore hidden file/dir
+	regexps = append(regexps, regexp.MustCompile(`/\.[^/]+$`))     // ignore hidden file/dir
+	regexps = append(regexps, regexp.MustCompile(`/assets(/.*)?`)) // ignore assets dir
 	for _, v := range Env.Ignores {
 		regexps = append(regexps, regexp.MustCompile(v))
 	}
