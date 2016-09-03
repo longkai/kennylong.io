@@ -209,7 +209,7 @@ func (s *Sakura) Ls(key string, size int) (interface{}, error) {
 
 // Get markdown detail.
 func (s *Sakura) Get(key string) (interface{}, error) {
-	log.Printf("Get(%q)", key)
+	// log.Printf("Get(%q)", key)
 	resp := make(chan interface{})
 	s.requests.get <- request{key, resp}
 	v := <-resp

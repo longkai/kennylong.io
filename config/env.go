@@ -22,13 +22,14 @@ type Configuration struct {
 	AccessToken string   `yaml:"access_token"`
 	Meta        struct {
 		GA            string `json:"ga"`
+		CDN           string `json:"cdn"`
+		Domain        string `json:"domain"`
 		Bio           string `json:"bio"`
 		Link          string `json:"link"`
 		Lang          string `json:"lang"`
 		Name          string `json:"name"`
 		Title         string `json:"title"`
 		Mail          string `json:"mail"`
-		Domain        string `json:"domain"`
 		Github        string `json:"github"`
 		Medium        string `json:"medium"`
 		Twitter       string `json:"twitter"`

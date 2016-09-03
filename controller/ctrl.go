@@ -20,6 +20,7 @@ const (
 
 var (
 	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
+		`linkify`:  Linkify,
 		`tags`:     render.Tags,
 		`format`:   render.Format,
 		`daysAgo`:  render.DaysAgo,
@@ -37,7 +38,7 @@ func Ctrl() {
 	repo = config.Env.Repo
 	sakura = render.NewSakura()
 	sakura.Post(config.Env.Repo)
-	initFS("")
+	initFS(config.Env.Meta.CDN, config.Env.Meta.Domain)
 
 	github.Init(`/api/github/hook`, repo, config.Env.HookSecret, config.Env.AccessToken, revalidate)
 	http.HandleFunc("/", home)
@@ -86,7 +87,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func entry(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasSuffix(r.RequestURI, "/") {
-		cdn(w, r)
+		serveFile(w, r)
 		return
 	}
 

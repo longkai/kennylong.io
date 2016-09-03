@@ -31,10 +31,10 @@
              {{if $a.Background | hasImage -}}
              background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
              {{- end}};">
-          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
+          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID | linkify}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID}}'>
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | linkify}}'>
           {{$a.Summary}}
         </div>
         {{- end}}
@@ -94,6 +94,7 @@
   var grid = document.getElementById('grid');
 
   var items;
+  var CDN = {{$.Meta.CDN}};
 
   window.onload = function() {
     // load data...
@@ -157,7 +158,7 @@
 
     ajax(
         'GET',
-        '/ls/' + lastKey(),
+        '//' + window.location.host + '/ls/' + lastKey(),
         function (data) {
           console.log(data);
           hasMore = data.length != 0;
@@ -197,12 +198,14 @@ function appendEssays(data) {
       cardMedia.style.backgroundImage = 'url("' + background(a) + '")';
     }
 
+    var link = linkify(a.id); // resolve link if cdn is enabled
+
     var h3 = document.createElement('h3');
     if (a.summary) {
       h3.className = 'quote';
     }
     var title = document.createElement('a');
-    title.setAttribute('href', a.id);
+    title.setAttribute('href', link);
     title.textContent = a.title;
 
     h3.appendChild(title);
@@ -219,7 +222,7 @@ function appendEssays(data) {
 
     var div = document.createElement('div');
     var author = document.createElement('strong');
-    author.textContent = '小龙同学';
+    author.textContent = '{{$.Meta.Name}}';
     var date = document.createElement('span');
     date.textContent = daysAgo(a.date) + ' 天前';
 
@@ -246,7 +249,7 @@ function appendEssays(data) {
       var summary = document.createElement('div');
       summary.className = 'mdl-color-text--grey-600 mdl-card__supporting-text';
       summary.style.cursor = 'pointer';
-      summary.setAttribute('href', a.id);
+      summary.setAttribute('href', link);
       summary.textContent = a.summary;
 
       go(summary);
@@ -305,7 +308,7 @@ function appendEssays(data) {
     if (bg.charAt(0) == '/' || bg.lastIndexOf('http://') == 0 || bg.lastIndexOf('https://') == 0) {
       return bg;
     }
-    return a.id + '/' + bg;
+    return linkify(a.id + '/' + bg);
   }
 </script>
 </body>

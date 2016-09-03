@@ -5,6 +5,10 @@
 <meta name="editor" content="vim">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
+{{if $.Meta.CDN -}}
+<base href="//{{$.Meta.CDN}}">
+{{- end}}
+
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" sizes="192x192" href="/assets/images/android-desktop.png">
@@ -90,7 +94,7 @@
 <script>
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-63860199-1']);
-  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', '{{$.Meta.Domain}}']);{{- end}}
+  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', '{{$.Domain}}']);{{- end}}
   _gaq.push(['_trackPageview']);
 </script>
 {{- end}}

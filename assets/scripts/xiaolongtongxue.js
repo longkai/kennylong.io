@@ -36,3 +36,17 @@ function openLink(el, url) {
     window.open(url, '_self');
   });
 }
+
+function linkfy(cdn, href) {
+  if (cdn) {
+    return qualifyURL(href);
+  }
+  return href;
+}
+
+// http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
+function qualifyURL(url) {
+  var a = document.createElement('a');
+  a.href = url;
+  return a.cloneNode(false).href;
+}
