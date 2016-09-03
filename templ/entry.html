@@ -15,20 +15,15 @@
   See the License for the specific language governing permissions and
   limitations under the License
 -->
-<html lang="zh">
+<html lang="{{$.Meta.Lang}}">
 <head>
-  {{template "header"}}
+  {{template "header" $}}
   <link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css">
-  <title>{{if .Title}}{{.Title}} - {{end}}小龙同学</title>
+  <title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
 </head>
 <body>
 <div class="demo-blog demo-blog--blogpost mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
-    <div class="demo-back" id="back">
-      <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" title="go back" role="button">
-        <i class="material-icons" role="presentation">arrow_back</i>
-      </a>
-    </div>
     <div class="demo-home">
       <button id="demo-menu-lower-right"
               class="mdl-button mdl-js-button mdl-button--icon">
@@ -43,13 +38,13 @@
     </div>
     <div class="demo-blog__posts mdl-grid">
       <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
-        <div class="mdl-card__media mdl-color-text--grey-50" style="{{if .Background}}background-image: url('{{.Background}}'){{end}}">
-          <h3>{{.Title}}</h3>
+        <div class="mdl-card__media mdl-color-text--grey-50" style="{{if $.A.Background}}background-image: url('{{$.A.Background}}'){{end}}">
+          <h3>{{$.A.Title}}</h3>
         </div>
         <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
           <div class="minilogo"></div>
           <div>
-            <strong>小龙同学</strong>
+            <strong>{{$.Meta.Name}}</strong>
             <span id="md_meta"></span>
           </div>
           <div class="section-spacer"></div>
@@ -70,12 +65,12 @@
         </div>
         <article class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
           <!-- content start -->
-          {{.Body}}
+          {{$.A.Body}}
           <!-- content end -->
         </article>
         <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
           <div class="tags">
-            {{range $i, $t := .Tags -}}
+            {{range $i, $t := $.A.Tags -}}
             {{if gt $i 0 -}}, {{- end}}
             <i class="material-icons" role="presentation">bookmark</i>
             <span class="visuallyhidden">bookmark</span>{{$t}}
@@ -143,9 +138,9 @@
         </div>
       </div>
 
-      {{if not .Hide -}}
+      {{if not $.A.Hide -}}
       <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
-        <a {{if .Newer -}}href="{{.Newer}}"{{- end}} class="demo-nav__button">
+        <a {{if $.A.Newer -}}href="{{$.A.Newer}}"{{- end}} class="demo-nav__button">
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
@@ -154,7 +149,7 @@
           上一篇
         </a>
         <div class="section-spacer"></div>
-        <a {{if .Older -}}href="{{.Older}}"{{- end}} class="demo-nav__button">
+        <a {{if $.A.Older -}}href="{{$.A.Older}}"{{- end}} class="demo-nav__button">
           下一篇
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
@@ -165,17 +160,17 @@
       </nav>
       {{- end}}
     </div>
-    {{template "footer"}}
+    {{template "footer" $}}
   </main>
   <div class="mdl-layout__obfuscator"></div>
 </div>
-{{template "script"}}
+{{template "script" $}}
 <script type="application/javascript">
   var md_meta = document.getElementById('md_meta');
   if (md_meta) {
-    var date = '{{.Date | format}}';
-    var _location = '{{.Location}}';
-    var weather = '{{.Weather}}';
+    var date = '{{$.A.Date | format}}';
+    var _location = '{{$.A.Location}}';
+    var weather = '{{$.A.Weather}}';
     md_meta.textContent = daysAgo(date) + ' 天前';
     if (_location) {
       md_meta.textContent += ', ' + _location;
@@ -183,14 +178,6 @@
     if (weather) {
       md_meta.textContent += ', ' + weather;
     }
-  }
-
-  if (window.history.length > 1) {
-    document.getElementById('back').addEventListener('click', function () {
-      window.history.back();
-    });
-  } else {
-    document.getElementById('back').style.display = 'none';
   }
 
   document.getElementById('home').addEventListener('click', function () {

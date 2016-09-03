@@ -15,16 +15,16 @@
   See the License for the specific language governing permissions and
   limitations under the License
 -->
-<html lang="zh">
+<html lang="{{$.Meta.Lang}}">
 <head>
-  {{template "header"}}
-  <title>小龙同学</title>
+  {{template "header" $}}
+  <title>{{$.Meta.Title}}</title>
 </head>
 <body>
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
-      {{range $i, $a := . -}}
+      {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media banner mdl-color-text--grey-50"
              style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
@@ -41,7 +41,7 @@
         <div class="mdl-card__supporting-text meta mdl-color-text--grey-600">
           <div class="minilogo"></div>
           <div>
-            <strong>小龙同学</strong>
+            <strong>{{$.Meta.Name}}</strong>
             <span>{{$a.Date | daysAgo}} 天前 {{if $a.Tags -}} 在 {{$a.Tags | tags}}{{- end}}
             </span>
           </div>
@@ -55,11 +55,11 @@
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
           <img src="/assets/images/qrcode.jpg" />
-          Java/Android Engineer; Gopher
+          {{$.Meta.Bio}}
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
           <div>
-            <strong>小龙同学</strong>
+            <strong>{{$.Meta.Name}}</strong>
           </div>
           <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right mdl-js-ripple-effect" for="menubtn">
             <li class="mdl-menu__item" id="about">About</li>
@@ -82,12 +82,12 @@
         </a>
       </nav>
     </div>
-    {{template "footer"}}
+    {{template "footer" $}}
   </main>
   <div class="mdl-layout__obfuscator"></div>
 </div>
 
-{{template "script"}}
+{{template "script" $}}
 <script type="application/javascript">
   var path = window.location.pathname;
   var layout = document.getElementsByClassName('mdl-layout__content')[0];
@@ -139,12 +139,8 @@
   document.getElementById('share').addEventListener('click', function () {
     toast.MaterialSnackbar.showSnackbar({message: 'not yet impl :)'});
   });
-  document.getElementById('about').addEventListener('click', function () {
-    window.open(window.location.protocol + '//' + window.location.host + '/misc/resume', '_blank');
-  });
-  document.getElementById('code').addEventListener('click', function () {
-    window.open('https://github.com/longkai/xiaolongtongxue.com', '_blank');
-  });
+  openLink(document.getElementById('about'), '{{$.Meta.Link}}');
+  openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
 
   // hide it first
   progress.style.width = '100%';

@@ -18,28 +18,7 @@ function daysAgo(s) {
 }
 
 Array.prototype.forEach.call(document.querySelectorAll('.social-btn'), function (el) {
-  var platform = el.getElementsByTagName('span')[0].textContent.toLowerCase();
-  console.log(platform);
-  switch (platform) {
-    case 'gmail': // :)
-      openLink(el, 'mailto:' + atob('aW0ubG9uZ2thaUBnbWFpbC5jb20='));
-      break;
-    case 'stackoverflow':
-      openLink(el, 'https://stackoverflow.com/users/3280791/longkai');
-      break;
-    case 'github':
-      openLink(el, 'https://github.com/longkai');
-      break;
-    case 'instagram':
-      openLink(el, 'https://www.instagram.com/xiangchiyoutiao');
-      break;
-    case 'medium':
-      openLink(el, 'https://medium.com/@longkai');
-      break;
-    case 'twitter':
-      openLink(el, 'https://twitter.com/xiaolongtongxue');
-      break;
-  }
+  openLink(el, el.getAttribute(('href')));
 });
 
 function openLink(el, url) {

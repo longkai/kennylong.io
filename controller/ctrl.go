@@ -19,21 +19,14 @@ const (
 )
 
 var (
-	templ    = `templ` // templates location
-	homeTmpl = template.Must(template.New("index.html").Funcs(template.FuncMap{
-		"daysAgo":  render.DaysAgo,
-		"tags":     render.Tags,
-		"hasColor": render.HasColor,
-		"hasImage": render.HasImage,
-		"relImage": render.IsRelImage,
-	}).ParseFiles(templ+"/index.html", templ+"/include.html"))
-
-	entryTempl = template.Must(template.New("entry.html").Funcs(template.FuncMap{
-		"format":   render.Format,
-		"tags":     render.Tags,
-		"hasColor": render.HasColor,
-		"hasImage": render.HasImage,
-	}).ParseFiles(templ+"/entry.html", templ+"/include.html"))
+	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
+		`tags`:     render.Tags,
+		`format`:   render.Format,
+		`daysAgo`:  render.DaysAgo,
+		`hasColor`: render.HasColor,
+		`hasImage`: render.HasImage,
+		`relImage`: render.IsRelImage,
+	}).ParseGlob(`templ/*`))
 
 	sakura   render.Engine
 	staticFs http.Handler
@@ -83,7 +76,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if err := homeTmpl.Execute(w, v); err != nil {
+	data := &struct {
+		List interface{}
+		Meta interface{}
+	}{v, config.Env.Meta}
+	if err := templs.ExecuteTemplate(w, "index.html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -99,7 +96,11 @@ func entry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err = entryTempl.Execute(w, v); err != nil {
+	data := &struct {
+		A    interface{}
+		Meta interface{}
+	}{v, config.Env.Meta}
+	if err = templs.ExecuteTemplate(w, "entry.html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
