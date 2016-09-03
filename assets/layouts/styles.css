@@ -487,24 +487,7 @@ body .demo-blog {
   opacity: 0.46;
   border-radius: 2px;
 }
-.social-btn__gmail {
-  background-image: url('/assets/icons/gmail.png');
-}
-.social-btn__stackoverflow {
-  background-image: url('/assets/icons/stackoverflow.png');
-}
-.social-btn__github {
-  background-image: url('/assets/icons/github-box.png');
-}
-.social-btn__instagram {
-  background-image: url('/assets/icons/instagram.png');
-}
-.social-btn__medium {
-  background-image: url('/assets/icons/medium.png');
-}
-.social-btn__twitter {
-  background-image: url('/assets/icons/twitter-box.png');
-}
+
 .social-btn__share {
   color: rgba(0, 0, 0, 0.54);
   background: transparent;
