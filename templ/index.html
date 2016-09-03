@@ -25,8 +25,8 @@
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := . -}}
-      <div class="mdl-card mdl-cell banner {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
-        <div class="mdl-card__media mdl-color-text--grey-50"
+      <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
+        <div class="mdl-card__media banner mdl-color-text--grey-50"
              style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
              {{if $a.Background | hasImage -}}
              background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
@@ -34,7 +34,7 @@
           <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text">
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID}}'>
           {{$a.Summary}}
         </div>
         {{- end}}
