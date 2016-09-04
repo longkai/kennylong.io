@@ -31,10 +31,10 @@
              {{if $a.Background | hasImage -}}
              background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
              {{- end}};">
-          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID | linkify}}">{{$a.Title}}</a></h3>
+          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID | escapeCDN}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | linkify}}'>
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | escapeCDN}}'>
           {{$a.Summary}}
         </div>
         {{- end}}
@@ -94,7 +94,6 @@
   var grid = document.getElementById('grid');
 
   var items;
-  var CDN = {{$.Meta.CDN}};
 
   window.onload = function() {
     // load data...
@@ -158,7 +157,7 @@
 
     ajax(
         'GET',
-        '//' + window.location.host + '/ls/' + lastKey(),
+        "//{0}/ls/{1}".format(window.location.host, lastKey()),
         function (data) {
           console.log(data);
           hasMore = data.length != 0;
@@ -174,11 +173,11 @@
           more.style.display = 'block';
           progress.style.display = 'none';
         },
-        function (code) {
+        function (code, text) {
           console.log(code);
           more.style.display = 'block';
           progress.style.display = 'none';
-          toast.MaterialSnackbar.showSnackbar({message: '出错了: ' + code});
+          toast.MaterialSnackbar.showSnackbar({message: '出错了：{0} - {1}'.format(code, text)});
         }
     );
   });
@@ -198,7 +197,7 @@ function appendEssays(data) {
       cardMedia.style.backgroundImage = 'url("' + background(a) + '")';
     }
 
-    var link = linkify(a.id); // resolve link if cdn is enabled
+    var link = escapeCDN(a.id); // resolve link if cdn is enabled
 
     var h3 = document.createElement('h3');
     if (a.summary) {
@@ -308,7 +307,7 @@ function appendEssays(data) {
     if (bg.charAt(0) == '/' || bg.lastIndexOf('http://') == 0 || bg.lastIndexOf('https://') == 0) {
       return bg;
     }
-    return linkify(a.id + '/' + bg);
+    return a.id + bg;
   }
 </script>
 </body>

@@ -20,13 +20,13 @@ const (
 
 var (
 	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
-		`linkify`:  Linkify,
-		`tags`:     render.Tags,
-		`format`:   render.Format,
-		`daysAgo`:  render.DaysAgo,
-		`hasColor`: render.HasColor,
-		`hasImage`: render.HasImage,
-		`relImage`: render.IsRelImage,
+		`escapeCDN`: EscapeCDN,
+		`tags`:      render.Tags,
+		`format`:    render.Format,
+		`daysAgo`:   render.DaysAgo,
+		`hasColor`:  render.HasColor,
+		`hasImage`:  render.HasImage,
+		`relImage`:  render.IsRelImage,
 	}).ParseGlob(`templ/*`))
 
 	repo   string

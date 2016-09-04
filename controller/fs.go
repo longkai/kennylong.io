@@ -35,8 +35,8 @@ func initFS(_cdn, _domain string) {
 
 func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
 
-// Linkify if CDN is used, linkify those non-static(avoid CDN) links.
-func Linkify(url string) string {
+// EscapeCDN if CDN is used, linkify those non-static(avoid CDN) links.
+func EscapeCDN(url string) string {
 	if cdn != "" {
 		return "//" + domain + "/" + strings.TrimLeft(url, "/") // use the same protocol
 	}
