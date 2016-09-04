@@ -10,12 +10,15 @@ import (
 	"github.com/longkai/xiaolongtongxue.com/controller"
 )
 
+var rev string
+
 func main() {
+	fmt.Printf("Happy hacking:) Build ID: %q\n", rev)
 	var env = `env.yaml` // def location
 	if len(os.Args) > 1 {
 		env = os.Args[1]
 	}
-	if err := config.Init(env); err != nil {
+	if err := config.Init(env, rev); err != nil {
 		log.Fatalf("config.Init(%q) fail: %v", env, err)
 	}
 	controller.Ctrl()

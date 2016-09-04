@@ -21,6 +21,7 @@ type Configuration struct {
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
 	Meta        struct {
+		V             string
 		GA            string `json:"ga"`
 		CDN           string `json:"cdn"`
 		Domain        string `json:"domain"`
@@ -72,7 +73,7 @@ var adjustEnv = func() {
 }
 
 // Init configuration, must call it only once.
-func Init(src string) error {
+func Init(src, rev string) error {
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -81,6 +82,7 @@ func Init(src string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
+	Env.Meta.V = rev // TODO: the doc says `importpath.name=value` can set to anywhere, but I tested not work...
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
