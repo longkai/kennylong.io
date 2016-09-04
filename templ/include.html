@@ -93,8 +93,8 @@
 </script>
 <script>
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-63860199-1']);
-  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', '{{$.Domain}}']);{{- end}}
+  _gaq.push(['_setAccount', '{{$.Meta.GA}}']);
+  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', '{{$.Meta.Domain}}']);{{- end}}
   _gaq.push(['_trackPageview']);
 </script>
 {{- end}}

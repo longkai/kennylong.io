@@ -37,7 +37,7 @@ function openLink(el, url) {
   });
 }
 
-function linkfy(cdn, href) {
+function linkify(cdn, href) {
   if (cdn) {
     return qualifyURL(href);
   }
