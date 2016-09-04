@@ -51,16 +51,24 @@ func hook(w http.ResponseWriter, r *http.Request) {
 }
 
 var handleHook = func() {
-	err := git.Pull(repo)
+	// 1. get current HEAD hash
+	v, err := git.Rev(repo)
 	if err != nil {
+		log.Printf("git.Rev(%q) fail: %v", err)
+		return
+	}
+	// 2. pull the latest content
+	if err = git.Pull(repo); err != nil {
 		log.Printf("`git pull` fail: %v", err)
 		return
 	}
-	a, m, d, err := git.Diff(repo)
+	// 3. diff changes
+	a, m, d, err := git.Diff(repo, v)
 	if err != nil {
 		log.Printf("`git diff` fail: %v", err)
 		return
 	}
+	// 4. let sb. known what changed
 	callback(a, m, d)
 }
 

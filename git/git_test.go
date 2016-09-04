@@ -1,15 +1,36 @@
 package git
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
 
-func TestDiffCmd(t *testing.T) {
-	// exe the command in the current repo is okay.
-	if _, _, _, err := Diff(`.`); err != nil {
-		t.Errorf("Diff(.): %v", err)
+func TestExecer(t *testing.T) {
+	saved := execer
+	defer func() { execer = saved }()
+
+	var wantError bool
+	execer = func(script string) ([]byte, error) {
+		var err error
+		if wantError {
+			err = errors.New(`balh`)
+		}
+		return nil, err
 	}
+
+	f := func(t *testing.T) {
+		_, _, _, err := Diff(`don't care`, `balh`)
+		if got := err != nil; got != wantError {
+			t.Errorf("Diff(...): %v, wantError %t", err, wantError)
+		}
+	}
+
+	wantError = true
+	t.Run(`WantError`, f)
+
+	wantError = false
+	t.Run(`NoError`, f)
 }
 
 func TestDiff(t *testing.T) {

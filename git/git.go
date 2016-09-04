@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 )
@@ -20,51 +21,58 @@ var (
 	re = regexp.MustCompile(`^([AMD])\s+(.*)`)
 )
 
-// Diff `git diff --name-status HEAD~ HEAD`
-func Diff(repo string) (adds, mods, dels []string, err error) {
-	script := fmt.Sprintf("cd %s && git diff --name-status HEAD~ HEAD", repo)
-	log.Printf("exec script:\n%q", script)
-	cmd := exec.Command("/bin/sh", "-c", script)
-	b, err := cmd.Output()
-	if err != nil {
-		return
-	}
-	fmt.Printf("%s\n", b)
-	adds, mods, dels = diff(bytes.NewReader(b))
-	return
+var execer = func(script string) ([]byte, error) {
+	os.Stdout.WriteString(script)
+	b, err := exec.Command(`/bin/sh`, `-c`, script).CombinedOutput()
+	os.Stdout.Write(b) // if b is nil, nothing outputs
+	return b, err
 }
 
 // Pull `git pull`
 func Pull(repo string) error {
-	script := fmt.Sprintf("cd %s && git pull;", repo)
-	log.Printf("exec sciprt:\n%q", script)
-	cmd := exec.Command("/bin/sh", "-c", script)
-	b, err := cmd.Output()
+	script := fmt.Sprintf("git -C %s pull", repo)
+	_, err := execer(script)
+	return err
+}
+
+// Rev `git rev-parse --short HEAD`
+func Rev(repo string) (string, error) {
+	script := fmt.Sprintf("git -C %s rev-parse --short HEAD", repo)
+	b, err := execer(script)
 	if err != nil {
-		return err
+		return "", err
 	}
-	// print output
-	fmt.Printf("%s\n", b)
-	return nil
+	return string(bytes.TrimSpace(b)), nil
+}
+
+// Diff `git diff --name-status [hash] to HEAD`
+func Diff(repo, hash string) (adds, mods, dels []string, err error) {
+	script := fmt.Sprintf("git -C %s diff --name-status %s HEAD", repo, hash)
+	b, err := execer(script)
+	if err != nil {
+		return
+	}
+	adds, mods, dels = diff(bytes.NewReader(b))
+	return
 }
 
 func diff(in io.Reader) (adds, mods, dels []string) {
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {
 		line := scanner.Text()
-		pair := re.FindStringSubmatch(line)
-		if len(pair) != 3 {
+		triple := re.FindStringSubmatch(line)
+		if len(triple) != 3 {
 			continue
 		}
-		switch pair[1] {
+		switch triple[1] {
 		case add:
-			adds = append(adds, pair[2])
+			adds = append(adds, triple[2])
 		case mod:
-			mods = append(mods, pair[2])
+			mods = append(mods, triple[2])
 		case del:
-			dels = append(dels, pair[2])
+			dels = append(dels, triple[2])
 		default:
-			log.Printf("Unknown git diff line: %q", line)
+			log.Printf("unknown git diff line: %q", line)
 		}
 	}
 	if err := scanner.Err(); err != nil {
