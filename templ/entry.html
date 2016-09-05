@@ -38,7 +38,8 @@
     </div>
     <div class="demo-blog__posts mdl-grid">
       <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
-        <div class="mdl-card__media mdl-color-text--grey-50" style="{{if $.A.Background}}background-image: url('{{$.A.Background}}'){{end}}">
+        <div class="mdl-card__media mdl-color-text--grey-50" style="background: {{if $.A.Background | bgImg -}}url('{{$.A.Background}}')
+             {{- else -}}{{$.A.Background}}{{- end}};">
           <h3>{{$.A.Title}}</h3>
         </div>
         <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
@@ -179,6 +180,8 @@
       md_meta.textContent += ', ' + weather;
     }
   }
+
+  styleCover(document.getElementsByClassName('mdl-card__media')[0]);
 
   document.getElementById('home').addEventListener('click', function () {
     window.open(window.location.protocol + '//' + window.location.host, "_self");

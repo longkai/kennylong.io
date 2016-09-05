@@ -26,12 +26,10 @@
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
-        <div class="mdl-card__media banner mdl-color-text--grey-50"
-             style="{{if $a.Background | hasColor -}}background-color: {{$a.Background}}{{- end}}
-             {{if $a.Background | hasImage -}}
-             background-image: url('{{if $a.Background | relImage}}{{$a.ID}}/{{$a.Background}}{{else}}{{$a.Background}}{{end}}')
-             {{- end}};">
-          <h3{{if not $a.Summary -}} class="quote"{{- end}}><a href="{{$a.ID | escapeCDN}}">{{$a.Title}}</a></h3>
+        <div class="mdl-card__media mdl-color-text--grey-50"
+             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background}}')
+             {{- else -}}{{$a.Background}}{{- end}};">
+          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID | escapeCDN}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
         <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | escapeCDN}}'>
@@ -124,8 +122,8 @@
     }
   };
 
-  Array.prototype.forEach.call(document.querySelectorAll('.banner, .summary'), function (el) {
-    el.style.cursor = 'pointer';
+  Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media, .summary'), function (el) {
+    styleCover(el);
     go(el);
   });
 
@@ -190,17 +188,22 @@ function appendEssays(data) {
     card.className = 'mdl-card mdl-cell on-the-road-again mdl-cell--12-col';
 
     var cardMedia = document.createElement('div');
-    cardMedia.className = 'mdl-card__media banner mdl-color-text--grey-50';
-    if (hasColor(a.background)) {
+    cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
+    // fallback to west-lake? TODO: better handling...
+    if (!a.background) {
+      a.background = '/assets/images/west-lake.jpg'
+    }
+    if (bgImg(a.background)) {
+      cardMedia.style.background = 'url("' + a.background + '")';
+      styleCover(cardMedia);
+    } else {
       cardMedia.style.backgroundColor = a.background;
-    } else if (hasImage(a.background)) {
-      cardMedia.style.backgroundImage = 'url("' + background(a) + '")';
     }
 
     var link = escapeCDN(a.id); // resolve link if cdn is enabled
 
     var h3 = document.createElement('h3');
-    if (a.summary) {
+    if (!a.summary) {
       h3.className = 'quote';
     }
     var title = document.createElement('a');
@@ -269,18 +272,8 @@ function appendEssays(data) {
     return key;
   }
 
-  function hasColor(s) {
-    if (s) {
-      return s.length != 0 && s[1] == '#';
-    }
-    return false;
-  }
-
-  function hasImage(s) {
-    if (s) {
-      return s.length != 0 && s[1] != '#';
-    }
-    return false;
+  function bgImg(s) {
+    return s ? s[0] != '#' : false;
   }
 
   function go(el) {
@@ -300,14 +293,6 @@ function appendEssays(data) {
     el.addEventListener('click', function () {
       window.open(window.location.protocol + '//' + window.location.host + target, '_self');
     });
-  }
-
-  function background(a) {
-    var bg = a.background;
-    if (bg.charAt(0) == '/' || bg.lastIndexOf('http://') == 0 || bg.lastIndexOf('https://') == 0) {
-      return bg;
-    }
-    return a.id + bg;
   }
 </script>
 </body>

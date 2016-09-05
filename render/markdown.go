@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -42,7 +44,8 @@ var parseYAML = func(in io.Reader, v interface{}) error {
 	return yaml.Unmarshal(b, v)
 }
 
-func parseID(path string) string {
+// parseID ensures start and end with `/` just same as HTTP RequestURI
+var parseID = func(path string) string {
 	base := config.Env.Repo
 	if !strings.HasPrefix(path, base) {
 		return ""
@@ -57,15 +60,63 @@ func parseID(path string) string {
 	return id[:strings.LastIndexByte(id, '/')+1]
 }
 
-func parseMd(in io.Reader) (*Meta, error) {
-	title, body, _yaml, err := parse(in)
+func parseMD(path string) (*Meta, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-
+	defer f.Close()
 	m := new(Meta)
+	if err = unmarshal(f, m); err != nil {
+		return nil, err
+	}
+	m.ID = parseID(path)
+	if m.body, err = linkify(bytes.NewReader(m.body), []byte(m.ID)); err != nil {
+		return nil, err
+	}
+	// don't forget to linkify meta's url
+	if len(m.Background) != 0 && !strings.HasPrefix(m.Background, `#`) && !reAbsURL.MatchString(m.Background) {
+		// not color bg
+		m.Background = m.ID + m.Background
+	}
+	return m, nil
+}
+
+func unmarshal(in io.Reader, m *Meta) error {
+	title, body, _yaml, err := parse(in)
+	if err != nil {
+		return err
+	}
+
 	m.Title = title
 	m.body = body
-	err = parseYAML(bytes.NewReader(_yaml), m)
-	return m, err
+	return parseYAML(bytes.NewReader(_yaml), m)
+}
+
+var (
+	reAbsURL = regexp.MustCompile(`(?i)((^https?:\/\/)|(^[\/]{1,2}))[^\/]?\S*`)
+	reMDLink = regexp.MustCompile(`\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)`)
+)
+
+// linkify makes all the relative links to absolute for easiliy handling
+var linkify = func(in io.Reader, prefix []byte) ([]byte, error) {
+	b, err := ioutil.ReadAll(in)
+	if err != nil {
+		return nil, err
+	}
+	ins := reMDLink.FindAllSubmatchIndex(b, -1)
+	var i int
+	return reMDLink.ReplaceAllFunc(b, func(old []byte) []byte {
+		defer func() { i++ }()
+		length := ins[i][2*2+1] - ins[i][2*2]     // url len
+		offset := ins[i][2*1+1] - ins[i][2*1] + 3 // 3 = [](
+		if !reAbsURL.Match(old[offset : offset+length]) {
+			// alloc new memory
+			buf := make([]byte, 0, len(old)+len(prefix))
+			buf = append(buf, old[:offset]...)
+			buf = append(buf, prefix...)
+			return append(buf, old[offset:]...)
+		}
+		return old
+	}), nil
 }

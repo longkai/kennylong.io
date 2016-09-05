@@ -25,8 +25,8 @@
 
 <link rel="shortcut icon" href="/assets/images/favicon.png?v={{$.Meta.V}}">
 
-<link rel="stylesheet" href="//fonts.lug.ustc.edu.cn/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
-<link rel="stylesheet" href="//fonts.lug.ustc.edu.cn/icon?family=Material+Icons">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/fonts/icons.css">
 <link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css?v={{$.Meta.V}}">
 <link rel="stylesheet" href="/assets/layouts/styles.css?v={{$.Meta.V}}">
 {{- end}}
@@ -35,32 +35,32 @@
 <footer class="mdl-mini-footer">
   <div class="mdl-mini-footer--left-section">
     {{if $.Meta.Mail -}}
-    <button href='mailto:{{$.Meta.Mail}}' class="mdl-mini-footer--social-btn social-btn social-btn__gmail">
+    <button href="mailto:{{$.Meta.Mail}}" class="mdl-mini-footer--social-btn social-btn social-btn__gmail">
       <span class="visuallyhidden">Gmail</span>
     </button>
     {{- end}}
     {{if $.Meta.Stackoverflow -}}
-    <button href='{{.Meta.Stackoverflow}}' class="mdl-mini-footer--social-btn social-btn social-btn__stackoverflow">
+    <button href="{{.Meta.Stackoverflow}}" class="mdl-mini-footer--social-btn social-btn social-btn__stackoverflow">
       <span class="visuallyhidden">Stackoverflow</span>
     </button>
     {{- end}}
     {{if $.Meta.Github -}}
-    <button href='{{$.Meta.Github}}' class="mdl-mini-footer--social-btn social-btn social-btn__github">
+    <button href="{{$.Meta.Github}}" class="mdl-mini-footer--social-btn social-btn social-btn__github">
       <span class="visuallyhidden">Github</span>
     </button>
     {{- end}}
     {{if $.Meta.Instagram -}}
-    <button href='{{$.Meta.Instagram}}' class="mdl-mini-footer--social-btn social-btn social-btn__instagram">
+    <button href="{{$.Meta.Instagram}}" class="mdl-mini-footer--social-btn social-btn social-btn__instagram">
       <span class="visuallyhidden">Instagram</span>
     </button>
     {{- end}}
     {{if $.Meta.Medium -}}
-    <button href='{{$.Meta.Medium}}' class="mdl-mini-footer--social-btn social-btn social-btn__medium">
+    <button href="{{$.Meta.Medium}}" class="mdl-mini-footer--social-btn social-btn social-btn__medium">
       <span class="visuallyhidden">Medium</span>
     </button>
     {{- end}}
     {{if $.Meta.Twitter -}}
-    <button href='{{$.Meta.Twitter}}' class="mdl-mini-footer--social-btn social-btn social-btn__twitter">
+    <button href="{{$.Meta.Twitter}}" class="mdl-mini-footer--social-btn social-btn social-btn__twitter">
       <span class="visuallyhidden">Twitter</span>
     </button>
     {{- end}}
@@ -84,7 +84,7 @@
 <script>
 // avoid CDN links
 function escapeCDN(url) {
-  var cdn = '{{$.Meta.CDN}}'
+  var cdn = {{$.Meta.CDN}};
   if (cdn) {
     return qualifyURL(href).replace(/^.*\/\/[^\/]+/, '//' + window.location.host);
   }
@@ -98,13 +98,13 @@ function escapeCDN(url) {
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', '{{$.Meta.GA}}', 'auto');
+  ga('create', {{$.Meta.GA}}, 'auto');
   ga('send', 'pageview');
 </script>
 <script>
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '{{$.Meta.GA}}']);
-  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', '{{$.Meta.Domain}}']);{{- end}}
+  _gaq.push(['_setAccount', {{$.Meta.GA}}]);
+  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', {{$.Meta.Domain}}]);{{- end}}
   _gaq.push(['_trackPageview']);
 </script>
 {{- end}}

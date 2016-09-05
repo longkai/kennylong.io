@@ -2,7 +2,6 @@ package render
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -47,19 +46,11 @@ func (h *Hiker) Into(sth string) bool {
 
 // Meet with sth if it's really interesting the traveller will call you.
 func (h *Hiker) Meet(sth string) {
-	f, err := os.Open(sth)
-	if err != nil {
-		log.Printf("open %q fail: %v", sth, err)
-		return
-	}
-	defer f.Close()
-
-	m, err := parseMd(f)
+	m, err := parseMD(sth)
 	if err != nil {
 		log.Printf("parse %q fail: %v", sth, err)
 		return
 	}
-	m.ID = parseID(sth)
 
 	h.callback(m) // let sb. know it's funny
 }

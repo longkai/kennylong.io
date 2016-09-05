@@ -21,12 +21,10 @@ const (
 var (
 	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
 		`escapeCDN`: EscapeCDN,
+		`bgImg`:     render.BgImg,
 		`tags`:      render.Tags,
 		`format`:    render.Format,
 		`daysAgo`:   render.DaysAgo,
-		`hasColor`:  render.HasColor,
-		`hasImage`:  render.HasImage,
-		`relImage`:  render.IsRelImage,
 	}).ParseGlob(`templ/*`))
 
 	repo   string
