@@ -25,9 +25,7 @@ _testmain.go
 
 .DS_Store
 
-# idea support
-.idea/
-*.iml
+build/
 
 assets/fonts/
 bower_components/
