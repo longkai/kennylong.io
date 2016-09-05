@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$1"="docker" ]; then
+if [ "$1" = "docker" ]; then
   cmd="docker build $2 $3 -t longkai/sakura:latest ."
   eval $cmd
   exit $?
