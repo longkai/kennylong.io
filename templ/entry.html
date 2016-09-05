@@ -141,7 +141,8 @@
 
       {{if not $.A.Hide -}}
       <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
-        <a {{if $.A.Newer -}}href="{{$.A.Newer | escapeCDN}}"{{- end}} class="demo-nav__button">
+        {{if $.A.Newer -}}
+        <a href="{{$.A.Newer | escapeCDN}}" class="demo-nav__button">
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
@@ -149,8 +150,10 @@
           </button>
           上一篇
         </a>
+        {{- end}}
         <div class="section-spacer"></div>
-        <a {{if $.A.Older -}}href="{{$.A.Older | escapeCDN}}"{{- end}} class="demo-nav__button">
+        {{if $.A.Older -}}
+        <a href="{{$.A.Older | escapeCDN}}" class="demo-nav__button">
           下一篇
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
@@ -158,6 +161,7 @@
             <i class="material-icons">arrow_forward</i>
           </button>
         </a>
+        {{- end}}
       </nav>
       {{- end}}
     </div>

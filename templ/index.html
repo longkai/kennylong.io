@@ -266,8 +266,8 @@ function appendEssays(data) {
 }
 
   function lastKey() {
-    e = nav.previousElementSibling;
-    key = e.getElementsByTagName('a')[0].href.substring(window.location.href.length-1);
+    var e = nav.previousElementSibling;
+    key = e.getElementsByTagName('a')[0].href.replace(/^.*\/\/[^\/]+/, '');
     console.log(key);
     return key;
   }
@@ -290,9 +290,7 @@ function appendEssays(data) {
     if (!target.startsWith('/')) {
       target = '/' + target
     }
-    el.addEventListener('click', function () {
-      window.open(window.location.protocol + '//' + window.location.host + target, '_self');
-    });
+    openLink(el, target);
   }
 </script>
 </body>

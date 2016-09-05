@@ -3,6 +3,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="description" content="{{$.Meta.Bio}}">
 <meta name="editor" content="vim">
+<meta name="backend" content="go1.7">
+<meta name="version" content="{{$.Meta.V}}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
 {{if $.Meta.CDN -}}
@@ -20,11 +22,16 @@
 <link rel="apple-touch-icon-precomposed" href="/assets/images/ios-desktop.png?v={{$.Meta.V}}">
 
 <!-- Tile icon for Win8 (144x144 + tile color) -->
-<meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png">
+<meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png?v={{$.Meta.V}}">
 <meta name="msapplication-TileColor" content="#DA532C">
 
 <link rel="shortcut icon" href="/assets/images/favicon.png?v={{$.Meta.V}}">
 
+<!-- go to https://github.com/longkai/gfdl to find some useful stuff if google is blocked
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
+<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+-->
+<!-- download fonts locally or with CDN -->
 <link rel="stylesheet" href="/assets/fonts/fonts.css?v={{$.Meta.V}}">
 <link rel="stylesheet" href="/assets/fonts/icons.css?v={{$.Meta.V}}">
 <link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css?v={{$.Meta.V}}">
@@ -86,7 +93,7 @@
 function escapeCDN(url) {
   var cdn = {{$.Meta.CDN}};
   if (cdn) {
-    return qualifyURL(href).replace(/^.*\/\/[^\/]+/, '//' + window.location.host);
+    return qualifyURL(url).replace(/^.*\/\/[^\/]+/, '//' + window.location.host);
   }
   return url;
 }
