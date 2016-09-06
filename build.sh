@@ -6,6 +6,11 @@ if [ "$1" = "docker" ]; then
   exit $?
 fi
 
+if [ ! -d "assets/bower_components" ]; then
+  # fetch frontend assets if necessary
+  cd assets && bower install && cd ..
+fi
+
 rev=`git rev-parse --short HEAD`
 
 cmd="go build -ldflags \"-X main.rev=$rev\""
