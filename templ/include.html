@@ -3,8 +3,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="description" content="{{$.Meta.Bio}}">
 <meta name="editor" content="vim">
+<meta name="docker" content="true">
 <meta name="backend" content="go1.7">
-<meta name="version" content="{{$.Meta.V}}">
+<meta name="version" content="{{$.Meta.V | printf "%x"}}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
 {{if $.Meta.CDN -}}

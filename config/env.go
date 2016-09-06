@@ -3,8 +3,10 @@ package config
 import (
 	"io/ioutil"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/longkai/xiaolongtongxue.com/helper"
 
@@ -21,7 +23,7 @@ type Configuration struct {
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
 	Meta        struct {
-		V             string
+		V             int64
 		GA            string `json:"ga"`
 		GF            bool   `json:"gf"`
 		CDN           string `json:"cdn"`
@@ -83,7 +85,12 @@ func Init(src, rev string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-	Env.Meta.V = rev // TODO: the doc says `importpath.name=value` can set to anywhere, but I tested not work...
+	// TODO: the doc says `importpath.name=value` can set to anywhere, but I tested not work...
+	if i, err := strconv.ParseInt(rev, 16, 0); err == nil {
+		Env.Meta.V = i // some CDNs(i.e. qiniu) only recognize ints, which is silly
+	} else {
+		Env.Meta.V = time.Now().Unix() // puts the timestamp as a fallback
+	}
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
