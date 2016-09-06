@@ -25,12 +25,16 @@ func (t timestamp) LessThan(other skiplist.Ordered) bool {
 
 type entry struct {
 	val   interface{}
-	err   error // TODO: retey?
+	err   error
 	ready chan struct{}
 }
 
 func (e *entry) call(in io.Reader, f Render) {
-	e.val, e.err = f(in)
+	// if render fail, don't close it, let it try again next time
+	if e.val, e.err = f(in); e.err != nil {
+		e.ready <- struct{}{}
+		return
+	}
 	close(e.ready)
 }
 
@@ -184,6 +188,8 @@ func (s *Sakura) get(req request) {
 		go e.call(bytes.NewReader(v.(*Meta).body), s.Render)
 		v.(*Meta).body = nil // clear unwanted data
 		s.cache[req.key] = e
+	} else if e.err != nil { // last render fail, try again
+		go e.call(bytes.NewReader(v.(*Meta).body), s.Render)
 	}
 	// deliver
 	go func() {
