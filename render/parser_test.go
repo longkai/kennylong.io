@@ -32,7 +32,7 @@ func TestNormalParse(t *testing.T) {
 	title, body, _yaml, err := parse(f)
 
 	if err != nil {
-		t.Errorf("parse(%q) fail: %v\n", err)
+		t.Errorf("parse(%q) fail: %v\n", src, err)
 	}
 	if !strings.Contains(title, wants.title) {
 		t.Errorf("title: strings.Contains(%q, %q) = false\n", title, wants.title)
@@ -48,7 +48,7 @@ func TestNormalParse(t *testing.T) {
 
 	m := map[string]interface{}{}
 	if err := yaml.Unmarshal(_yaml, &m); err != nil {
-		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", err)
+		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", _yaml, err)
 	}
 }
 
@@ -81,6 +81,6 @@ body2
 
 	m := map[string]interface{}{}
 	if err := yaml.Unmarshal(_yaml, &m); err != nil {
-		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", err)
+		t.Errorf("yaml.Unmarshal(%s) fail: %v\n", _yaml, err)
 	}
 }

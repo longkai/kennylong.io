@@ -54,7 +54,7 @@ var handleHook = func() {
 	// 1. get current HEAD hash
 	v, err := git.Rev(repo)
 	if err != nil {
-		log.Printf("git.Rev(%q) fail: %v", err)
+		log.Printf("git.Rev(%q) fail: %v", repo, err)
 		return
 	}
 	// 2. pull the latest content

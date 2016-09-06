@@ -10,7 +10,7 @@ ARG go=1.7
 ADD https://storage.googleapis.com/golang/go${go}.linux-amd64.tar.gz go.tar.gz
 RUN tar -C /usr/local -xzf go.tar.gz && rm -rf go.tar.gz
 ENV GOPATH /go
-ENV PATH $PATH:/usr/local/go/bin
+ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Install Nodejs&Bower
