@@ -1,5 +1,5 @@
 sakura:
-  image: longkai/sakura
+  image: longkai/xiaolongtongxue.com
   ports:
     - "1217:1217"
   volumes:

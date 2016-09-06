@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "$1" = "docker" ]; then
-  cmd="docker build $2 $3 -t longkai/sakura:latest ."
+  cmd="docker build $2 $3 -t longkai/xiaolongtongxue.com:latest ."
   eval $cmd
   exit $?
 fi
