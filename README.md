@@ -72,6 +72,7 @@ hook_secret: Github WebHook secret
 access_token: Github Personal access token
 meta:
   ga: GA tracker ID
+  gf: false # Use Google Fonts, check `templ/include.html`
   #cdn: CDN domain # currently only tested qiniu
   domain: domain.com # required only if using CDN
   bio: something about you

@@ -23,6 +23,7 @@ type Configuration struct {
 	Meta        struct {
 		V             string
 		GA            string `json:"ga"`
+		GF            bool   `json:"gf"`
 		CDN           string `json:"cdn"`
 		Domain        string `json:"domain"`
 		Bio           string `json:"bio"`

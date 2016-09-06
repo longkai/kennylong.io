@@ -6,9 +6,14 @@ if [ "$1" = "docker" ]; then
   exit $?
 fi
 
+# fetch frontend assets if necessary
 if [ ! -d "assets/bower_components" ]; then
-  # fetch frontend assets if necessary
   cd assets && bower install && cd ..
+fi
+
+# test existence of Google Fonts 
+if [ ! -d "assets/fonts" ]; then
+  echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' for more infomation."
 fi
 
 rev=`git rev-parse --short HEAD`

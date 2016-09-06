@@ -27,13 +27,15 @@
 
 <link rel="shortcut icon" href="/assets/images/favicon.png?v={{$.Meta.V}}">
 
-<!-- go to https://github.com/longkai/gfdl to find some useful stuff if google is blocked
+{{if $.Meta.GF -}}
+<!-- go to https://github.com/longkai/gfdl to find some useful stuff if google is blocked -->
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
 <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
--->
+{{- else -}}
 <!-- download fonts locally or with CDN -->
 <link rel="stylesheet" href="/assets/fonts/fonts.css?v={{$.Meta.V}}">
 <link rel="stylesheet" href="/assets/fonts/icons.css?v={{$.Meta.V}}">
+{{- end}}
 <link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css?v={{$.Meta.V}}">
 <link rel="stylesheet" href="/assets/layouts/styles.css?v={{$.Meta.V}}">
 {{- end}}
