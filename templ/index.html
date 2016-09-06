@@ -52,7 +52,7 @@
           <span class="visuallyhidden">add</span>
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
-          <img src="/assets/images/qrcode.jpg" />
+          <img src="/assets/images/qrcode.jpg?v={{$.Meta.V}}" />
           {{$.Meta.Bio}}
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
@@ -137,7 +137,16 @@
   document.getElementById('share').addEventListener('click', function () {
     toast.MaterialSnackbar.showSnackbar({message: 'not yet impl :)'});
   });
-  openLink(document.getElementById('about'), '{{$.Meta.Link}}');
+
+  var _link = {{$.Meta.Link}};
+  if (_link.startsWith('https://') || _link.startsWith('http://')) {
+    // nothing...
+  } else if (_link.startsWith('/')) {
+    _link = escapeCDN(_link);
+  } else {
+    _link = qualifyURL(_link);
+  }
+  openLink(document.getElementById('about'), _link);
   openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
 
   // hide it first
@@ -145,11 +154,6 @@
   progress.style.display = 'none';
 
   more.addEventListener('click', function () {
-    if (!hasMore) {
-      toast.MaterialSnackbar.showSnackbar({message: '没有更多啦'});
-      return;
-    }
-
     more.style.display = 'none';
     progress.style.display = 'block';
 
@@ -159,6 +163,9 @@
         function (data) {
           console.log(data);
           hasMore = data.length != 0;
+          if (data.length == 0) {
+            toast.MaterialSnackbar.showSnackbar({message: '没有更多啦'});
+          }
 
           // do append
           appendEssays(data);
@@ -189,9 +196,8 @@ function appendEssays(data) {
 
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
-    // fallback to west-lake? TODO: better handling...
     if (!a.background) {
-      a.background = '/assets/images/west-lake.jpg'
+      a.background = '/assets/images/default.jpg?v=${$.Meta.V}'
     }
     if (bgImg(a.background)) {
       cardMedia.style.background = 'url("' + a.background + '")';
