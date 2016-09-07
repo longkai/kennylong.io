@@ -1,15 +1,23 @@
 xiaolongtongxue.com
 ===
 [![Build Status](https://travis-ci.org/longkai/xiaolongtongxue.com.svg?branch=master)](https://travis-ci.org/longkai/xiaolongtongxue.com)
-[![Docker Automated buil](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg?maxAge=2592000)](https://hub.docker.com/r/longkai/xiaolongtongxue.com/)
+[![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg?maxAge=2592000)](https://hub.docker.com/r/longkai/xiaolongtongxue.com/)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![License CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by/4.0/)
 
 Frontend and backend source of https://xiaolongtongxue.com
 
-It builds upon **Github Fav Markdown API**, rendering from a plain markdown repo to a nice website. Moreover, it supports **auto update** when you push commmits to Github.
+It builds upon **Github Fav Markdown API**, rendering from a plain markdown repo to a nice website. Moreover, it supports **auto update** when you push commits to Github.
 
 It's highly **customizable** and even has a docker image for build-run-ship easily.
+
+## Features
+- **Auto** Using Git/Github to keep your writing workflow, when you push your work to Github, your website will sync changes automatically
+- **Standard** Github Fav Markdown rendering style and API
+- **Fast** Using Non-blocking archetecture, no really a static website but dynamical
+- **Docker** Run right from Docker
+- **Support CDN** Put all your static stuff to *CDN*(Only tested qiniu)
+- **Configurable** You can modify for your needs
 
 ## Markdown format Requirement
 1. Each doc must have an directory
@@ -59,8 +67,10 @@ then run `docker-compose up -d`
 - [golang][go] >= 1.7
 - [bower][bower]
 
-1. `git clone https://github.com/longkai/xiaolongtongxue.com.git`
-2. `./build.sh`
+### Building
+1. `go get github.com/longkai/xiaolongtongxue.com && rm $GOPATH/bin/xiaolongtongxue.com`
+2. `cd $GOPATH/src/github.com/longkai/xiaolongtongxue.com`
+3. `./build.sh`
 4. `./xiaolongtongxue.com [/path/to/env.yaml]`
 
 ## Configuration
@@ -92,6 +102,9 @@ ignores: # NOTE the path is **HTTP Path** format
 ```
 
 Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yaml` and the docker mount pointer MUST be same.
+
+## CDN Support
+I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yaml`.
 
 Happy hacking.
 
