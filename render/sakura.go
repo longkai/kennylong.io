@@ -24,16 +24,24 @@ func (t timestamp) LessThan(other skiplist.Ordered) bool {
 }
 
 type entry struct {
-	val   interface{}
+	//val   interface{}
 	err   error
 	ready chan struct{}
 }
 
-func (e *entry) call(in io.Reader, f Render) {
-	// if render fail, don't close it, let it try again next time
-	if e.val, e.err = f(in); e.err != nil {
-		e.ready <- struct{}{}
-		return
+func (e *entry) call(in io.Reader, f Render, callback func(b interface{})) {
+	var (
+		retry = 0
+		val   interface{}
+	)
+	for retry < 3 { // max 3 retries
+		val, e.err = f(in)
+		if e.err == nil {
+			// success
+			callback(val)
+			break
+		}
+		retry++
 	}
 	close(e.ready)
 }
@@ -182,14 +190,15 @@ func (s *Sakura) get(req request) {
 	}
 
 	e := s.cache[req.key]
+	m := v.(*Meta)
 	if e == nil {
 		// cache misses
 		e = &entry{ready: make(chan struct{})}
-		go e.call(bytes.NewReader(v.(*Meta).body), s.Render)
-		v.(*Meta).body = nil // clear unwanted data
+		go e.call(bytes.NewReader(m.Body.([]byte)), s.Render, func(res interface{}) {
+			// render success
+			m.Body = template.HTML(res.([]byte))
+		})
 		s.cache[req.key] = e
-	} else if e.err != nil { // last render fail, try again
-		go e.call(bytes.NewReader(v.(*Meta).body), s.Render)
 	}
 	// deliver
 	go func() {
@@ -197,7 +206,7 @@ func (s *Sakura) get(req request) {
 		if e.err != nil {
 			req.resp <- e.err
 		} else {
-			req.resp <- &Markdown{Meta: *v.(*Meta), Older: older, Newer: newer, Body: template.HTML(e.val.([]byte))} // TODO: cache the HTML better?
+			req.resp <- &Markdown{Meta: *m, Older: older, Newer: newer}
 		}
 	}()
 }

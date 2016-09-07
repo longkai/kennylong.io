@@ -2,7 +2,6 @@ package render
 
 import (
 	"bytes"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,23 +16,22 @@ import (
 
 // Meta metadata for the markdown.
 type Meta struct {
-	ID         string    `json:"id"`
-	Title      string    `json:"title"`
-	Tags       []string  `json:"tags"`
-	Date       time.Time `json:"date"`
-	Weather    string    `json:"weather"`
-	Summary    string    `json:"summary"`
-	Location   string    `json:"location"`
-	Background string    `json:"background"`
-	Hide       bool      `json:"hide"` //  hide from the list, but still can get will url
-	body       []byte    // TODO: avoid this field?
+	ID         string      `json:"id"`
+	Title      string      `json:"title"`
+	Tags       []string    `json:"tags"`
+	Date       time.Time   `json:"date"`
+	Weather    string      `json:"weather"`
+	Summary    string      `json:"summary"`
+	Location   string      `json:"location"`
+	Background string      `json:"background"`
+	Hide       bool        `json:"hide"` //  hide from the list, but still can get will url
+	Body       interface{} // initilize as []byte, then render it as template.HTML
 }
 
 // Markdown a rendered *md file.
 type Markdown struct {
 	Meta
 	Older, Newer string
-	Body         template.HTML
 }
 
 var parseYAML = func(in io.Reader, v interface{}) error {
@@ -71,7 +69,7 @@ func parseMD(path string) (*Meta, error) {
 		return nil, err
 	}
 	m.ID = parseID(path)
-	if m.body, err = linkify(bytes.NewReader(m.body), []byte(m.ID)); err != nil {
+	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(m.ID)); err != nil {
 		return nil, err
 	}
 	// don't forget to linkify meta's url
@@ -89,7 +87,7 @@ func unmarshal(in io.Reader, m *Meta) error {
 	}
 
 	m.Title = title
-	m.body = body
+	m.Body = body
 	return parseYAML(bytes.NewReader(_yaml), m)
 }
 
