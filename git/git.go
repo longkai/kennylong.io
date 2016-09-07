@@ -22,7 +22,7 @@ var (
 )
 
 var execer = func(script string) ([]byte, error) {
-	os.Stdout.WriteString(script)
+	fmt.Println(script)
 	b, err := exec.Command(`/bin/sh`, `-c`, script).CombinedOutput()
 	os.Stdout.Write(b) // if b is nil, nothing outputs
 	return b, err
@@ -30,14 +30,14 @@ var execer = func(script string) ([]byte, error) {
 
 // Pull `git pull`
 func Pull(repo string) error {
-	script := fmt.Sprintf("git -C %s pull", repo)
+	script := fmt.Sprintf("cd %s && git pull", repo)
 	_, err := execer(script)
 	return err
 }
 
 // Rev `git rev-parse --short HEAD`
 func Rev(repo string) (string, error) {
-	script := fmt.Sprintf("git -C %s rev-parse --short HEAD", repo)
+	script := fmt.Sprintf("cd %s && git rev-parse --short HEAD", repo)
 	b, err := execer(script)
 	if err != nil {
 		return "", err
@@ -47,7 +47,7 @@ func Rev(repo string) (string, error) {
 
 // Diff `git diff --name-status [hash] to HEAD`
 func Diff(repo, hash string) (adds, mods, dels []string, err error) {
-	script := fmt.Sprintf("git -C %s diff --name-status %s HEAD", repo, hash)
+	script := fmt.Sprintf("cd %s && git diff --name-status %s HEAD", repo, hash)
 	b, err := execer(script)
 	if err != nil {
 		return
