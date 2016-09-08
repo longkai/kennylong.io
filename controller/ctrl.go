@@ -11,6 +11,7 @@ import (
 
 	"github.com/longkai/xiaolongtongxue.com/config"
 	"github.com/longkai/xiaolongtongxue.com/github"
+	"github.com/longkai/xiaolongtongxue.com/medium"
 	"github.com/longkai/xiaolongtongxue.com/render"
 )
 
@@ -27,18 +28,22 @@ var (
 		`daysAgo`:   render.DaysAgo,
 	}).ParseGlob(`templ/*`))
 
-	repo   string
+	env    *config.Configuration
 	sakura render.Engine
 )
 
 // Ctrl main controller.
 func Ctrl() {
-	repo = config.Env.Repo
+	env = config.Env
 	sakura = render.NewSakura()
-	sakura.Post(config.Env.Repo)
-	initFS(config.Env.Meta.CDN, config.Env.Meta.Domain)
+	sakura.Post(env.Repo)
+	initFS(env.Meta.CDN, env.Meta.Domain)
 
-	github.Init(`/api/github/hook`, repo, config.Env.HookSecret, config.Env.AccessToken, revalidate)
+	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
+	if env.MediumToken != "" {
+		medium.Init(env.MediumToken, env.Meta.Domain)
+	}
+
 	http.HandleFunc("/", home)
 	http.HandleFunc("/ls/", ls)
 	for _, v := range config.Roots() {
@@ -54,8 +59,19 @@ var installHanlder = func(p string) {
 
 var revalidate = func(a, m, d []string) {
 	for i := range a {
-		if v := config.Root(filepath.Join(repo, a[i])); v != "" {
+		p := filepath.Join(env.Repo, a[i])
+		// check if new router(i.e., URL starts with /balalaba/...)
+		if v := config.Root(p); v != "" {
 			installHanlder(v)
+		}
+		// TODO: better handling path travel stuffs...
+		if env.MediumToken != "" && config.Ignored(p) && strings.HasSuffix(p, ".md") {
+			// meidum only allow posting new stuff, no other editing allow right now...
+			go func() {
+				if err := medium.Post(p); err != nil {
+					log.Printf("medium.Post(%q) fail: %v", p, err)
+				}
+			}()
 		}
 	}
 	if err := sakura.Revalidate(a, m, d); err != nil {

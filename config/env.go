@@ -22,6 +22,7 @@ type Configuration struct {
 	Ignores     []string `yaml:"ignores"` // regexp
 	HookSecret  string   `yaml:"hook_secret"`
 	AccessToken string   `yaml:"access_token"`
+	MediumToken string   `yaml:"medium_token"`
 	Meta        struct {
 		V             int64
 		GA            string `json:"ga"`

@@ -24,8 +24,9 @@ type Meta struct {
 	Summary    string      `json:"summary"`
 	Location   string      `json:"location"`
 	Background string      `json:"background"`
-	Hide       bool        `json:"hide"` //  hide from the list, but still can get will url
-	Body       interface{} // initilize as []byte, then render it as template.HTML
+	License    string      `json:"license"` // default all-rights-reserved
+	Hide       bool        `json:"hide"`    // hide from the list, but still can get will url
+	Body       interface{} `json:"-"`       // initilized as []byte, then render it as template.HTML
 }
 
 // Markdown a rendered *md file.
@@ -59,6 +60,11 @@ var parseID = func(path string) string {
 }
 
 func parseMD(path string) (*Meta, error) {
+	return ParseMD(path, "")
+}
+
+// ParseMD a markdown doc for a given path, baseURL is used for linkify all the relative links in the doc to absoluate for some other reasons(e.g., let 3rd sync its resources). If `basePrefix` is empty, the doc's ID will be used.
+func ParseMD(path, baseURL string) (*Meta, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -69,11 +75,14 @@ func parseMD(path string) (*Meta, error) {
 		return nil, err
 	}
 	m.ID = parseID(path)
-	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(m.ID)); err != nil {
+	if baseURL == "" {
+		baseURL = m.ID
+	}
+	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(baseURL)); err != nil {
 		return nil, err
 	}
 	// don't forget to linkify meta's url
-	if len(m.Background) != 0 && !strings.HasPrefix(m.Background, `#`) && !reAbsURL.MatchString(m.Background) {
+	if len(m.Background) != 0 && m.Background[0] != '#' && !reAbsURL.MatchString(m.Background) {
 		// not color bg
 		m.Background = m.ID + m.Background
 	}
@@ -86,7 +95,8 @@ func unmarshal(in io.Reader, m *Meta) error {
 		return err
 	}
 
-	m.Title = title
+	m.Title = title                   // defaults with parsed title if not specified in YAML
+	m.License = "all-rights-reserved" // default
 	m.Body = body
 	return parseYAML(bytes.NewReader(_yaml), m)
 }
