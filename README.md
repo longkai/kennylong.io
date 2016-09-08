@@ -5,7 +5,7 @@ xiaolongtongxue.com
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![License CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by/4.0/)
 
-Frontend and backend source of https://xiaolongtongxue.com
+Source of https://xiaolongtongxue.com
 
 It builds upon **Github Fav Markdown API**, rendering from a plain markdown repo to a nice website. Moreover, it supports **auto update** when you push commits to Github.
 
@@ -13,16 +13,18 @@ It's highly **customizable** and even has a docker image for build-run-ship easi
 
 ## Features
 - **Auto** Using Git/Github to keep your writing workflow, when you push your work to Github, your website will sync changes automatically
-- **Standard** Github Fav Markdown rendering style and API
-- **Fast** Using Non-blocking archetecture, no really a static website but dynamical
+- **Standard** [Github Fav Markdown][github fav md] rendering style and API
 - **Docker** Run right from Docker
-- **Support CDN** Put all your static stuff to *CDN*(Only tested qiniu)
+- **Fast** Using Non-blocking architecture, not really a static website but dynamical
 - **Configurable** You can modify for your needs
+- **Support CDN** Put all your static stuff to *CDN*(Only tested qiniu)
+- **Support Medium** Auto posting your new work when pushing to Github
 
 ## Markdown format Requirement
-1. Each doc must have an directory
-2. Each doc must ends with `.md`
-3. Must have a `EOF` Fenced code block, all the rest has no restrict,
+### Each Doc Must...
+1. resident in a directory, one per one
+2. file name ends with `.md`, prefer `README.md`
+3. have an `EOF` [Fenced code block][Fenced code block], all the rest has no restricts
 
 Note the format is(at least one `#`),
 
@@ -32,18 +34,22 @@ Note the format is(at least one `#`),
 ```
 
 ```yaml
---- sample
-background: banner image for this article
-date: 2016-01-07T02:50:41+08:00 # must be this format
+--- sample, all the options is optional except `date`
+title: # only required if not specify in markdown
+date: 2016-01-07T02:50:41+08:00 # required, must be this format
 hide: false # if true this article won't show in the list
 location: somewhere 
+background: banner image for this article
 summary: summary for this article
+weather: hey, what's the weather like?
+license: # "all-rights-reserved", "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain". The default is "all-rights-reserved".
 tags:
   - tag1
   - tag2
   - ...
-weather: hey, what's the weather like?
 ```
+
+Take a look a full [sample][sample].
 
 ## Run with Docker
 Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yaml:/env.yaml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
@@ -80,11 +86,12 @@ port: 1217
 repo: /repo
 hook_secret: Github WebHook secret
 access_token: Github Personal access token
+#medium_token: Medium Self-issued access tokens
 meta:
   ga: GA tracker ID
   gf: false # Use Google Fonts, check `templ/include.html`
   #cdn: CDN domain # currently only tested qiniu
-  domain: domain.com # required only if using CDN
+  domain: https://your-domain.com # required only if using CDN or medium posting service
   bio: something about you
   link: other link about you
   lang: zh
@@ -97,7 +104,7 @@ meta:
   twitter: twitter link if any
   instagram: ins link if any
   stackoverflow: stackoverflow link if any
-ignores: # NOTE the path is **HTTP Path** format
+ignores:  # NOTE: the path is **HTTP RequestURI** format
   - '^/[^/]+\.md$' # ignore *.md in root dir
 ```
 
@@ -106,7 +113,16 @@ Note if you use docker image with which container has a mounted repo, the `repo`
 ## CDN Support
 I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yaml`.
 
+## Medium Support
+The [official Medium API][medium] only allows posting new stuff to their side(e.g., editing or deleting are not supported). Note the limitation before you plugin it.
+
+
 Happy hacking.
 
+
+[github fav md]: https://guides.github.com/features/mastering-markdown/
+[Fenced code block]: https://help.github.com/articles/creating-and-highlighting-code-blocks/
+[sample]: https://raw.githubusercontent.com/longkai/xiaolongtongxue.com/master/render/testdata/normal.md
 [go]: https://golang.org/
 [bower]: https://bower.io/
+[medium]: https://github.com/Medium/medium-api-docs/issues/52

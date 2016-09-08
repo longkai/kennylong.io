@@ -25,7 +25,7 @@ func TestNormalParse(t *testing.T) {
 	}{
 		`标题`, [][]byte{
 			[]byte(`Body`),
-			[]byte(`header2`),
+			[]byte(`section`),
 		}, []byte(`https://`),
 	}
 
