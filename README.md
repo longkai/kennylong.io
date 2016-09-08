@@ -34,9 +34,9 @@ Note the format is(at least one `#`),
 ```
 
 ```yaml
---- sample, all the options is optional except `date`
+--- sample, only `date` is required
 title: # only required if not specify in markdown
-date: 2016-01-07T02:50:41+08:00 # required, must be this format
+date: 2016-01-07T02:50:41+08:00 # required, must be this format(i.e., RFC3339)
 hide: false # if true this article won't show in the list
 location: somewhere 
 background: banner image for this article
@@ -49,7 +49,7 @@ tags:
   - ...
 ```
 
-Take a look a full [sample][sample].
+Take a look at a full [sample][sample].
 
 ## Run with Docker
 Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yaml:/env.yaml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.

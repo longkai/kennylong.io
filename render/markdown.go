@@ -16,17 +16,17 @@ import (
 
 // Meta metadata for the markdown.
 type Meta struct {
-	ID         string      `json:"id"`
-	Title      string      `json:"title"`
+	ID         string      `json:"id,omitempty" yaml:"-"`
+	Title      string      `json:"title" yaml:",omitempty"`
 	Tags       []string    `json:"tags"`
 	Date       time.Time   `json:"date"`
 	Weather    string      `json:"weather"`
 	Summary    string      `json:"summary"`
 	Location   string      `json:"location"`
 	Background string      `json:"background"`
-	License    string      `json:"license"` // default all-rights-reserved
-	Hide       bool        `json:"hide"`    // hide from the list, but still can get will url
-	Body       interface{} `json:"-"`       // initilized as []byte, then render it as template.HTML
+	License    string      `json:"license"`    // default all-rights-reserved
+	Hide       bool        `json:"hide"`       // hide from the list, but still can get will url
+	Body       interface{} `json:"-" yaml:"-"` // initilized as []byte, then render it as template.HTML
 }
 
 // Markdown a rendered *md file.
