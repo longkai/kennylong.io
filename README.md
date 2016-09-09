@@ -49,7 +49,7 @@ tags:
   - ...
 ```
 
-Take a look at a full [sample][sample].
+Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, checkout the [source](cmd/newmd) or download [here][dl].
 
 ## Run with Docker
 Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yaml:/env.yaml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
@@ -123,6 +123,7 @@ Happy hacking.
 [github fav md]: https://guides.github.com/features/mastering-markdown/
 [Fenced code block]: https://help.github.com/articles/creating-and-highlighting-code-blocks/
 [sample]: https://raw.githubusercontent.com/longkai/xiaolongtongxue.com/master/render/testdata/normal.md
+[dl]: https://dl.xiaolongtongxue.com/newmd/
 [go]: https://golang.org/
 [bower]: https://bower.io/
 [medium]: https://github.com/Medium/medium-api-docs/issues/52
