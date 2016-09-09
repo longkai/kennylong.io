@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "material-design-lite": "^1.2.0",
+    "material-design-lite": "^1.2.1",
     "github-markdown-css": "^2.4.0"
   }
 }

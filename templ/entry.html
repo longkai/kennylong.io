@@ -33,7 +33,7 @@
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
           for="demo-menu-lower-right">
         <li class="mdl-menu__item" id="home">首页</li>
-        <li class="mdl-menu__item">CC BY 4.0</li>
+        <!-- <li class="mdl-menu__item">CC BY 4.0</li> -->
       </ul>
     </div>
     <div class="demo-blog__posts mdl-grid">
@@ -75,6 +75,11 @@
             {{if gt $i 0 -}}, {{- end}}
             <i class="material-icons" role="presentation">bookmark</i>
             <span class="visuallyhidden">bookmark</span>{{$t}}
+            {{- end}}
+            {{if $.A.License -}}
+            <div class="section-spacer"></div>
+            <i class="material-icons" role="presentation">copyright</i>
+            <span class="visuallyhidden">copyright</span> {{$.A.License}}
             {{- end}}
           </div>
           <!--

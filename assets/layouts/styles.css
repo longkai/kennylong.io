@@ -11,7 +11,7 @@ body::before {
     position: fixed;
 }
 @media (max-width: 415px) {
-  .social-btn__medium, .social-btn__instagram {
+  .social-btn__stackoverflow, .social-btn__github {
     display: none;
   }
 }

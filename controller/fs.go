@@ -12,20 +12,20 @@ import (
 var (
 	fs     http.Handler
 	cdn    string
-	domain string
+	origin string
 )
 
 // Init static file handler
-func initFS(_cdn, _domain string) {
+func initFS(_cdn, _origin string) {
 	src, dest := `assets`, filepath.Join(env.Repo, `assets`)
 	log.Printf("cpAssets(%q, %q)", src, dest)
 	go cpAssets(src, dest)
 	fs = http.FileServer(http.Dir(env.Repo))
 	http.Handle(`/assets/`, fs)
-	cdn, domain = _cdn, _domain
+	cdn, origin = _cdn, _origin
 	if cdn != "" {
-		if domain == "" {
-			log.Fatalf("CDN %q is enbaled, domain is empty", cdn)
+		if origin == "" {
+			log.Fatalf("CDN %q is enbaled, origin is empty", cdn)
 		}
 		prefix := `/cdn/`
 		log.Printf("http.StripPrefix(%q) for CDN %s", prefix, cdn)
@@ -38,7 +38,7 @@ func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
 // EscapeCDN if CDN is used, linkify those non-static(avoid CDN) links.
 func EscapeCDN(url string) string {
 	if cdn != "" {
-		return domain + "/" + strings.TrimLeft(url, "/")
+		return origin + "/" + strings.TrimLeft(url, "/")
 	}
 	return url
 }

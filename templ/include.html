@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
 {{if $.Meta.CDN -}}
-<base href="//{{$.Meta.CDN}}">
+<base href="{{$.Meta.CDN}}">
 {{- end}}
 
 <!-- Add to homescreen for Chrome on Android -->
@@ -49,19 +49,14 @@
       <span class="visuallyhidden">Gmail</span>
     </button>
     {{- end}}
-    {{if $.Meta.Stackoverflow -}}
-    <button href="{{.Meta.Stackoverflow}}" class="mdl-mini-footer--social-btn social-btn social-btn__stackoverflow">
-      <span class="visuallyhidden">Stackoverflow</span>
-    </button>
-    {{- end}}
-    {{if $.Meta.Github -}}
-    <button href="{{$.Meta.Github}}" class="mdl-mini-footer--social-btn social-btn social-btn__github">
-      <span class="visuallyhidden">Github</span>
-    </button>
-    {{- end}}
     {{if $.Meta.Instagram -}}
     <button href="{{$.Meta.Instagram}}" class="mdl-mini-footer--social-btn social-btn social-btn__instagram">
       <span class="visuallyhidden">Instagram</span>
+    </button>
+    {{- end}}
+    {{if $.Meta.Twitter -}}
+    <button href="{{$.Meta.Twitter}}" class="mdl-mini-footer--social-btn social-btn social-btn__twitter">
+      <span class="visuallyhidden">Twitter</span>
     </button>
     {{- end}}
     {{if $.Meta.Medium -}}
@@ -69,9 +64,14 @@
       <span class="visuallyhidden">Medium</span>
     </button>
     {{- end}}
-    {{if $.Meta.Twitter -}}
-    <button href="{{$.Meta.Twitter}}" class="mdl-mini-footer--social-btn social-btn social-btn__twitter">
-      <span class="visuallyhidden">Twitter</span>
+    {{if $.Meta.Github -}}
+    <button href="{{$.Meta.Github}}" class="mdl-mini-footer--social-btn social-btn social-btn__github">
+      <span class="visuallyhidden">Github</span>
+    </button>
+    {{- end}}
+    {{if $.Meta.Stackoverflow -}}
+    <button href="{{.Meta.Stackoverflow}}" class="mdl-mini-footer--social-btn social-btn social-btn__stackoverflow">
+      <span class="visuallyhidden">Stackoverflow</span>
     </button>
     {{- end}}
   </div>
@@ -114,7 +114,6 @@ function escapeCDN(url) {
 <script>
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', {{$.Meta.GA}}]);
-  {{if $.Meta.Domain -}}_gaq.push(['_setDomainName', {{$.Meta.Domain}}]);{{- end}}
   _gaq.push(['_trackPageview']);
 </script>
 {{- end}}

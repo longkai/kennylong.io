@@ -37,11 +37,11 @@ func Ctrl() {
 	env = config.Env
 	sakura = render.NewSakura()
 	sakura.Post(env.Repo)
-	initFS(env.Meta.CDN, env.Meta.Domain)
+	initFS(env.Meta.CDN, env.Meta.Origin)
 
 	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
 	if env.MediumToken != "" {
-		medium.Init(env.MediumToken, env.Meta.Domain)
+		medium.Init(env.MediumToken, env.Meta.Origin)
 	}
 
 	http.HandleFunc("/", home)

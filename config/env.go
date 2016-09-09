@@ -28,7 +28,7 @@ type Configuration struct {
 		GA            string `json:"ga"`
 		GF            bool   `json:"gf"`
 		CDN           string `json:"cdn"`
-		Domain        string `json:"domain"`
+		Origin        string `json:"origin"`
 		Bio           string `json:"bio"`
 		Link          string `json:"link"`
 		Lang          string `json:"lang"`

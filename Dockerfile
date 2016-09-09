@@ -6,7 +6,7 @@ MAINTAINER longkai <im.longkai@gmail.com>
 RUN yum -y install git
 
 # Install Golang
-ARG go=1.7
+ARG go=1.7.1
 ADD https://storage.googleapis.com/golang/go${go}.linux-amd64.tar.gz go.tar.gz
 RUN tar -C /usr/local -xzf go.tar.gz && rm -rf go.tar.gz
 ENV GOPATH /go
@@ -42,7 +42,7 @@ RUN ./build.sh
 
 # Cleanup
 RUN npm uninstall -g bower
-RUN rm -rf $GOPATH/bin/* /usr/local/go* /usr/local/node*
+RUN rm -rf $GOPATH/bin/* $GOPAH/pkg* /usr/local/go* /usr/local/node*
 
 # Setup
 EXPOSE 1217
