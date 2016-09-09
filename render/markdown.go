@@ -64,7 +64,7 @@ func parseMD(path string) (*Meta, error) {
 }
 
 // ParseMD a markdown doc for a given path, baseURL is used for linkify all the relative links in the doc to absoluate for some other reasons(e.g., let 3rd sync its resources). If `basePrefix` is empty, the doc's ID will be used.
-func ParseMD(path, baseURL string) (*Meta, error) {
+func ParseMD(path, origin string) (*Meta, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -75,10 +75,8 @@ func ParseMD(path, baseURL string) (*Meta, error) {
 		return nil, err
 	}
 	m.ID = parseID(path)
-	if baseURL == "" {
-		baseURL = m.ID
-	}
-	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(baseURL)); err != nil {
+	origin += m.ID
+	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(origin)); err != nil {
 		return nil, err
 	}
 	// don't forget to linkify meta's url

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/longkai/xiaolongtongxue.com/render"
 )
@@ -33,7 +34,7 @@ func Init(_token, _endpoint string) {
 	if _token == "" || _endpoint == "" {
 		log.Fatalf("empty meidum token %q or endpoint %q, aborting", _token, _endpoint)
 	}
-	token, endpoint = _token, _endpoint
+	token, endpoint = _token, strings.TrimRight(_endpoint, "/") // trim right for pretty URL
 	go func() {
 		try := 0
 		for try < 3 { // retry max 3 times
@@ -66,6 +67,7 @@ func Post(path string) error {
 	}
 	// always `markdown` and `public` since you have publish to your site
 	p := &payload{Title: m.Title, Tags: m.Tags, License: m.License, Format: "markdown", Status: "public"}
+	p.CanonicalURL = endpoint + "/" + strings.TrimLeft(m.ID, "/")
 	// title has been stripped by parser, however, medium needs it, so we have to prepend it. see their doc at: https://github.com/Medium/medium-api-docs#33-posts
 	p.Content = fmt.Sprintf("%s\n===\n%s", m.Title, b)
 
@@ -131,7 +133,7 @@ func reqest(method, url string, payload io.Reader, ok func(status int) bool) ([]
 
 	defer resp.Body.Close()
 	if !ok(resp.StatusCode) {
-		return nil, fmt.Errorf("StatusCode %d", resp.StatusCode)
+		return nil, fmt.Errorf("unwanted status code %d", resp.StatusCode)
 	}
 	return ioutil.ReadAll(resp.Body)
 }
