@@ -65,7 +65,7 @@ var revalidate = func(a, m, d []string) {
 			installHanlder(v)
 		}
 		// TODO: better handling path travel stuffs...
-		if env.MediumToken != "" && config.Ignored(p) && strings.HasSuffix(p, ".md") {
+		if env.MediumToken != "" && !config.Ignored(p) && strings.HasSuffix(p, ".md") {
 			// meidum only allow posting new stuff, no other editing allow right now...
 			go func() {
 				if err := medium.Post(p); err != nil {
