@@ -15,10 +15,10 @@ It's highly **customizable** and even has a docker image for build-run-ship easi
 - **Auto** Using Git/Github to keep your writing workflow, when you push your work to Github, your website will sync changes automatically
 - **Standard** [Github Fav Markdown][github fav md] rendering style and API
 - **Docker** Run right from Docker
-- **Fast** Using Non-blocking architecture, not really a static website but dynamical
+- **Fast** With Non-blocking architecture, not really a static but dynamical
 - **Configurable** You can modify for your needs
 - **Support CDN** Put all your static stuff to *CDN*(Only tested qiniu)
-- **Support Medium** Auto posting your new work when pushing to Github
+- **Support Medium** Auto posting your new works when pushing to Github
 
 ## Markdown format Requirement
 ### Each Doc Must...
@@ -37,12 +37,12 @@ Note the format is(at least one `#`),
 --- sample, only `date` is required
 title: # only required if not specify in markdown
 date: 2016-01-07T02:50:41+08:00 # required, must be this format(i.e., RFC3339)
-hide: false # if true this article won't show in the list
-location: somewhere 
-background: banner image for this article
+hide: false # if true this article won't appear in the list
 summary: summary for this article
 weather: hey, what's the weather like?
 license: # "all-rights-reserved", "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain". The default is "all-rights-reserved".
+location: somewhere 
+background: banner image for this article
 tags:
   - tag1
   - tag2
@@ -108,7 +108,15 @@ ignores:  # NOTE: the path is **HTTP RequestURI** format
   - '^/[^/]+\.md$' # ignore *.md in root dir
 ```
 
+Remember in the `assets/images/` there are some placeholder images, you would like to replace with yours.
+
 Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yaml` and the docker mount pointer MUST be same.
+
+## Github Hook&Markdown Support
+1. obtain your github *personal access token* from your settings
+2. goto your markdown repo settings, in *Webhooks & services* Tab add a webhook with **Payload URL** `your-domain.com/api/github/api`, then set the **Secret**, note the *push* event is required. 
+
+Don't forget to set this information in `eny.yaml`!
 
 ## CDN Support
 I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yaml`.
