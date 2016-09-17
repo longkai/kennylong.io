@@ -13,7 +13,7 @@ fi
 
 # test existence of Google Fonts 
 if [ ! -d "assets/fonts" ]; then
-  echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' for more infomation."
+  echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' or 'cmd/gfdl' for more information."
 fi
 
 rev=`git rev-parse --short HEAD`
