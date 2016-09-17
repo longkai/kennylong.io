@@ -17,6 +17,7 @@
 -->
 <html lang="{{$.Meta.Lang}}">
 <head>
+  <meta name="description" content="{{$.A.Summary}}">
   {{template "header" $}}
   <link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css?v={{$.Meta.V}}">
   <title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
@@ -196,5 +197,6 @@
     window.open(window.location.protocol + '//' + window.location.host, "_self");
   });
 </script>
+{{template "GA" $.Meta.GA}}
 </body>
 </html>

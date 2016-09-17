@@ -17,6 +17,7 @@
 -->
 <html lang="{{$.Meta.Lang}}">
 <head>
+  <meta name="description" content="{{$.Meta.Bio}}">
   {{template "header" $}}
   <title>{{$.Meta.Title}}</title>
 </head>
@@ -296,5 +297,6 @@ function appendEssays(data) {
     openLink(el, target);
   }
 </script>
+{{template "GA" $.Meta.GA}}
 </body>
 </html>
