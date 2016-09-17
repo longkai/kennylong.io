@@ -39,6 +39,7 @@ func gfdl(src, dst string) {
 		handle(err)
 	}
 	ch := make(chan string)
+	lastSeg := func(url string) string { return url[strings.LastIndexByte(url, '/')+1:] }
 	for _, item := range re.FindAll(b, -1) {
 		wg.Add(1)
 		url := string(item)
@@ -48,7 +49,7 @@ func gfdl(src, dst string) {
 			if err != nil {
 				handle(err)
 			}
-			if err := ioutil.WriteFile(filepath.Join(dir, url[strings.LastIndexByte(url, '/')+1:]), bytes, 0644); err != nil {
+			if err := ioutil.WriteFile(filepath.Join(dir, lastSeg(url)), bytes, 0644); err != nil {
 				handle(err)
 			}
 			ch <- url
@@ -59,7 +60,7 @@ func gfdl(src, dst string) {
 		close(ch)
 	}()
 	for url := range ch {
-		b = bytes.Replace(b, []byte(url), []byte(url[strings.LastIndexByte(url, '/')+1:]), -1)
+		b = bytes.Replace(b, []byte(url), []byte(lastSeg(url)), -1)
 	}
 	if err := ioutil.WriteFile(dst, b, 0644); err != nil {
 		handle(err)
