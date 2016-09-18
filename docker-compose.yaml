@@ -1,5 +1,5 @@
 sakura:
-  image: longkai/xiaolongtongxue.com
+  image: longkai/xiaolongtongxue.com:latest # alpha branch for new features 
   ports:
     - "1217:1217"
   volumes:

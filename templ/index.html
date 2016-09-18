@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
   Material Design Lite
   Copyright 2015 Google Inc. All rights reserved.
@@ -15,13 +15,9 @@
   See the License for the specific language governing permissions and
   limitations under the License
 -->
-<html lang="{{$.Meta.Lang}}">
-<head>
-  <meta name="description" content="{{$.Meta.Bio}}">
-  {{template "header" $}}
-  <title>{{$.Meta.Title}}</title>
-</head>
-<body>
+<meta name="description" content="{{$.Meta.Bio}}">
+{{template "header" $}}
+<title>{{$.Meta.Title}}</title>
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
@@ -87,7 +83,7 @@
 </div>
 
 {{template "script" $}}
-<script type="application/javascript">
+<script>
   var path = window.location.pathname;
   var layout = document.getElementsByClassName('mdl-layout__content')[0];
   var grid = document.getElementById('grid');
@@ -298,5 +294,3 @@ function appendEssays(data) {
   }
 </script>
 {{template "GA" $.Meta.GA}}
-</body>
-</html>

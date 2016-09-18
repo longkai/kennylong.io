@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
   Material Design Lite
   Copyright 2015 Google Inc. All rights reserved.
@@ -15,14 +15,10 @@
   See the License for the specific language governing permissions and
   limitations under the License
 -->
-<html lang="{{$.Meta.Lang}}">
-<head>
-  <meta name="description" content="{{$.A.Summary}}">
-  {{template "header" $}}
-  <link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css?v={{$.Meta.V}}">
-  <title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
-</head>
-<body>
+<meta name="description" content="{{$.A.Summary}}">
+{{template "header" $}}
+<link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css?v={{$.Meta.V}}">
+<title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
 <div class="demo-blog demo-blog--blogpost mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
     <div class="demo-home">
@@ -176,7 +172,7 @@
   <div class="mdl-layout__obfuscator"></div>
 </div>
 {{template "script" $}}
-<script type="application/javascript">
+<script>
   var md_meta = document.getElementById('md_meta');
   if (md_meta) {
     var date = '{{$.A.Date | format}}';
@@ -198,5 +194,3 @@
   });
 </script>
 {{template "GA" $.Meta.GA}}
-</body>
-</html>

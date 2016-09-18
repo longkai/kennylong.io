@@ -25,13 +25,13 @@ type Configuration struct {
 	MediumToken string   `yaml:"medium_token"`
 	Meta        struct {
 		V             int64
+		B             string
 		GA            string `json:"ga"`
 		GF            bool   `json:"gf"`
 		CDN           string `json:"cdn"`
 		Origin        string `json:"origin"`
 		Bio           string `json:"bio"`
 		Link          string `json:"link"`
-		Lang          string `json:"lang"`
 		Name          string `json:"name"`
 		Title         string `json:"title"`
 		Mail          string `json:"mail"`
@@ -77,7 +77,7 @@ var adjustEnv = func() {
 }
 
 // Init configuration, must call it only once.
-func Init(src, rev string) error {
+func Init(src, rev, branch string) error {
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -92,6 +92,7 @@ func Init(src, rev string) error {
 	} else {
 		Env.Meta.V = time.Now().Unix() // puts the timestamp as a fallback
 	}
+	Env.Meta.B = branch
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil

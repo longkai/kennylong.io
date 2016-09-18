@@ -46,7 +46,7 @@ RUN ./build.sh
 # Cleanup
 RUN npm uninstall -g bower
 RUN mv assets templ xiaolongtongxue.com $GOPATH
-RUN rm -rf $GOPATH/src $GOPATH/bin $GOPAH/pkg /usr/local/go /usr/local/node*
+RUN rm -rf $GOPATH/src $GOPATH/bin $GOPATH/pkg /usr/local/go /usr/local/node*
 
 # Setup
 WORKDIR $GOPATH

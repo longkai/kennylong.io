@@ -16,8 +16,9 @@ if [ ! -d "assets/fonts" ]; then
   echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' or 'cmd/gfdl' for more information."
 fi
 
-rev=`git rev-parse --short HEAD`
+r=`git rev-parse --short HEAD`
+b=`git rev-parse --abbrev-ref HEAD`
 
-cmd="go build -ldflags \"-X main.rev=$rev\""
+cmd="go build -ldflags \"-X main.v=$v -X main.b=$b\""
 
 echo "$cmd" && eval $cmd
