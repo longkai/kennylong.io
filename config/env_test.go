@@ -11,12 +11,12 @@ func TestInit(t *testing.T) {
 
 	src := "./testdata/env.yaml"
 
-	if err := Init(src, ``, ``); err != nil {
-		t.Errorf("Init(%q, ``, ``) = %v\n", src, err)
+	if err := Init(src); err != nil {
+		t.Errorf("Init(%q) = %v\n", src, err)
 	}
 
 	if Env == nil {
-		t.Errorf("Init(%q, ``), Env = nil\n", src)
+		t.Errorf("Init(%q), Env = nil\n", src)
 	}
 
 	// testify defauly ignore behavious

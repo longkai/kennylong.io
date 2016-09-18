@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -47,6 +48,8 @@ var (
 	// Env global environment
 	Env *Configuration
 
+	v, b string // compile time metas
+
 	regexps []*regexp.Regexp
 	mu      sync.Mutex // guards roots
 	roots   map[string]struct{}
@@ -77,7 +80,8 @@ var adjustEnv = func() {
 }
 
 // Init configuration, must call it only once.
-func Init(src, rev, branch string) error {
+func Init(src string) error {
+	fmt.Printf("Happy hacking :) Build ID: %s, Branch: %s\n", v, b)
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -86,13 +90,12 @@ func Init(src, rev, branch string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-	// TODO: the doc says `importpath.name=value` can set to anywhere, but I tested not work...
-	if i, err := strconv.ParseInt(rev, 16, 0); err == nil {
+	if i, err := strconv.ParseInt(v, 16, 0); err == nil {
 		Env.Meta.V = i // some CDNs(i.e. qiniu) only recognize ints, which is silly
 	} else {
 		Env.Meta.V = time.Now().Unix() // puts the timestamp as a fallback
 	}
-	Env.Meta.B = branch
+	Env.Meta.B = b
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
