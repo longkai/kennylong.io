@@ -25,20 +25,22 @@ ARG repo=https://github.com/longkai/essays.git
 RUN git clone --depth=1 ${repo} /repo
 
 # Compile and Build
-RUN go get github.com/longkai/xiaolongtongxue.com
-WORKDIR "$GOPATH/src/github.com/longkai/xiaolongtongxue.com/assets"
+ENV workdir $GOPATH/src/github.com/longkai/xiaolongtongxue.com
+COPY . $workdir
+WORKDIR $workdir
+RUN go get ./...
+WORKDIR $workdir/assets
 RUN bower install
 # Replace my fav mdl theme here, you can do it using `docker volume`
 ADD https://code.getmdl.io/1.2.1/material.light_green-green.min.css bower_components/material-design-lite/material.min.css
-
 # Predownload Google Fonts
-WORKDIR "$GOPATH/src/github.com/longkai/xiaolongtongxue.com/assets/fonts"
-RUN go get github.com/longkai/gfdl
+WORKDIR $workdir/cmd/gfdl
+RUN go install
+WORKDIR $workdir/assets/fonts
 RUN gfdl "https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh" fonts.css
 RUN gfdl "https://fonts.googleapis.com/icon?family=Material+Icons" icons.css
-
-WORKDIR "$GOPATH/src/github.com/longkai/xiaolongtongxue.com"
 # Replace our own which has build ID maybe helpful for CDN cache problem
+WORKDIR $workdir
 RUN ./build.sh
 
 # Cleanup
