@@ -29,7 +29,7 @@
 
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
           for="demo-menu-lower-right">
-        <li class="mdl-menu__item" id="home">首页</li>
+        <li class="mdl-menu__item" id="home">Home</li>
         <!-- <li class="mdl-menu__item">CC BY 4.0</li> -->
       </ul>
     </div>
@@ -150,13 +150,13 @@
               role="presentation">
             <i class="material-icons">arrow_back</i>
           </button>
-          上一篇
+          Newer
         </a>
         {{- end}}
         <div class="section-spacer"></div>
         {{if $.A.Older -}}
         <a href="{{$.A.Older | escapeCDN}}" class="demo-nav__button">
-          下一篇
+          Older
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
@@ -178,7 +178,7 @@
     var date = '{{$.A.Date | format}}';
     var _location = '{{$.A.Location}}';
     var weather = '{{$.A.Weather}}';
-    md_meta.textContent = daysAgo(date) + ' 天前';
+    md_meta.textContent = daysAgo(date) + ' days ago';
     if (_location) {
       md_meta.textContent += ', ' + _location;
     }
