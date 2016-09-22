@@ -36,18 +36,18 @@ Note the format is(at least one `#`),
 title: # only required if unspecified in markdown
 date: 2016-01-07T02:50:41+08:00 # required, must be this format(i.e., RFC3339)
 hide: false # if true this article won't appear in the list
-summary: summary for this article
-weather: hey, what's the weather like?
+summary: # summary for this article
+weather: # hey, what's the weather like?
 license: # "all-rights-reserved", "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain". The default is "all-rights-reserved".
-location: somewhere 
-background: banner image for this article
+location:  # where you wrote this?
+background: # banner image for this article, or RGBA hex color value(i.e. starting with '#')
 tags:
   - tag1
   - tag2
   - ...
 ```
 
-Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, checkout the [source](cmd/newmd) or download [here][dl].
+Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, go [get it](cmd/newmd)!
 
 ## Run with Docker
 Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
