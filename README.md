@@ -52,7 +52,7 @@ tags:
 Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, checkout the [source](cmd/newmd) or download [here][dl].
 
 ## Run with Docker
-Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yaml:/env.yaml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
+Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
 
 Or, if you prefer `docker-compose`, modify for your needs,
 
@@ -62,7 +62,7 @@ sakura:
   ports:
     - "1217:1217"
   volumes:
-    - /path/to/env.yaml:/env.yaml:ro
+    - /path/to/env.yml:/env.yml:ro
     - /path/to/repo:/repo
 ```
 
@@ -77,11 +77,11 @@ then run `docker-compose up -d`
 1. `go get github.com/longkai/xiaolongtongxue.com && rm $GOPATH/bin/xiaolongtongxue.com`
 2. `cd $GOPATH/src/github.com/longkai/xiaolongtongxue.com`
 3. `./build.sh`
-4. `./xiaolongtongxue.com [/path/to/env.yaml]`
+4. `./xiaolongtongxue.com [/path/to/env.yml]`
 
 ## Configuration
 ```yaml
---- env.yaml
+--- env.yml
 port: 1217
 repo: /repo
 hook_secret: Github WebHook secret
@@ -109,16 +109,16 @@ ignores:  # NOTE: the path is **HTTP RequestURI** format
 
 Remember in the `assets/images/` there are some placeholder images, you would like to replace with yours.
 
-Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yaml` and the docker mount pointer MUST be same.
+Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yml` and the docker mount pointer MUST be same.
 
 ## Github Hook&Markdown Support
 1. obtain your github *personal access token* from your settings
 2. goto your markdown repo settings, in *Webhooks & services* Tab add a webhook with **Payload URL** `your-domain.com/api/github/api`, then set the **Secret**, note the *push* event is required. 
 
-Don't forget to set this information in `eny.yaml`!
+Don't forget to set this information in `eny.yml`!
 
 ## CDN Support
-I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yaml`.
+I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yml`.
 
 ## Medium Support
 The [official Medium API][medium] only allows posting new stuff to their side(e.g., editing or deleting are not supported). Note the limitation before you plugin it.

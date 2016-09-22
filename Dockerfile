@@ -51,6 +51,6 @@ RUN rm -rf $GOPATH/src $GOPATH/bin $GOPATH/pkg /usr/local/go /usr/local/node*
 # Setup
 WORKDIR $GOPATH
 EXPOSE 1217
-VOLUME ["/repo", "/env.yaml"]
+VOLUME ["/repo", "/env.yml"]
 ENTRYPOINT ["./xiaolongtongxue.com"]
-CMD ["/env.yaml"] # Let users override mounted configutation file path
+CMD ["/env.yml"] # Let users override mounted configutation file path

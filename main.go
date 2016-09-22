@@ -38,7 +38,7 @@ import (
 )
 
 func main() {
-	var env = `env.yaml` // def location
+	var env = `env.yml` // def location
 	if len(os.Args) > 1 {
 		env = os.Args[1]
 	}

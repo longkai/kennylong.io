@@ -9,7 +9,7 @@ func TestInit(t *testing.T) {
 		regexps = saved2
 	}()
 
-	src := "./testdata/env.yaml"
+	src := "./testdata/env.yml"
 
 	if err := Init(src); err != nil {
 		t.Errorf("Init(%q) = %v\n", src, err)

@@ -3,5 +3,5 @@ sakura:
   ports:
     - "1217:1217"
   volumes:
-    - ~/env.yaml:/env.yaml:ro
+    - ~/env.yml:/env.yml:ro
     #- /path/to/repo:/repo

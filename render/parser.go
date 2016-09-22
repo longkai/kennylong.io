@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	re = regexp.MustCompile("\\s*(?:#+\\s*)?(?P<title>\\S[\\S ]*\\S)?(?:\\s*[-=]+\\s*)?(?P<body>[\\S\\s]+?)(#+\\s*EOF\\s+```yaml\\s*(?P<yaml>[\\S\\s]+)```)(?P<links>[\\S\\s]*)")
+	re = regexp.MustCompile("\\s*(?:#+\\s*)?(?P<title>\\S[\\S ]*\\S)?(?:\\s*[-=]+\\s*)?(?P<body>[\\S\\s]+?)(#+\\s*EOF\\s+```ya?ml\\s*(?P<yaml>[\\S\\s]+)```)(?P<links>[\\S\\s]*)")
 )
 
 // parse parsing the markdown then extracting the metas. If no title matches, the first non-blank line will be used as title. **Note title and YAML(required) will be stripped from the body**.

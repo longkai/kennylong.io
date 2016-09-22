@@ -59,7 +59,7 @@ body1
 body2
 
 ### EOF
-` + "```yaml" +
+` + "```yml" +
 		`key: val` + "```" +
 		`
 [1]: https://xiaolongtongxue.com
