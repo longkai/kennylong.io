@@ -8,14 +8,13 @@
   "main": "index.html",
   "moduleType": [],
   "keywords": [
-    "markdown",
-    "material",
     "blog",
-    "golang"
+    "github",
+    "markdown"
   ],
   "license": "MIT",
   "dependencies": {
     "material-design-lite": "^1.2.1",
-    "github-markdown-css": "^2.4.0"
+    "github-markdown-css": "^2.4.1"
   }
 }
