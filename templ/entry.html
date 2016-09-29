@@ -18,6 +18,11 @@
 <meta name="description" content="{{$.A.Summary}}">
 {{template "header" $}}
 <link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css?v={{$.Meta.V}}">
+<style>
+/* better look :) */
+article p { text-align: justify; }
+article code { word-break: break-all; }
+</style>
 <title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
 <div class="demo-blog demo-blog--blogpost mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">

@@ -17,7 +17,7 @@ happy-hacking/
 ./happy-hacking:
 README.md
 
-$ cat happy-hacking/README.md                       ✱ ◼
+$ cat happy-hacking/README.md
 Happy Hacking
 ===
 Content goes here...
