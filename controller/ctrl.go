@@ -37,7 +37,7 @@ func Ctrl() {
 	env = config.Env
 	sakura = render.NewSakura()
 	sakura.Post(env.Repo)
-	initFS(env.Meta.CDN, env.Meta.Origin)
+	initFS(env.Meta.CDN, env.Meta.Origin, env.Meta.V)
 
 	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
 	if env.MediumToken != "" {

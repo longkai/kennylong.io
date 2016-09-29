@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -16,7 +17,7 @@ var (
 )
 
 // Init static file handler
-func initFS(_cdn, _origin string) {
+func initFS(_cdn, _origin, v string) {
 	src, dest := `assets`, filepath.Join(env.Repo, `assets`)
 	log.Printf("cpAssets(%q, %q)", src, dest)
 	go cpAssets(src, dest)
@@ -27,7 +28,10 @@ func initFS(_cdn, _origin string) {
 		if origin == "" {
 			log.Fatalf("CDN %q is enbaled, origin is empty", cdn)
 		}
-		prefix := `/cdn/`
+		if v != "" {
+			v += "/" // for pretty URL
+		}
+		prefix := fmt.Sprintf("/cdn/%s", v) // plus a version code avoiding cdn hard cache...
 		log.Printf("http.StripPrefix(%q) for CDN %s", prefix, cdn)
 		http.Handle(prefix, http.StripPrefix(prefix, fs))
 	}

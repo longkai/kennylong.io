@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/longkai/xiaolongtongxue.com/helper"
 
@@ -25,7 +23,7 @@ type Configuration struct {
 	AccessToken string   `yaml:"access_token"`
 	MediumToken string   `yaml:"medium_token"`
 	Meta        struct {
-		V             int64
+		V             string
 		B             string
 		GA            string `json:"ga"`
 		GF            bool   `json:"gf"`
@@ -90,12 +88,7 @@ func Init(src string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-	if i, err := strconv.ParseInt(v, 16, 0); err == nil {
-		Env.Meta.V = i // some CDNs(i.e. qiniu) only recognize ints, which is silly
-	} else {
-		Env.Meta.V = time.Now().Unix() // puts the timestamp as a fallback
-	}
-	Env.Meta.B = b
+	Env.Meta.V, Env.Meta.B = v, b
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
