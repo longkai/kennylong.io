@@ -21,11 +21,10 @@ const (
 
 var (
 	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
-		`escapeCDN`: EscapeCDN,
-		`bgImg`:     render.BgImg,
-		`tags`:      render.Tags,
-		`format`:    render.Format,
-		`daysAgo`:   render.DaysAgo,
+		`bgImg`:   render.BgImg,
+		`tags`:    render.Tags,
+		`format`:  render.Format,
+		`daysAgo`: render.DaysAgo,
 	}).ParseGlob(`templ/*`))
 
 	env    *config.Configuration
@@ -35,7 +34,7 @@ var (
 // Ctrl main controller.
 func Ctrl() {
 	env = config.Env
-	sakura = render.NewSakura()
+	sakura = render.NewSakura(env.Meta.CDN)
 	sakura.Post(env.Repo)
 	initFS(env.Meta.CDN, env.Meta.Origin, env.Meta.V)
 

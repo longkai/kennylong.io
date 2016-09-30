@@ -114,6 +114,12 @@ func linkify(in io.Reader, prefix []byte, re *regexp.Regexp, f indexer) ([]byte,
 	if err != nil {
 		return nil, err
 	}
+
+	// normalize the prefix
+	if prefix[len(prefix)-1] != '/' {
+		prefix = append(prefix, '/')
+	}
+
 	indices := re.FindAllSubmatchIndex(b, -1)
 	var i int
 	return re.ReplaceAllFunc(b, func(old []byte) []byte {

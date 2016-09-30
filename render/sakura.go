@@ -13,15 +13,12 @@ import (
 	"github.com/ryszard/goskiplist/skiplist"
 )
 
-// Render _
-type Render func(in io.Reader) (interface{}, error)
-
 type timestamp int64
 
 // LessThan using timestamp from meta as key for skiplist sort.
-func (t timestamp) LessThan(other skiplist.Ordered) bool {
-	return t < timestamp(other.(timestamp))
-}
+func (t timestamp) LessThan(other skiplist.Ordered) bool { return t < timestamp(other.(timestamp)) }
+
+type render func(id string, in io.Reader) (interface{}, error)
 
 type entry struct {
 	//val   interface{}
@@ -29,13 +26,13 @@ type entry struct {
 	ready chan struct{}
 }
 
-func (e *entry) call(in io.Reader, f Render, callback func(b interface{})) {
+func (e *entry) call(id string, in io.Reader, f render, callback func(b interface{})) {
 	var (
 		retry = 0
 		val   interface{}
 	)
 	for retry < 3 { // max 3 retries
-		val, e.err = f(in)
+		val, e.err = f(id, in)
 		if e.err == nil {
 			// success
 			callback(val)
@@ -67,7 +64,7 @@ type requests struct {
 
 // Sakura render engine.
 type Sakura struct {
-	Render
+	render
 	Traveller
 	requests
 	list  *skiplist.SkipList
@@ -194,8 +191,7 @@ func (s *Sakura) get(req request) {
 	if e == nil {
 		// cache misses
 		e = &entry{ready: make(chan struct{})}
-		go e.call(bytes.NewReader(m.Body.([]byte)), s.Render, func(res interface{}) {
-			// render success
+		go e.call(m.ID, bytes.NewReader(m.Body.([]byte)), s.render, func(res interface{}) {
 			m.Body = template.HTML(res.([]byte))
 		})
 		s.cache[req.key] = e
@@ -288,8 +284,8 @@ func (s *Sakura) Revalidate(adds, mods, dels []string) error {
 	return nil
 }
 
-// NewSakura _
-func NewSakura() Engine {
+// NewSakura sakura render engine with cdn support
+func NewSakura(cdn string) Engine {
 	s := &Sakura{
 		cache: make(map[string]*entry),
 		index: make(map[string]timestamp),
@@ -301,7 +297,13 @@ func NewSakura() Engine {
 			post: make(chan interface{}),
 			put:  make(chan request),
 		},
-		Render: func(in io.Reader) (interface{}, error) { return github.Markdown(in) },
+		render: func(id string, in io.Reader) (interface{}, error) {
+			b, err := github.Markdown(in)
+			if err == nil && cdn != "" {
+				return linkifyHTML(bytes.NewReader(b), []byte(cdn+id))
+			}
+			return b, err
+		},
 	}
 	s.Traveller = &Hiker{func(v interface{}) { s.requests.post <- v }}
 	go s.loop()

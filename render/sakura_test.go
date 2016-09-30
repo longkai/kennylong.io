@@ -7,13 +7,13 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	s := NewSakura().(*Sakura)
+	s := NewSakura(``).(*Sakura)
 	var (
 		withError   bool
 		calledTimes int
 		wantTimes   int
 	)
-	s.Render = func(in io.Reader) (interface{}, error) {
+	s.render = func(id string, in io.Reader) (interface{}, error) {
 		calledTimes++
 		if withError {
 			return nil, errors.New("balabala")

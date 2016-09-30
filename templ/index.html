@@ -28,12 +28,12 @@
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media mdl-color-text--grey-50"
-             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background}}')
+             style="background: {{if $a.Background | bgImg -}}url('{{$.Meta.CDN}}{{$a.Background}}')
              {{- else -}}{{$a.Background}}{{- end}};">
-          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID | escapeCDN}}">{{$a.Title}}</a></h3>
+          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | escapeCDN}}'>
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID}}'>
           {{$a.Summary}}
         </div>
         {{- end}}
@@ -53,7 +53,7 @@
           <span class="visuallyhidden">add</span>
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
-          <img src="/assets/images/qrcode.jpg" />
+          <img src="{{$.Meta.CDN}}/assets/images/qrcode.jpg" />
           {{$.Meta.Bio}}
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
@@ -140,13 +140,6 @@
   });
 
   var _link = {{$.Meta.Link}};
-  if (_link.startsWith('https://') || _link.startsWith('http://')) {
-    // nothing...
-  } else if (_link.startsWith('/')) {
-    _link = escapeCDN(_link);
-  } else {
-    _link = qualifyURL(_link);
-  }
   openLink(document.getElementById('about'), _link);
   openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
 
@@ -198,7 +191,7 @@ function appendEssays(data) {
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
     if (!a.background) {
-      a.background = '/assets/images/default.jpg'
+       a.background = CDN_URL + '/assets/images/default.jpg'
     }
     if (bgImg(a.background)) {
       cardMedia.style.background = 'url("' + a.background + '")';
@@ -207,7 +200,7 @@ function appendEssays(data) {
       cardMedia.style.backgroundColor = a.background;
     }
 
-    var link = escapeCDN(a.id); // resolve link if cdn is enabled
+    var link = a.id;
 
     var h3 = document.createElement('h3');
     if (!a.summary) {

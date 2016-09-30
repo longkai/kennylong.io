@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"strings"
 
 	"github.com/longkai/xiaolongtongxue.com/helper"
 )
@@ -25,9 +24,6 @@ func initFS(_cdn, _origin, v string) {
 	http.Handle(`/assets/`, fs)
 	cdn, origin = _cdn, _origin
 	if cdn != "" {
-		if origin == "" {
-			log.Fatalf("CDN %q is enbaled, origin is empty", cdn)
-		}
 		if v != "" {
 			v += "/" // for pretty URL
 		}
@@ -38,14 +34,6 @@ func initFS(_cdn, _origin, v string) {
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
-
-// EscapeCDN if CDN is used, linkify those non-static(avoid CDN) links.
-func EscapeCDN(url string) string {
-	if cdn != "" {
-		return origin + "/" + strings.TrimLeft(url, "/")
-	}
-	return url
-}
 
 func cpAssets(src, dest string) {
 	// ensure dir

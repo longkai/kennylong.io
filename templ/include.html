@@ -8,25 +8,21 @@
 <meta name="version" content="{{$.Meta.V}}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
-{{if $.Meta.CDN -}}
-<base href="{{$.Meta.CDN}}/{{$.Meta.V}}">
-{{- end}}
-
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" sizes="192x192" href="/assets/images/android-desktop.png">
+<link rel="icon" sizes="192x192" href="{{$.Meta.CDN}}/assets/images/android-desktop.png">
 
 <!-- Add to homescreen for Safari on iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="{{$.Meta.Title}}">
-<link rel="apple-touch-icon-precomposed" href="/assets/images/ios-desktop.png">
+<link rel="apple-touch-icon-precomposed" href="{{$.Meta.CDN}}/assets/images/ios-desktop.png">
 
 <!-- Tile icon for Win8 (144x144 + tile color) -->
-<meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png">
+<meta name="msapplication-TileImage" content="{{$.Meta.CDN}}/assets/images/ms-touch-icon-144x144-precomposed.png">
 <meta name="msapplication-TileColor" content="#da532c">
 
-<link rel="shortcut icon" href="/assets/images/favicon.png">
+<link rel="shortcut icon" href="{{$.Meta.CDN}}/assets/images/favicon.png">
 
 {{if $.Meta.GF -}}
 <!-- go to `cmd/gfdl` to find some useful stuff if google is blocked -->
@@ -34,11 +30,11 @@
 <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 {{- else -}}
 <!-- download fonts locally or with CDN -->
-<link rel="stylesheet" href="/assets/fonts/fonts.css">
-<link rel="stylesheet" href="/assets/fonts/icons.css">
+<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/fonts/fonts.css">
+<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/fonts/icons.css">
 {{- end}}
-<link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css">
-<link rel="stylesheet" href="/assets/layouts/styles.css">
+<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/bower_components/material-design-lite/material.min.css">
+<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/layouts/styles.css">
 {{- end}}
 
 {{define "footer" -}}
@@ -89,18 +85,9 @@
 {{- end}}
 
 {{define "script" -}}
-<script src="/assets/bower_components/material-design-lite/material.min.js"></script>
-<script src="/assets/scripts/xiaolongtongxue.js"></script>
-<script>
-// avoid CDN links
-function escapeCDN(url) {
-  var cdn = {{$.Meta.CDN}};
-  if (cdn) {
-    return qualifyURL(url).replace(/^.*\/\/[^\/]+/, '//' + window.location.host);
-  }
-  return url;
-}
-</script>
+<script src="{{$.Meta.CDN}}/assets/bower_components/material-design-lite/material.min.js"></script>
+<script src="{{$.Meta.CDN}}/assets/scripts/xiaolongtongxue.js"></script>
+<script>const CDN_URL = {{$.Meta.CDN}};</script>
 {{- end}}
 
 {{define "GA" -}}

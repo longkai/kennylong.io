@@ -17,12 +17,12 @@
 -->
 <meta name="description" content="{{$.A.Summary}}">
 {{template "header" $}}
-<link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css">
+<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/bower_components/github-markdown-css/github-markdown.css">
 <style>
 .tags { display: flex; align-items: center; }
 article p { text-align: justify; } /* better look :) */
 article code { word-break: break-all; }
-article p, ul, ol { font-size: 16px; }
+article p, ul, ol, blockquote { font-size: 16px; } /* change mdl default style */
 article blockquote:before, article blockquote:after { content: none; }
 </style>
 <title>{{if $.A.Title}}{{$.A.Title}} - {{end}}{{$.Meta.Title}}</title>
@@ -93,7 +93,7 @@ article blockquote:before, article blockquote:after { content: none; }
       {{if not $.A.Hide -}}
       <nav id="nav" class="demo-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
         {{if $.A.Newer -}}
-        <a href="{{$.A.Newer | escapeCDN}}" class="demo-nav__button">
+        <a href="{{$.A.Newer}}" class="demo-nav__button">
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
               role="presentation">
@@ -104,7 +104,7 @@ article blockquote:before, article blockquote:after { content: none; }
         {{- end}}
         <div class="section-spacer"></div>
         {{if $.A.Older -}}
-        <a href="{{$.A.Older | escapeCDN}}" class="demo-nav__button">
+        <a href="{{$.A.Older}}" class="demo-nav__button">
           Older
           <button
               class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-color--white mdl-color-text--grey-900"
