@@ -38,7 +38,7 @@ func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
 func cpAssets(src, dest string) {
 	// ensure dir
 	for _, e := range helper.Dirents(src) {
-		_src, _dest := filepath.Join(src, e.Name()), filepath.Join(dest, e.Name())
+		_src, _dest := filepath.Join(src, e.Name()), filepath.Join(dest, revAsset(e.Name()))
 		if e.IsDir() {
 			go cpAssets(_src, _dest)
 		} else {

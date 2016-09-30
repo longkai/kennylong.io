@@ -88,12 +88,6 @@ func Init(src string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-	if Env.Meta.CDN != "" {
-		if v == "" {
-			return fmt.Errorf("CDN %q is enabled, require a version number, plz use `build.sh` to build the binary", Env.Meta.CDN)
-		}
-		Env.Meta.CDN = strings.TrimRight(Env.Meta.CDN, "/") + "/" + v // build cdn prefix
-	}
 	Env.Meta.V, Env.Meta.B = v, b
 	roots = make(map[string]struct{})
 	adjustEnv()
