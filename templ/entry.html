@@ -17,7 +17,7 @@
 -->
 <meta name="description" content="{{$.A.Summary}}">
 {{template "header" $}}
-<link rel="stylesheet" href="{{$.Meta.CDN}}/assets/bower_components/github-markdown-css/github-markdown.css">
+<link rel="stylesheet" href="{{"/assets/bower_components/github-markdown-css/github-markdown.css" | cdn}}">
 <style>
 .tags { display: flex; align-items: center; }
 article p { text-align: justify; } /* better look :) */
@@ -42,7 +42,7 @@ article blockquote:before, article blockquote:after { content: none; }
     </div>
     <div class="demo-blog__posts mdl-grid">
       <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
-        <div class="mdl-card__media mdl-color-text--grey-50" style="background: {{if $.A.Background | bgImg -}}url('{{$.A.Background}}')
+        <div class="mdl-card__media mdl-color-text--grey-50" style="background: {{if $.A.Background | bgImg -}}url('{{$.A.Background | cdn}}')
              {{- else -}}{{$.A.Background}}{{- end}};">
           <h3>{{$.A.Title}}</h3>
         </div>

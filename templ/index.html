@@ -28,7 +28,7 @@
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media mdl-color-text--grey-50"
-             style="background: {{if $a.Background | bgImg -}}url('{{$.Meta.CDN}}{{$a.Background}}')
+             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background | cdn}}')
              {{- else -}}{{$a.Background}}{{- end}};">
           <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
@@ -53,7 +53,7 @@
           <span class="visuallyhidden">add</span>
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
-          <img src="{{$.Meta.CDN}}/assets/images/qrcode.jpg" />
+          <img src="/assets/images/qrcode.jpg" />
           {{$.Meta.Bio}}
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
@@ -191,7 +191,7 @@ function appendEssays(data) {
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
     if (!a.background) {
-       a.background = CDN_URL + '/assets/images/default.jpg'
+      a.background = CDN_URL + '/assets/images/default.jpg'
     }
     if (bgImg(a.background)) {
       cardMedia.style.background = 'url("' + a.background + '")';

@@ -20,15 +20,9 @@ const (
 )
 
 var (
-	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
-		`bgImg`:   render.BgImg,
-		`tags`:    render.Tags,
-		`format`:  render.Format,
-		`daysAgo`: render.DaysAgo,
-	}).ParseGlob(`templ/*`))
-
 	env    *config.Configuration
 	sakura render.Engine
+	templs *template.Template
 )
 
 // Ctrl main controller.
@@ -36,6 +30,7 @@ func Ctrl() {
 	env = config.Env
 	sakura = render.NewSakura(env.Meta.CDN)
 	sakura.Post(env.Repo)
+	installTempls()
 	initFS(env.Meta.CDN, env.Meta.Origin, env.Meta.V)
 
 	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
@@ -48,6 +43,16 @@ func Ctrl() {
 	for _, v := range config.Roots() {
 		installHanlder(v)
 	}
+}
+
+var installTempls = func() {
+	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
+		`cdn`:     TransformCDN,
+		`bgImg`:   render.BgImg,
+		`tags`:    render.Tags,
+		`format`:  render.Format,
+		`daysAgo`: render.DaysAgo,
+	}).ParseGlob(`templ/*`))
 }
 
 var installHanlder = func(p string) {
