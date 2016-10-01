@@ -84,7 +84,7 @@ var revalidate = func(a, m, d []string) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	if r.RequestURI != "/" {
+	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
@@ -104,12 +104,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func entry(w http.ResponseWriter, r *http.Request) {
-	if !strings.HasSuffix(r.RequestURI, "/") {
+	if !strings.HasSuffix(r.URL.Path, "/") {
 		serveFile(w, r)
 		return
 	}
 
-	v, err := sakura.Get(r.RequestURI)
+	v, err := sakura.Get(r.URL.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -124,9 +124,9 @@ func entry(w http.ResponseWriter, r *http.Request) {
 }
 
 func ls(w http.ResponseWriter, r *http.Request) {
-	key := r.RequestURI[len("/ls"):]
+	key := r.URL.Path[len("/ls"):]
 	if len(key) <= 1 { // `/` is not allowed
-		http.Error(w, fmt.Sprintf("RequestURI %q, last segment not found", r.RequestURI), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Path %q, last segment not found", r.URL.Path), http.StatusBadRequest)
 		return
 	}
 	v, err := sakura.Ls(key, pageSize)
