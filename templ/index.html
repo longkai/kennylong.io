@@ -27,9 +27,7 @@
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
-        <div class="mdl-card__media mdl-color-text--grey-50"
-             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background | cdn}}')
-             {{- else -}}{{$a.Background}}{{- end}};">
+        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{$a.Background}}">
           <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
@@ -124,7 +122,7 @@
   };
 
   Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media, .summary'), function (el) {
-    styleCover(el);
+    banner(el.getAttribute('banner'), el);
     go(el);
   });
 
@@ -190,15 +188,7 @@ function appendEssays(data) {
 
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
-    if (!a.background) {
-      a.background = CDN_URL + '/assets/images/default.jpg'
-    }
-    if (bgImg(a.background)) {
-      cardMedia.style.background = 'url("' + a.background + '")';
-      styleCover(cardMedia);
-    } else {
-      cardMedia.style.backgroundColor = a.background;
-    }
+    banner(a.background, cardMedia);
 
     var link = a.id;
 
@@ -270,10 +260,6 @@ function appendEssays(data) {
     key = e.getElementsByTagName('a')[0].href.replace(/^.*\/\/[^\/]+/, '');
     //console.log(key);
     return key;
-  }
-
-  function bgImg(s) {
-    return s ? s[0] != '#' : false;
   }
 
   function go(el) {

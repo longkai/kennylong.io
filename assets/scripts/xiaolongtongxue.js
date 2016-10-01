@@ -51,12 +51,24 @@ function openLink(el, url) {
   });
 }
 
-function styleCover(el) {
+function banner(s, el) {
   el.style.cursor = 'pointer';
-  var saved = el.style.background;
-  var bg = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), ' + saved;
-  //console.log('changed: ' + bg);
-  el.style.background = bg;
+
+  var cdn = CDN_URL ? CDN_URL : '';
+  if (!s) {
+     // s = a.background = cdn + '/assets/images/default.jpg'
+     return;
+  }
+  if (s.charAt(0) == '#') {
+    el.style.backgroundColor = s;
+    return;
+  }
+  var url = s;
+  if (!/^(?:[a-z]+:)?\/\//i.test(url)) {
+    url = cdn + '/' + url
+  }
+
+  el.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), url("{0}")'.format(url);
   el.style.backgroundSize = 'cover';
   el.style.backgroundRepeat = 'no-repeat';
   el.style.backgroundPosition = 'center center';

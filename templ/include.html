@@ -85,9 +85,9 @@
 {{- end}}
 
 {{define "script" -}}
+<script>const CDN_URL = {{$.Meta.CDN}};</script>
 <script src="{{"/assets/bower_components/material-design-lite/material.min.js" | cdn}}"></script>
 <script src="{{"/assets/scripts/xiaolongtongxue.js" | cdn}}"></script>
-<script>const CDN_URL = {{$.Meta.CDN}};</script>
 {{- end}}
 
 {{define "GA" -}}

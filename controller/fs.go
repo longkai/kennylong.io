@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -62,12 +61,4 @@ func revAsset(name string) string {
 		return fmt.Sprintf("%s-%s%s", name[:i], v, name[i:])
 	}
 	return name
-}
-
-// TransformCDN to cdn href
-func TransformCDN(href string) template.URL {
-	if cdn == "" {
-		return template.URL(href)
-	}
-	return template.URL(cdn + revAsset(href))
 }

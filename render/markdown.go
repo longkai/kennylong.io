@@ -107,6 +107,9 @@ var (
 	reHTMLLink = regexp.MustCompile(`(?i)<(a|img)[\s\S]+?(href|src)=['"](\S*\.\S+)['"][\s\S]*?>`)
 )
 
+// IsAbsURL test url is absolute or not.
+func IsAbsURL(url string) bool { return reAbsURL.MatchString(url) }
+
 type indexer func(indices []int) (offset, length int)
 
 func linkify(in io.Reader, prefix []byte, re *regexp.Regexp, f indexer) ([]byte, error) {
