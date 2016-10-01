@@ -51,18 +51,11 @@ function openLink(el, url) {
   });
 }
 
-// http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
-function qualifyURL(url) {
-  var a = document.createElement('a');
-  a.href = url;
-  return a.cloneNode(false).href;
-}
-
 function styleCover(el) {
   el.style.cursor = 'pointer';
   var saved = el.style.background;
   var bg = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), ' + saved;
-  console.log('changed: ' + bg);
+  //console.log('changed: ' + bg);
   el.style.background = bg;
   el.style.backgroundSize = 'cover';
   el.style.backgroundRepeat = 'no-repeat';

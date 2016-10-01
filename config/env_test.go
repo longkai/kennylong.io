@@ -9,14 +9,14 @@ func TestInit(t *testing.T) {
 		regexps = saved2
 	}()
 
-	src := "./testdata/env.yaml"
+	src := "./testdata/env.yml"
 
-	if err := Init(src, ``); err != nil {
-		t.Errorf("Init(%q, ``) = %v\n", src, err)
+	if err := Init(src); err != nil {
+		t.Errorf("Init(%q) = %v\n", src, err)
 	}
 
 	if Env == nil {
-		t.Errorf("Init(%q, ``), Env = nil\n", src)
+		t.Errorf("Init(%q), Env = nil\n", src)
 	}
 
 	// testify defauly ignore behavious

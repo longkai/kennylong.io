@@ -75,9 +75,11 @@ func ParseMD(path, origin string) (*Meta, error) {
 		return nil, err
 	}
 	m.ID = parseID(path)
-	origin += m.ID
-	if m.Body, err = linkify(bytes.NewReader(m.Body.([]byte)), []byte(origin)); err != nil {
-		return nil, err
+	if origin != "" {
+		origin += m.ID
+		if m.Body, err = linkifyMD(bytes.NewReader(m.Body.([]byte)), []byte(origin)); err != nil {
+			return nil, err
+		}
 	}
 	// don't forget to linkify meta's url
 	if len(m.Background) != 0 && m.Background[0] != '#' && !reAbsURL.MatchString(m.Background) {
@@ -100,29 +102,57 @@ func unmarshal(in io.Reader, m *Meta) error {
 }
 
 var (
-	reAbsURL = regexp.MustCompile(`(?i)((^https?:\/\/)|(^[\/]{1,2}))[^\/]?\S*`)
-	reMDLink = regexp.MustCompile(`\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)`)
+	reAbsURL   = regexp.MustCompile(`(?i)((^https?:\/\/)|(^[\/]{1,2}))[^\/]?\S*`)
+	reMDLink   = regexp.MustCompile(`\[([^\]]*)\]\(([^)"]+)(?: \"([^\"]+)\")?\)`)
+	reHTMLLink = regexp.MustCompile(`(?i)<(a|img)[\s\S]+?(href|src)=['"](\S*\.\S+)['"][\s\S]*?>`)
 )
 
-// linkify makes all the relative links to absolute for easiliy handling
-var linkify = func(in io.Reader, prefix []byte) ([]byte, error) {
+type indexer func(indices []int) (offset, length int)
+
+func linkify(in io.Reader, prefix []byte, re *regexp.Regexp, f indexer) ([]byte, error) {
 	b, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}
-	ins := reMDLink.FindAllSubmatchIndex(b, -1)
+
+	// normalize the prefix
+	if prefix[len(prefix)-1] != '/' {
+		prefix = append(prefix, '/')
+	}
+
+	indices := re.FindAllSubmatchIndex(b, -1)
 	var i int
-	return reMDLink.ReplaceAllFunc(b, func(old []byte) []byte {
+	return re.ReplaceAllFunc(b, func(old []byte) []byte {
 		defer func() { i++ }()
-		length := ins[i][2*2+1] - ins[i][2*2]     // url len
-		offset := ins[i][2*1+1] - ins[i][2*1] + 3 // 3 = [](
+		offset, length := f(indices[i])
 		if !reAbsURL.Match(old[offset : offset+length]) {
 			// alloc new memory
-			buf := make([]byte, 0, len(old)+len(prefix))
-			buf = append(buf, old[:offset]...)
-			buf = append(buf, prefix...)
-			return append(buf, old[offset:]...)
+			buf := make([]byte, len(old)+len(prefix))
+			copy(buf, old[:offset])
+			copy(buf[offset:], prefix)
+			copy(buf[offset+len(prefix):], old[offset:])
+			return buf
 		}
 		return old
 	}), nil
+}
+
+// linkify makes all the relative links in markdown to absolute for easy handling
+var linkifyMD = func(in io.Reader, prefix []byte) ([]byte, error) {
+	f := func(indices []int) (offset, length int) {
+		offset = indices[2*2] - indices[0]     // group 2 is the link
+		length = indices[2*2+1] - indices[2*2] // link len
+		return
+	}
+	return linkify(in, prefix, reMDLink, f)
+}
+
+// linkify makes all the relative resources links(must ends with .xxx) in HTML to absolute for easy handling
+var linkifyHTML = func(in io.Reader, prefix []byte) ([]byte, error) {
+	f := func(indices []int) (offset, length int) {
+		offset = indices[2*3] - indices[0]     // group 3 is the link
+		length = indices[2*3+1] - indices[2*3] // link len
+		return
+	}
+	return linkify(in, prefix, reHTMLLink, f)
 }

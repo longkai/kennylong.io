@@ -1,44 +1,40 @@
 {{define "header" -}}
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="description" content="{{$.Meta.Bio}}">
-<meta name="editor" content="vim">
+<meta name="editor" content="vim8">
 <meta name="docker" content="true">
-<meta name="backend" content="go1.7">
-<meta name="version" content="{{$.Meta.V | printf "%x"}}">
+<meta name="backend" content="go1.7.1">
+<meta name="branch" content="{{$.Meta.B}}">
+<meta name="version" content="{{$.Meta.V}}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-
-{{if $.Meta.CDN -}}
-<base href="{{$.Meta.CDN}}">
-{{- end}}
 
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" sizes="192x192" href="/assets/images/android-desktop.png?v={{$.Meta.V}}">
+<link rel="icon" sizes="192x192" href="{{"/assets/images/android-desktop.png" | cdn}}">
 
 <!-- Add to homescreen for Safari on iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="{{$.Meta.Title}}">
-<link rel="apple-touch-icon-precomposed" href="/assets/images/ios-desktop.png?v={{$.Meta.V}}">
+<link rel="apple-touch-icon-precomposed" href="{{"/assets/images/ios-desktop.png" | cdn}}">
 
 <!-- Tile icon for Win8 (144x144 + tile color) -->
-<meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png?v={{$.Meta.V}}">
-<meta name="msapplication-TileColor" content="#DA532C">
+<meta name="msapplication-TileImage" content="{{"/assets/images/ms-touch-icon-144x144-precomposed.png" | cdn}}">
+<meta name="msapplication-TileColor" content="#da532c">
 
-<link rel="shortcut icon" href="/assets/images/favicon.png?v={{$.Meta.V}}">
+<link rel="shortcut icon" href="{{"/assets/images/favicon.png" | cdn}}">
 
 {{if $.Meta.GF -}}
-<!-- go to https://github.com/longkai/gfdl to find some useful stuff if google is blocked -->
+<!-- go to `cmd/gfdl` to find some useful stuff if google is blocked -->
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh">
 <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 {{- else -}}
 <!-- download fonts locally or with CDN -->
-<link rel="stylesheet" href="/assets/fonts/fonts.css?v={{$.Meta.V}}">
-<link rel="stylesheet" href="/assets/fonts/icons.css?v={{$.Meta.V}}">
+<link rel="stylesheet" href="{{"/assets/fonts/fonts.css" | cdn}}">
+<link rel="stylesheet" href="{{"/assets/fonts/icons.css" | cdn}}">
 {{- end}}
-<link rel="stylesheet" href="/assets/bower_components/material-design-lite/material.min.css?v={{$.Meta.V}}">
-<link rel="stylesheet" href="/assets/layouts/styles.css?v={{$.Meta.V}}">
+<link rel="stylesheet" href="{{"/assets/bower_components/material-design-lite/material.min.css" | cdn}}">
+<link rel="stylesheet" href="{{"/assets/layouts/styles.css" | cdn}}">
 {{- end}}
 
 {{define "footer" -}}
@@ -89,32 +85,21 @@
 {{- end}}
 
 {{define "script" -}}
-<script src="/assets/bower_components/material-design-lite/material.min.js?v={{$.Meta.V}}"></script>
-<script src="/assets/scripts/xiaolongtongxue.js?v={{$.Meta.V}}"></script>
-<script>
-// avoid CDN links
-function escapeCDN(url) {
-  var cdn = {{$.Meta.CDN}};
-  if (cdn) {
-    return qualifyURL(url).replace(/^.*\/\/[^\/]+/, '//' + window.location.host);
-  }
-  return url;
-}
-</script>
-{{if $.Meta.GA -}}
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+<script src="{{"/assets/bower_components/material-design-lite/material.min.js" | cdn}}"></script>
+<script src="{{"/assets/scripts/xiaolongtongxue.js" | cdn}}"></script>
+<script>const CDN_URL = {{$.Meta.CDN}};</script>
+{{- end}}
 
-  ga('create', {{$.Meta.GA}}, 'auto');
-  ga('send', 'pageview');
-</script>
+{{define "GA" -}}
+{{if $ -}}
 <script>
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', {{$.Meta.GA}}]);
-  _gaq.push(['_trackPageview']);
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', '{{$}}', 'auto');
+ga('send', 'pageview');
 </script>
 {{- end}}
 {{- end}}

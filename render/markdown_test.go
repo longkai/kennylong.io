@@ -64,7 +64,7 @@ func TestAbsURLRegexp(t *testing.T) {
 	}
 }
 
-func TestLinkify(t *testing.T) {
+func TestLinkifyMD(t *testing.T) {
 	prefix := `/prefix/`
 	var str = `
 [link1](path/to/link)
@@ -78,11 +78,40 @@ func TestLinkify(t *testing.T) {
 [你好](/)
 `
 
-	got, err := linkify(strings.NewReader(str), []byte(prefix))
+	got, err := linkifyMD(strings.NewReader(str), []byte(prefix))
 	if err != nil {
-		t.Errorf("linkify(%s) fail: %v", str, err)
+		t.Errorf("linkifyMD(%s) fail: %v", str, err)
 	}
 	if string(got) != want {
-		t.Errorf("linkify(%s) = %s, want %s", str, got, want)
+		t.Errorf("linkifyMD(%s) = %s, want %s", str, got, want)
+	}
+}
+
+func TestLinkifyHTML(t *testing.T) {
+	prefix := `/prefix/`
+	var str = `
+<p><a title="balabala" href="final-work.jpg" target="_blank"><img src="final-work.jpg" alt="final-work" style="max-width:100%;"></a></p>
+
+<p><a href="a/b.c/final-work.xxx?v=123" target="_blank"><img src="final-work.jpg" alt="final-work" style="max-width:100%;"></a></p>
+
+<a href="final-work.d?v=1&ts=123" target="_blank" />
+<a href="https://g.com/final-work.d?v=1&ts=123" target="_blank" />
+<img src='final-work.jpg' alt="final-work" style="max-width:100%;" />`
+
+	var want = `
+<p><a title="balabala" href="/prefix/final-work.jpg" target="_blank"><img src="/prefix/final-work.jpg" alt="final-work" style="max-width:100%;"></a></p>
+
+<p><a href="/prefix/a/b.c/final-work.xxx?v=123" target="_blank"><img src="/prefix/final-work.jpg" alt="final-work" style="max-width:100%;"></a></p>
+
+<a href="/prefix/final-work.d?v=1&ts=123" target="_blank" />
+<a href="https://g.com/final-work.d?v=1&ts=123" target="_blank" />
+<img src='/prefix/final-work.jpg' alt="final-work" style="max-width:100%;" />`
+
+	got, err := linkifyHTML(strings.NewReader(str), []byte(prefix))
+	if err != nil {
+		t.Errorf("linkifyHTML(%s) fail: %v", str, err)
+	}
+	if string(got) != want {
+		t.Errorf("linkifyHTML(%s) = %s, want %s", str, got, want)
 	}
 }

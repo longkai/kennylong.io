@@ -2,8 +2,6 @@ xiaolongtongxue.com
 ===
 [![Build Status](https://travis-ci.org/longkai/xiaolongtongxue.com.svg?branch=master)](https://travis-ci.org/longkai/xiaolongtongxue.com)
 [![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg?maxAge=2592000)](https://hub.docker.com/r/longkai/xiaolongtongxue.com/)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![License CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by/4.0/)
 
 Source of https://xiaolongtongxue.com
 
@@ -35,24 +33,24 @@ Note the format is(at least one `#`),
 
 ```yaml
 --- sample, only `date` is required
-title: # only required if not specify in markdown
+title: # only required if unspecified in markdown
 date: 2016-01-07T02:50:41+08:00 # required, must be this format(i.e., RFC3339)
 hide: false # if true this article won't appear in the list
-summary: summary for this article
-weather: hey, what's the weather like?
+summary: # summary for this article
+weather: # hey, what's the weather like?
 license: # "all-rights-reserved", "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain". The default is "all-rights-reserved".
-location: somewhere 
-background: banner image for this article
+location:  # where you wrote this?
+background: # banner image for this article, or RGBA hex color value(i.e. starting with '#')
 tags:
   - tag1
   - tag2
   - ...
 ```
 
-Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, checkout the [source](cmd/newmd) or download [here][dl].
+Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, go [get it](cmd/newmd)!
 
 ## Run with Docker
-Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yaml:/env.yaml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
+Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
 
 Or, if you prefer `docker-compose`, modify for your needs,
 
@@ -62,7 +60,7 @@ sakura:
   ports:
     - "1217:1217"
   volumes:
-    - /path/to/env.yaml:/env.yaml:ro
+    - /path/to/env.yml:/env.yml:ro
     - /path/to/repo:/repo
 ```
 
@@ -77,11 +75,11 @@ then run `docker-compose up -d`
 1. `go get github.com/longkai/xiaolongtongxue.com && rm $GOPATH/bin/xiaolongtongxue.com`
 2. `cd $GOPATH/src/github.com/longkai/xiaolongtongxue.com`
 3. `./build.sh`
-4. `./xiaolongtongxue.com [/path/to/env.yaml]`
+4. `./xiaolongtongxue.com [/path/to/env.yml]`
 
 ## Configuration
 ```yaml
---- env.yaml
+--- env.yml
 port: 1217
 repo: /repo
 hook_secret: Github WebHook secret
@@ -90,11 +88,10 @@ access_token: Github Personal access token
 meta:
   ga: GA tracker ID
   gf: false # Use Google Fonts, check `templ/include.html`
-  #cdn: CDN origin # currently only tested qiniu
-  origin: https://your-domain.com # (i.e. `window.location.origin` in JS) required only if using CDN or medium posting service
+  #cdn: CDN URL prefix # currently only tested qiniu
+  #origin: https://your-domain.com # (i.e. `window.location.origin` in JS) required only if enable medium posting service
   bio: something about you
   link: other link about you
-  lang: zh
   name: your name
   title: page title
   mail: you@somewhere
@@ -110,16 +107,16 @@ ignores:  # NOTE: the path is **HTTP RequestURI** format
 
 Remember in the `assets/images/` there are some placeholder images, you would like to replace with yours.
 
-Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yaml` and the docker mount pointer MUST be same.
+Note if you use docker image with which container has a mounted repo, the `repo` in the `env.yml` and the docker mount pointer MUST be same.
 
 ## Github Hook&Markdown Support
 1. obtain your github *personal access token* from your settings
 2. goto your markdown repo settings, in *Webhooks & services* Tab add a webhook with **Payload URL** `your-domain.com/api/github/api`, then set the **Secret**, note the *push* event is required. 
 
-Don't forget to set this information in `eny.yaml`!
+Don't forget to set this information in `eny.yml`!
 
 ## CDN Support
-I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yaml`.
+I only tested *qiniu CDN* which can fetch then cache your site stuff for a given url. You must set your site url with prefix `/cdn/` to qiniu, then specify the CDN domain in `env.yml`.
 
 ## Medium Support
 The [official Medium API][medium] only allows posting new stuff to their side(e.g., editing or deleting are not supported). Note the limitation before you plugin it.

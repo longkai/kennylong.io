@@ -20,24 +20,18 @@ const (
 )
 
 var (
-	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
-		`escapeCDN`: EscapeCDN,
-		`bgImg`:     render.BgImg,
-		`tags`:      render.Tags,
-		`format`:    render.Format,
-		`daysAgo`:   render.DaysAgo,
-	}).ParseGlob(`templ/*`))
-
 	env    *config.Configuration
 	sakura render.Engine
+	templs *template.Template
 )
 
 // Ctrl main controller.
 func Ctrl() {
 	env = config.Env
-	sakura = render.NewSakura()
+	sakura = render.NewSakura(env.Meta.CDN)
 	sakura.Post(env.Repo)
-	initFS(env.Meta.CDN, env.Meta.Origin)
+	installTempls()
+	initFS(env.Meta.CDN, env.Meta.Origin, env.Meta.V)
 
 	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
 	if env.MediumToken != "" {
@@ -49,6 +43,16 @@ func Ctrl() {
 	for _, v := range config.Roots() {
 		installHanlder(v)
 	}
+}
+
+var installTempls = func() {
+	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
+		`cdn`:     TransformCDN,
+		`bgImg`:   render.BgImg,
+		`tags`:    render.Tags,
+		`format`:  render.Format,
+		`daysAgo`: render.DaysAgo,
+	}).ParseGlob(`templ/*`))
 }
 
 var installHanlder = func(p string) {
@@ -80,7 +84,7 @@ var revalidate = func(a, m, d []string) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	if r.RequestURI != "/" {
+	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
@@ -100,12 +104,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func entry(w http.ResponseWriter, r *http.Request) {
-	if !strings.HasSuffix(r.RequestURI, "/") {
+	if !strings.HasSuffix(r.URL.Path, "/") {
 		serveFile(w, r)
 		return
 	}
 
-	v, err := sakura.Get(r.RequestURI)
+	v, err := sakura.Get(r.URL.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -120,9 +124,9 @@ func entry(w http.ResponseWriter, r *http.Request) {
 }
 
 func ls(w http.ResponseWriter, r *http.Request) {
-	key := r.RequestURI[len("/ls"):]
+	key := r.URL.Path[len("/ls"):]
 	if len(key) <= 1 { // `/` is not allowed
-		http.Error(w, fmt.Sprintf("RequestURI %q, last segment not found", r.RequestURI), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Path %q, last segment not found", r.URL.Path), http.StatusBadRequest)
 		return
 	}
 	v, err := sakura.Ls(key, pageSize)

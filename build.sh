@@ -1,7 +1,8 @@
 #!/bin/sh
 
+# TODO: since we've imposed docker build automate, this should be deleted.
 if [ "$1" = "docker" ]; then
-  cmd="docker build $2 $3 -t longkai/xiaolongtongxue.com:latest ."
+  cmd="docker build $2 $3 -t longkai/xiaolongtongxue.com:`git rev-parse --abbrev-ref HEAD` ."
   eval $cmd
   exit $?
 fi
@@ -13,11 +14,12 @@ fi
 
 # test existence of Google Fonts 
 if [ ! -d "assets/fonts" ]; then
-  echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' for more infomation."
+  echo "Google fonts have not yet been downloaded locally. Checkout 'templ/include.html' or 'cmd/gfdl' for more information."
 fi
 
-rev=`git rev-parse --short HEAD`
-
-cmd="go build -ldflags \"-X main.rev=$rev\""
+cmd="go build -ldflags \"\
+  -X github.com/longkai/xiaolongtongxue.com/config.v=`git rev-parse --short HEAD` \
+  -X github.com/longkai/xiaolongtongxue.com/config.b=`git rev-parse --abbrev-ref HEAD` \
+  \""
 
 echo "$cmd" && eval $cmd

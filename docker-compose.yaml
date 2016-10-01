@@ -1,7 +1,0 @@
-sakura:
-  image: longkai/xiaolongtongxue.com
-  ports:
-    - "1217:1217"
-  volumes:
-    - ~/env.yaml:/env.yaml:ro
-    #- /path/to/repo:/repo

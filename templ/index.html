@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
   Material Design Lite
   Copyright 2015 Google Inc. All rights reserved.
@@ -15,24 +15,25 @@
   See the License for the specific language governing permissions and
   limitations under the License
 -->
-<html lang="{{$.Meta.Lang}}">
-<head>
-  {{template "header" $}}
-  <title>{{$.Meta.Title}}</title>
-</head>
-<body>
+{{template "header" $}}
+<meta name="description" content="{{$.Meta.Bio}}">
+<style>
+#more { margin: auto; }
+.summary { text-align: justify; }
+</style>
+<title>{{$.Meta.Title}}</title>
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
         <div class="mdl-card__media mdl-color-text--grey-50"
-             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background}}')
+             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background | cdn}}')
              {{- else -}}{{$a.Background}}{{- end}};">
-          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID | escapeCDN}}">{{$a.Title}}</a></h3>
+          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID | escapeCDN}}'>
+        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID}}'>
           {{$a.Summary}}
         </div>
         {{- end}}
@@ -40,7 +41,7 @@
           <div class="minilogo"></div>
           <div>
             <strong>{{$.Meta.Name}}</strong>
-            <span>{{$a.Date | daysAgo}} 天前 {{if $a.Tags -}} 在 {{$a.Tags | tags}}{{- end}}
+            <span>{{$a.Date | daysAgo}} days ago {{if $a.Tags -}} in {{$a.Tags | tags}}{{- end}}
             </span>
           </div>
         </div>
@@ -52,7 +53,7 @@
           <span class="visuallyhidden">add</span>
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
-          <img src="/assets/images/qrcode.jpg?v={{$.Meta.V}}" />
+          <img src="/assets/images/qrcode.jpg" />
           {{$.Meta.Bio}}
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
@@ -86,7 +87,7 @@
 </div>
 
 {{template "script" $}}
-<script type="application/javascript">
+<script>
   var path = window.location.pathname;
   var layout = document.getElementsByClassName('mdl-layout__content')[0];
   var grid = document.getElementById('grid');
@@ -112,7 +113,7 @@
   };
 
   window.onunload = function() {
-    var pos = grid.getBoundingClientRect().top - 230;
+    var pos = grid.getBoundingClientRect().top - 230; // 230 is the paddingTop css attr in style.css
     //console.log('saving pos for ' + path + ' ' + pos);
     sessionStorage[path] = pos;
 
@@ -139,13 +140,6 @@
   });
 
   var _link = {{$.Meta.Link}};
-  if (_link.startsWith('https://') || _link.startsWith('http://')) {
-    // nothing...
-  } else if (_link.startsWith('/')) {
-    _link = escapeCDN(_link);
-  } else {
-    _link = qualifyURL(_link);
-  }
   openLink(document.getElementById('about'), _link);
   openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
 
@@ -164,7 +158,7 @@
           //console.log(data);
           hasMore = data.length != 0;
           if (data.length == 0) {
-            toast.MaterialSnackbar.showSnackbar({message: '没有更多啦'});
+            toast.MaterialSnackbar.showSnackbar({message: 'no more 😰'});
           }
 
           // do append
@@ -179,10 +173,10 @@
           progress.style.display = 'none';
         },
         function (code, text) {
-          //console.log(code);
+          console.log('load more error: code {0}, text {1}'.format(code, text ? text : 'nop'));
           more.style.display = 'block';
           progress.style.display = 'none';
-          toast.MaterialSnackbar.showSnackbar({message: '出错了：{0} - {1}'.format(code, text)});
+          toast.MaterialSnackbar.showSnackbar({message: 'Something wrong 😳'});
         }
     );
   });
@@ -197,7 +191,7 @@ function appendEssays(data) {
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
     if (!a.background) {
-      a.background = '/assets/images/default.jpg?v=${$.Meta.V}'
+      a.background = CDN_URL + '/assets/images/default.jpg'
     }
     if (bgImg(a.background)) {
       cardMedia.style.background = 'url("' + a.background + '")';
@@ -206,7 +200,7 @@ function appendEssays(data) {
       cardMedia.style.backgroundColor = a.background;
     }
 
-    var link = escapeCDN(a.id); // resolve link if cdn is enabled
+    var link = a.id;
 
     var h3 = document.createElement('h3');
     if (!a.summary) {
@@ -232,11 +226,11 @@ function appendEssays(data) {
     var author = document.createElement('strong');
     author.textContent = '{{$.Meta.Name}}';
     var date = document.createElement('span');
-    date.textContent = daysAgo(a.date) + ' 天前';
+    date.textContent = daysAgo(a.date) + ' days ago';
 
     // tags
     if (a.tags) {
-      date.textContent += ' 在 ';
+      date.textContent += ' in ';
       for (var j = 0; j < a.tags.length; j++) {
         date.textContent += '#' + a.tags[j];
         if (j != a.tags.length - 1) {
@@ -296,5 +290,4 @@ function appendEssays(data) {
     openLink(el, target);
   }
 </script>
-</body>
-</html>
+{{template "GA" $.Meta.GA}}

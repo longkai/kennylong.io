@@ -1,12 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/longkai/xiaolongtongxue.com/helper"
 
@@ -24,14 +23,14 @@ type Configuration struct {
 	AccessToken string   `yaml:"access_token"`
 	MediumToken string   `yaml:"medium_token"`
 	Meta        struct {
-		V             int64
+		V             string
+		B             string
 		GA            string `json:"ga"`
 		GF            bool   `json:"gf"`
 		CDN           string `json:"cdn"`
 		Origin        string `json:"origin"`
 		Bio           string `json:"bio"`
 		Link          string `json:"link"`
-		Lang          string `json:"lang"`
 		Name          string `json:"name"`
 		Title         string `json:"title"`
 		Mail          string `json:"mail"`
@@ -46,6 +45,8 @@ type Configuration struct {
 var (
 	// Env global environment
 	Env *Configuration
+
+	v, b string // compile time metas
 
 	regexps []*regexp.Regexp
 	mu      sync.Mutex // guards roots
@@ -77,7 +78,8 @@ var adjustEnv = func() {
 }
 
 // Init configuration, must call it only once.
-func Init(src, rev string) error {
+func Init(src string) error {
+	fmt.Printf("Happy hacking :) Build ID: %s, Branch: %s\n", v, b)
 	bytes, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -86,12 +88,7 @@ func Init(src, rev string) error {
 	if err = yaml.Unmarshal(bytes, Env); err != nil {
 		return err
 	}
-	// TODO: the doc says `importpath.name=value` can set to anywhere, but I tested not work...
-	if i, err := strconv.ParseInt(rev, 16, 0); err == nil {
-		Env.Meta.V = i // some CDNs(i.e. qiniu) only recognize ints, which is silly
-	} else {
-		Env.Meta.V = time.Now().Unix() // puts the timestamp as a fallback
-	}
+	Env.Meta.V, Env.Meta.B = v, b
 	roots = make(map[string]struct{})
 	adjustEnv()
 	return nil
