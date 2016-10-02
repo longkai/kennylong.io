@@ -141,15 +141,19 @@ end */
   display: flex;
   flex-direction: column;
 }
+/* del: slow swap since the js post append the .is-small-screen
 .demo-blog.is-small-screen .demo-blog__posts > .mdl-card.coffee-pic {
   order: 0;
 }
 .demo-blog.is-small-screen .demo-blog__posts > .mdl-card.something-else {
   order: -1;
 }
+end */
+/* del: each entry has its own
 .demo-blog .coffee-pic .mdl-card__media {
   background-image: url('/assets/images/default.jpg');
 }
+end */
 .demo-blog .something-else .mdl-card__media {
   display: flex;
   flex-direction: column;
@@ -180,14 +184,14 @@ end */
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
 }
-/* mod: with our default img */
+/* del: each entry has its own
 .demo-blog .on-the-road-again .mdl-card__media {
   background-image: url('/assets/images/default.jpg');
 }
 .demo-blog .shopping .mdl-card__media {
   background-image: url('/assets/images/default.jpg');
 }
-/* end */
+end */
 .demo-blog .demo-blog__posts > .demo-nav {
   margin: 12px 15px;
   display: flex;

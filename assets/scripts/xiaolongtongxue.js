@@ -54,7 +54,7 @@ function openLink(el, url) {
 function banner(s, el) {
   el.style.cursor = 'pointer';
 
-  var cdn = CDN_URL ? CDN_URL : '';
+  var cdn = CDN_URL ? CDN_URL : ''; // cdn may enabled...
   if (!s) {
      // s = a.background = cdn + '/assets/images/default.jpg'
      return;
@@ -64,8 +64,9 @@ function banner(s, el) {
     return;
   }
   var url = s;
+  // if it's not an abs url
   if (!/^(?:[a-z]+:)?\/\//i.test(url)) {
-    url = cdn + '/' + url
+    url = cdn + url
   }
 
   el.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), url("{0}")'.format(url);

@@ -86,6 +86,16 @@
 
 {{template "script" $}}
 <script>
+function handleScreenSize() {
+  // swap first two cell if it's phone or tablet
+  var isPhoneOrTablet = window.matchMedia("only screen and (max-width: 768px)").matches;
+  var bio = document.getElementsByClassName('something-else')[0];
+  var firstCell = document.getElementsByClassName('coffee-pic')[0];
+  bio.style.order = isPhoneOrTablet ? -1 : 0;
+  firstCell.style.order = isPhoneOrTablet ? 0 : -1;
+}
+handleScreenSize(); window.onresize = function(event) { handleScreenSize(); };
+
   var path = window.location.pathname;
   var layout = document.getElementsByClassName('mdl-layout__content')[0];
   var grid = document.getElementById('grid');
