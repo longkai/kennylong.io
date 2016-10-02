@@ -70,6 +70,9 @@ body .demo-blog {
   flex-grow: 1;
 }
 .demo-blog .mdl-card__media {
+/* add: no init color background from mdl */
+  background-color: transparent;
+/* end */
   box-sizing: border-box;
   background-size: cover;
   padding: 24px;
@@ -243,7 +246,9 @@ end */
   background-color: transparent;
 }
 .demo-blog--blogpost .demo-blog__posts > .mdl-card .mdl-card__media {
+/* mod: has its own
   background-image: url('images/road_big.jpg');
+end */
   height: 280px;
 }
 .demo-blog--blogpost .comments {
