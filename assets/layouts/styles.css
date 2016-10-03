@@ -12,7 +12,7 @@ body::before {
 }
 /* add: hide social icon for small screens */
 @media (max-width: 415px) {
-  .social-btn__stackoverflow, .social-btn__github {
+  .social-btn__stackoverflow {
     display: none;
   }
 }

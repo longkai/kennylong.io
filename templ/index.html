@@ -143,10 +143,6 @@ handleScreenSize(); window.onresize = function(event) { handleScreenSize(); };
   var progress = document.getElementById('progress');
   var toast = document.getElementById('toast');
 
-  document.getElementById('share').addEventListener('click', function () {
-    toast.MaterialSnackbar.showSnackbar({message: 'not yet impl :)'});
-  });
-
   var _link = {{$.Meta.Link}};
   openLink(document.getElementById('about'), _link);
   openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
