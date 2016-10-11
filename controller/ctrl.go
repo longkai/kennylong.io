@@ -47,11 +47,10 @@ func Ctrl() {
 
 var installTempls = func() {
 	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
+		`tags`:    Tags,
+		`format`:  Format,
+		`daysAgo`: DaysAgo,
 		`cdn`:     TransformCDN,
-		`bgImg`:   render.BgImg,
-		`tags`:    render.Tags,
-		`format`:  render.Format,
-		`daysAgo`: render.DaysAgo,
 	}).ParseGlob(`templ/*`))
 }
 

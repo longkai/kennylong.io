@@ -27,9 +27,7 @@
     <div id="grid" class="demo-blog__posts mdl-grid">
       {{range $i, $a := $.List -}}
       <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
-        <div class="mdl-card__media mdl-color-text--grey-50"
-             style="background: {{if $a.Background | bgImg -}}url('{{$a.Background | cdn}}')
-             {{- else -}}{{$a.Background}}{{- end}};">
+        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{$a.Background}}">
           <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
         </div>
         {{if $a.Summary -}}
@@ -88,6 +86,16 @@
 
 {{template "script" $}}
 <script>
+function handleScreenSize() {
+  // swap first two cell if it's phone or tablet
+  var isPhoneOrTablet = window.matchMedia("only screen and (max-width: 768px)").matches;
+  var bio = document.getElementsByClassName('something-else')[0];
+  var firstCell = document.getElementsByClassName('coffee-pic')[0];
+  bio.style.order = isPhoneOrTablet ? -1 : 0;
+  firstCell.style.order = isPhoneOrTablet ? 0 : -1;
+}
+handleScreenSize(); window.onresize = function(event) { handleScreenSize(); };
+
   var path = window.location.pathname;
   var layout = document.getElementsByClassName('mdl-layout__content')[0];
   var grid = document.getElementById('grid');
@@ -124,7 +132,7 @@
   };
 
   Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media, .summary'), function (el) {
-    styleCover(el);
+    banner(el.getAttribute('banner'), el);
     go(el);
   });
 
@@ -134,10 +142,6 @@
   var more = document.getElementById('more');
   var progress = document.getElementById('progress');
   var toast = document.getElementById('toast');
-
-  document.getElementById('share').addEventListener('click', function () {
-    toast.MaterialSnackbar.showSnackbar({message: 'not yet impl :)'});
-  });
 
   var _link = {{$.Meta.Link}};
   openLink(document.getElementById('about'), _link);
@@ -190,15 +194,7 @@ function appendEssays(data) {
 
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
-    if (!a.background) {
-      a.background = CDN_URL + '/assets/images/default.jpg'
-    }
-    if (bgImg(a.background)) {
-      cardMedia.style.background = 'url("' + a.background + '")';
-      styleCover(cardMedia);
-    } else {
-      cardMedia.style.backgroundColor = a.background;
-    }
+    banner(a.background, cardMedia);
 
     var link = a.id;
 
@@ -270,10 +266,6 @@ function appendEssays(data) {
     key = e.getElementsByTagName('a')[0].href.replace(/^.*\/\/[^\/]+/, '');
     //console.log(key);
     return key;
-  }
-
-  function bgImg(s) {
-    return s ? s[0] != '#' : false;
   }
 
   function go(el) {

@@ -96,6 +96,7 @@ func TestLinkifyHTML(t *testing.T) {
 
 <a href="final-work.d?v=1&ts=123" target="_blank" />
 <a href="https://g.com/final-work.d?v=1&ts=123" target="_blank" />
+<a href="//g.com/final-work.d?v=1&ts=123" target="_blank" />
 <img src='final-work.jpg' alt="final-work" style="max-width:100%;" />`
 
 	var want = `
@@ -105,6 +106,7 @@ func TestLinkifyHTML(t *testing.T) {
 
 <a href="/prefix/final-work.d?v=1&ts=123" target="_blank" />
 <a href="https://g.com/final-work.d?v=1&ts=123" target="_blank" />
+<a href="//g.com/final-work.d?v=1&ts=123" target="_blank" />
 <img src='/prefix/final-work.jpg' alt="final-work" style="max-width:100%;" />`
 
 	got, err := linkifyHTML(strings.NewReader(str), []byte(prefix))

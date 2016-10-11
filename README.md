@@ -50,9 +50,9 @@ tags:
 Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, go [get it](cmd/newmd)!
 
 ## Run with Docker
-Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes.
+Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes. A [bootstrapping shell script](misc/docker-run.sh) has been ready to go.
 
-Or, if you prefer `docker-compose`, modify for your needs,
+Or, if you prefer `docker-compose`, [modify](misc/docker-compose.yml) for your needs,
 
 ```yaml
 sakura:
@@ -95,7 +95,6 @@ meta:
   name: your name
   title: page title
   mail: you@somewhere
-  domain: domain.com # optional, for multiple sub-domain tracking
   github: your Github link if nay
   medium: medium repo if any
   twitter: twitter link if any

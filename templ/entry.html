@@ -42,8 +42,7 @@ article blockquote:before, article blockquote:after { content: none; }
     </div>
     <div class="demo-blog__posts mdl-grid">
       <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
-        <div class="mdl-card__media mdl-color-text--grey-50" style="background: {{if $.A.Background | bgImg -}}url('{{$.A.Background | cdn}}')
-             {{- else -}}{{$.A.Background}}{{- end}};">
+        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{$.A.Background}}">
           <h3>{{$.A.Title}}</h3>
         </div>
         <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
@@ -62,11 +61,11 @@ article blockquote:before, article blockquote:after { content: none; }
             <i class="material-icons" role="presentation">bookmark</i>
             <span class="visuallyhidden">bookmark</span>
           </div>
-          -->
           <div>
             <i class="material-icons" role="presentation">share</i>
             <span class="visuallyhidden">share</span>
           </div>
+          -->
         </div>
         <article class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
           <!-- content start -->
@@ -127,16 +126,22 @@ article blockquote:before, article blockquote:after { content: none; }
     var date = '{{$.A.Date | format}}';
     var _location = '{{$.A.Location}}';
     var weather = '{{$.A.Weather}}';
-    md_meta.textContent = daysAgo(date) + ' days ago';
+
+    var space = "&nbsp;";
+    var templ = '<i style="font-size: 1.2rem; vertical-align: text-bottom;" class="material-icons">{0}</i>';
+    var html = templ.format('access_time');
+    html += daysAgo(date) + ' days ago' + space;
     if (_location) {
-      md_meta.textContent += ', ' + _location;
+      html += templ.format('location_on') + _location + space;
     }
     if (weather) {
-      md_meta.textContent += ', ' + weather;
+      html += templ.format('mood') + weather;
     }
+    md_meta.innerHTML = html;
   }
 
-  styleCover(document.getElementsByClassName('mdl-card__media')[0]);
+  var el = document.getElementsByClassName('mdl-card__media')[0];
+  banner(el.getAttribute('banner'), el);
 
   document.getElementById('home').addEventListener('click', function () {
     window.open(window.location.protocol + '//' + window.location.host, "_self");
