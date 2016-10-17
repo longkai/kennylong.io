@@ -11,20 +11,19 @@ import (
 )
 
 var (
-	fs     http.Handler
-	v      string
-	cdn    string
-	origin string
+	v   string
+	cdn string
+	fs  http.Handler
 )
 
 // Init static file handler
-func initFS(_cdn, _origin, _v string) {
+func initFS(_cdn, _v string) {
+	cdn, v = _cdn, _v
 	src, dest := `assets`, filepath.Join(env.Repo, `assets`)
 	log.Printf("cpAssets(%q, %q)", src, dest)
 	go cpAssets(src, dest)
 	fs = http.FileServer(http.Dir(env.Repo))
 	http.Handle(`/assets/`, fs)
-	cdn, origin, v = _cdn, _origin, _v
 	if cdn != "" {
 		prefix := `/cdn/`
 		log.Printf("http.StripPrefix(%q) for CDN %s", prefix, cdn)
@@ -35,14 +34,13 @@ func initFS(_cdn, _origin, _v string) {
 func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
 
 func cpAssets(src, dest string) {
-	// ensure dir
 	for _, e := range helper.Dirents(src) {
-		_src, _dest := filepath.Join(src, e.Name()), filepath.Join(dest, revAsset(e.Name()))
+		src, dest = filepath.Join(src, e.Name()), filepath.Join(dest, revAsset(e.Name()))
 		if e.IsDir() {
-			go cpAssets(_src, _dest)
+			go cpAssets(src, dest)
 		} else {
 			go func() {
-				if err := helper.Cp(_src, _dest); err != nil {
+				if err := helper.Cp(src, dest); err != nil {
 					log.Print(err)
 				}
 			}()
