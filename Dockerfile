@@ -53,4 +53,4 @@ WORKDIR $GOPATH
 EXPOSE 1217
 VOLUME ["/repo", "/env.yml"]
 ENTRYPOINT ["./xiaolongtongxue.com"]
-CMD ["/env.yml"] # Let users override mounted configutation file path
+CMD ["/env.yml", "2>&1 | tee /log.txt"] # Let users override mounted configutation file path

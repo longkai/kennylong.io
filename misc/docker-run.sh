@@ -12,7 +12,7 @@ image="longkai/xiaolongtongxue.com:$tag"
 
 # update docker image if any
 echo "pulling $image"
-`docker pull $image | grep "is up to date" > /dev/null`
+docker pull $image | grep "is up to date" &> /dev/null
 uptodate=$?
 
 # stop if it's running

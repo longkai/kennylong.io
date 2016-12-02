@@ -1,12 +1,5 @@
 #!/bin/sh
 
-# TODO: since we've imposed docker build automate, this should be deleted.
-if [ "$1" = "docker" ]; then
-  cmd="docker build $2 $3 -t longkai/xiaolongtongxue.com:`git rev-parse --abbrev-ref HEAD` ."
-  eval $cmd
-  exit $?
-fi
-
 # fetch frontend assets if necessary
 if [ ! -d "assets/bower_components" ]; then
   cd assets && bower install && cd ..
@@ -22,4 +15,4 @@ cmd="go build -ldflags \"\
   -X github.com/longkai/xiaolongtongxue.com/config.b=`git rev-parse --abbrev-ref HEAD` \
   \""
 
-echo "$cmd" && eval $cmd
+echo $cmd && eval $cmd
