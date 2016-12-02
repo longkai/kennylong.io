@@ -35,12 +35,13 @@ func serveFile(w http.ResponseWriter, r *http.Request) { fs.ServeHTTP(w, r) }
 
 func cpAssets(src, dest string) {
 	for _, e := range helper.Dirents(src) {
-		src, dest = filepath.Join(src, e.Name()), filepath.Join(dest, revAsset(e.Name()))
+		_src := filepath.Join(src, e.Name())
+		_dest := filepath.Join(dest, revAsset(e.Name()))
 		if e.IsDir() {
-			go cpAssets(src, dest)
+			go cpAssets(_src, _dest)
 		} else {
 			go func() {
-				if err := helper.Cp(src, dest); err != nil {
+				if err := helper.Cp(_src, _dest); err != nil {
 					log.Print(err)
 				}
 			}()
