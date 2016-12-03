@@ -1,12 +1,19 @@
 #!/bin/sh
 
-# usage: docker-run.sh [tag]
+# Always with the lastest docker image
+# usage: docker-run.sh [tag] [container-name]
 
 tag=$1
+container=$2
 
 if [ -z "$tag" ]; then
   tag="latest"
 fi
+
+if [ -z "$container" ]; then
+  container="essays"
+fi
+
 
 image="longkai/xiaolongtongxue.com:$tag"
 
@@ -16,7 +23,6 @@ docker pull $image | grep "is up to date" &> /dev/null
 uptodate=$?
 
 # stop if it's running
-container="sakura"
 running=`docker inspect  --format="{{ .State.Running }}" $container` 
 if [ $? -eq 0 ]; then
   if [ $running = "true" ]; then
@@ -32,6 +38,7 @@ if [ $? -eq 0 ]; then
   docker rm $container
 fi
 
-docker run -d -p 1217:1217 --name=$container -v $HOME/env.yml:/env.yml:ro $image
+# NOTE: don't forget to change your environment!
+docker run -d -p 1217:1217 --name=$container -v $HOME/env.yml:/env.yml:ro  -v $HOME/repo:/repo $image
 
 # clean up may goes here...

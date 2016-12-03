@@ -50,15 +50,15 @@ tags:
 Take a look at a full [sample][sample]. There is even a command-line tool for auto-generating this format, go [get it](cmd/newmd)!
 
 ## Run with Docker
-Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes. A [bootstrapping shell script](misc/docker-run.sh) has been ready to go.
+Run `docker run -d -p 1217:1217 -v /path/to/repo:/repo -v /path/to/env.yml:/env.yml:ro longkai/xiaolongtongxue.com` Don't forget to replace your volumes. A [bootstrapping shell script](scripts/docker-run.sh) has been ready to go.
 
-Or, if you prefer `docker-compose`, [modify](misc/docker-compose.yml) for your needs,
+Or, if you prefer `docker-compose`, [modify](docker-compose.yml) for your  environment,
 
 ```yaml
-sakura:
+essays:
   image: longkai/xiaolongtongxue.com
   ports:
-    - "1217:1217"
+    - 1217:1217
   volumes:
     - /path/to/env.yml:/env.yml:ro
     - /path/to/repo:/repo

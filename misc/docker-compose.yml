@@ -1,8 +1,0 @@
-sakura:
-  image: longkai/xiaolongtongxue.com:latest # other branch may have new features 
-  ports:
-    - 1217:1217
-  volumes:
-    - ~/env.yml:/env.yml:ro
-    #- /path/to/repo:/repo
-  restart: always
