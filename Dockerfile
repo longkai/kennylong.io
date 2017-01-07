@@ -23,7 +23,7 @@ RUN apk add --no-cache git && \
     curl https://code.getmdl.io/1.2.1/material.light_green-green.min.css > bower_components/material-design-lite/material.min.css && \
     cd $SRC/cmd/gfdl/ && \
     go install && \
-    cd $SRC/assets/&& \
+    cd $SRC/assets/ && \
     gfdl 'https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=zh' fonts/fonts.css && \
     gfdl 'https://fonts.googleapis.com/icon?family=Material+Icons' fonts/icons.css && \
     cd $SRC && \

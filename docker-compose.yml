@@ -3,7 +3,7 @@ essays:
   ports:
     - 1217:1217
   volumes:
-    #- $PWD/log.txt:/log.txt
+    - $PWD/log.txt:/log.txt
     - $HOME/env.yml:/env.yml:ro
     - $HOME/src/github.com/longkai/essays:/repo
   restart: always
