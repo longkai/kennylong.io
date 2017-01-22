@@ -114,24 +114,26 @@ func (s *Sakura) post(v interface{}) {
 func (s *Sakura) ls(req listrequest) {
 	l := []interface{}{}
 	f := func(it skiplist.Iterator, size int) {
-		for i := 0; i < size && it.Previous(); {
+		for i := 0; i < size; {
 			v := it.Value()
-			// drop those who is hide
+			// drop those who are hide
 			if !v.(*Meta).Hide {
 				l = append(l, it.Value())
 				i++
+			}
+			if !it.Previous() {
+				break
 			}
 		}
 	}
 
 	deliver := func(v interface{}) { req.resp <- v }
 
-	if req.key == "" {
+	if req.key == "" { // the index page request
 		// from the max down to size
 		it := s.list.SeekToLast()
 		defer it.Close()
-		l = append(l, it.Value())
-		f(it, req.size-1)
+		f(it, req.size)
 		go deliver(l)
 		return
 	}
@@ -143,7 +145,10 @@ func (s *Sakura) ls(req listrequest) {
 	}
 	it := s.list.Seek(index)
 	defer it.Close()
-	f(it, req.size)
+	// the key one has been delivered, drop it
+	if it.Previous() {
+		f(it, req.size)
+	}
 	// deliver
 	go deliver(l)
 }
