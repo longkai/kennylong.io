@@ -20,6 +20,7 @@
 <style>
 #more { margin: auto; }
 .summary { text-align: justify; }
+#bio { text-align: center; }
 </style>
 <title>{{$.Meta.Title}}</title>
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
@@ -52,7 +53,7 @@
         </button>
         <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
           <img src="/assets/images/qrcode.jpg" />
-          {{$.Meta.Bio}}
+          <pre id="bio">{{$.Meta.Bio}}</pre>
         </div>
         <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
           <div>
