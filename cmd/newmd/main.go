@@ -10,16 +10,15 @@ import (
 )
 
 const (
-	templ = `%s
-===
-Content goes here...
+	templ = `# %s
+Content goes here..
 
-### EOF
+## EOF
 ` + "```yaml" + `
 date: %s
 summary: # summary for this article
 weather: # hey, what's the weather like?
-license: all-rights-reserved # "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain".
+license: cc-40-by # "all-rights-reserved", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain".
 location: # where you wrote this?
 background: # banner image for this article, or RGBA hex color value(i.e. starting with '#')
 tags:
