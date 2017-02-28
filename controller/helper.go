@@ -16,11 +16,11 @@ func Format(t time.Time) string { return t.Format(time.RFC1123Z) }
 func Tags(m []string) string {
 	buf := new(bytes.Buffer)
 	for _, v := range m {
-		buf.WriteByte('#')
+		buf.WriteString("🏷 ")
 		buf.WriteString(v)
-		buf.WriteString(`, `)
+		buf.WriteString(` `)
 	}
-	buf.Truncate(buf.Len() - 2) // drop last `, `
+	//buf.Truncate(buf.Len() - 2) // drop last `, `
 	return buf.String()
 }
 

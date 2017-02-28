@@ -40,7 +40,7 @@
           <div class="minilogo"></div>
           <div>
             <strong>{{$.Meta.Name}}</strong>
-            <span>{{$a.Date | daysAgo}} days ago {{if $a.Tags -}} in {{$a.Tags | tags}}{{- end}}
+            <span>🗓 {{$a.Date | daysAgo}} days ago {{if $a.Tags -}} {{$a.Tags | tags}}{{- end}}
             </span>
           </div>
         </div>
@@ -223,15 +223,14 @@ function appendEssays(data) {
     var author = document.createElement('strong');
     author.textContent = '{{$.Meta.Name}}';
     var date = document.createElement('span');
-    date.textContent = daysAgo(a.date) + ' days ago';
+    date.textContent = "🗓 " + daysAgo(a.date) + ' days ago';
 
     // tags
     if (a.tags) {
-      date.textContent += ' in ';
       for (var j = 0; j < a.tags.length; j++) {
-        date.textContent += '#' + a.tags[j];
+        date.textContent += ' 🏷 ' + a.tags[j];
         if (j != a.tags.length - 1) {
-          date.textContent += ', ';
+          //date.textContent += ' ';
         }
       }
     }
