@@ -127,15 +127,13 @@ article blockquote:before, article blockquote:after { content: none; }
     var _location = '{{$.A.Location}}';
     var weather = '{{$.A.Weather}}';
 
-    var space = "&nbsp;";
-    var templ = '<i style="font-size: 1.2rem; vertical-align: text-bottom;" class="material-icons">{0}</i>';
-    var html = templ.format('access_time');
-    html += daysAgo(date) + ' days ago' + space;
+    var html = '🗓 ';
+    html += daysAgo(date) + ' days ago';
     if (_location) {
-      html += templ.format('location_on') + _location + space;
+      html += ' 📍 ' + _location;
     }
     if (weather) {
-      html += templ.format('mood') + weather;
+      html += ' 🌦  ' + weather;
     }
     md_meta.innerHTML = html;
   }
