@@ -8,6 +8,8 @@ ENV SRC /tmp/src/github.com/longkai/xiaolongtongxue.com
 
 RUN apk add --no-cache git && \
   apk add --no-cache --virtual .build-deps \
+                                  build-base \
+                                  linux-headers \
                                   curl \
                                   go \
                                   nodejs && \
