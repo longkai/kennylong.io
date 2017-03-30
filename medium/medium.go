@@ -8,78 +8,91 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
-	"github.com/longkai/xiaolongtongxue.com/render"
+	"github.com/longkai/xiaolongtongxue.com/context"
+	"github.com/longkai/xiaolongtongxue.com/helper"
+	"github.com/longkai/xiaolongtongxue.com/repo"
 )
-
-var (
-	uid      string
-	token    string
-	endpoint string
-
-	ready = make(chan struct{})
-)
-
-var parse = func(path string) (*render.Meta, error) {
-	return render.ParseMD(path, endpoint)
-}
 
 var provideURL = func(path string) string {
 	return "https://api.medium.com/v1" + path
 }
 
-// Init meidum post service, it must be called before any othter functions in this package.
-func Init(_token, _endpoint string) {
-	if _token == "" || _endpoint == "" {
-		log.Fatalf("empty meidum token %q or endpoint %q, aborting", _token, _endpoint)
+// Medium the medium writing platform.
+type Medium struct {
+	uid, token string
+	origin     string
+	renderer   repo.Renderer
+	ready      chan struct{}
+}
+
+// NewMedium create a medium representation.
+func NewMedium(conf context.Conf) *Medium {
+	origin := conf.Meta.Origin
+	m := &Medium{
+		token:  conf.MediumToken,
+		origin: origin,
+		ready:  make(chan struct{}),
+		renderer: &repo.GithubRenderer{
+			User:       conf.Github.User,
+			Repo:       conf.Github.Repo,
+			Pt:         repo.NewPathTransformer(conf.RepoDir),
+			StripTitle: false,
+			URLTransformer: func(str string) string {
+				return fmt.Sprintf("%s/%s", origin, str)
+			},
+		},
 	}
-	token, endpoint = _token, strings.TrimRight(_endpoint, "/") // trim right for pretty URL
-	go func() {
-		try := 0
-		for try < 3 { // retry max 3 times
-			try++
-			if id, err := me(); err != nil {
-				log.Printf("me() fail: %v, tried %d times", err, try)
-			} else {
-				uid = id
-				break
-			}
-		}
-		close(ready)
-	}()
+	go m.fetchUID()
+	return m
+}
+
+// Visit repost the newly docs to the medium.
+func (m *Medium) Visit(docs repo.Docs) {
+	for _, doc := range docs {
+		go m.Post(doc)
+	}
+}
+
+// It must be called before any othter functions in this package.
+func (m *Medium) fetchUID() {
+	val, err := helper.Retry(3, func() (interface{}, error) { return me(m.token) })
+	if err != nil {
+		log.Printf("medium.me() fail: %v", err)
+	} else {
+		m.uid = val.(string)
+		log.Printf("medium uid %s", m.uid)
+	}
+	close(m.ready)
 }
 
 // Post from the given path
-func Post(path string) error {
-	<-ready
-	if uid == "" {
-		return fmt.Errorf("Post(%q) without uid, aborting", path)
+func (m *Medium) Post(doc repo.Doc) error {
+	<-m.ready
+	if m.uid == "" {
+		return fmt.Errorf("Post(%q) without uid, abort posting", doc.Path)
 	}
 
-	m, err := parse(path)
+	html, err := m.renderer.Render(doc.Path)
 	if err != nil {
 		return err
 	}
-	b, ok := m.Body.([]byte)
-	if !ok {
-		return fmt.Errorf("never happen, the parsed markdown is not `[]byte`")
-	}
-	// always `markdown` and `public` since you have publish to your site
-	p := &payload{Title: m.Title, Tags: m.Tags, License: m.License, Format: "markdown", Status: "public"}
-	p.CanonicalURL = endpoint + "/" + strings.TrimLeft(m.ID, "/")
-	// title has been stripped by parser, however, medium needs it, so we have to prepend it. see their doc at: https://github.com/Medium/medium-api-docs#33-posts
-	p.Content = fmt.Sprintf("%s\n===\n%s", m.Title, b)
 
-	if _, err := p.post(); err != nil {
+	// Always `html` and `public` since you have publish to your site
+	p := &payload{Title: doc.Title, Tags: doc.Tags, License: doc.License, Format: "html", Status: "public"}
+	p.CanonicalURL = m.origin + "/" + doc.URL
+	// title has been stripped by parser, however, medium needs it, so we have to prepend it. see their doc at: https://github.com/Medium/medium-api-docs#33-posts
+	p.Content = string(html)
+
+	if _, err := p.post(m.uid, m.token); err != nil {
 		return err
 	}
 	return nil
 }
 
 // me only fetchs user's `id`
-func me() (string, error) {
-	b, err := reqest(http.MethodGet, provideURL("/me"), nil, func(s int) bool { return s == http.StatusOK })
+func me(token string) (string, error) {
+	b, err := reqest(http.MethodGet, provideURL("/me"), token, nil, func(s int) bool { return s == http.StatusOK })
 	if err != nil {
 		return "", err
 	}
@@ -105,19 +118,19 @@ type payload struct {
 	CanonicalURL string   `json:"canonicalUrl,omitempty"`
 }
 
-func (p *payload) post() ([]byte, error) {
+func (p *payload) post(uid, token string) ([]byte, error) {
 	b, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
 	}
-	b, err = reqest(http.MethodPost, provideURL(fmt.Sprintf("/users/%s/posts", uid)), bytes.NewReader(b), func(s int) bool { return s == http.StatusCreated })
+	b, err = reqest(http.MethodPost, provideURL(fmt.Sprintf("/users/%s/posts", uid)), token, bytes.NewReader(b), func(s int) bool { return s == http.StatusCreated })
 	if err != nil {
 		return nil, err
 	}
 	return b, nil
 }
 
-func reqest(method, url string, payload io.Reader, ok func(status int) bool) ([]byte, error) {
+func reqest(method, url, token string, payload io.Reader, ok func(status int) bool) ([]byte, error) {
 	r, err := http.NewRequest(method, url, payload)
 	if err != nil {
 		return nil, err

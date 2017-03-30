@@ -1,12 +1,19 @@
 port: 1217
-repo: /repo
-hook_secret: Github WebHook secret
-access_token: Github Personal access token
+repo_dir: /repo
 #medium_token: Medium Self-issued access tokens
+glob_docs:
+  - README.* # Any file start with README.xxx would be parse as an articles.
+skip_dirs:
+  - .* # skip hidden dirs
+  - assets # assets dir is resered as front-end resources
+github:
+  user: # Github user name
+  repo: # Github repo name
+  hook_secret: # Github WebHook secret
+  access_token: # Github Personal access token
 meta:
   ga: GA tracker ID
   gf: false # Use Google Fonts, check `templ/include.html`
-  #cdn: CDN URL prefix # currently only tested qiniu
   #origin: https://your-domain.com # (i.e. `window.location.origin` in JS) required only if enable medium posting service
   bio: something about you
   link: other link about you
@@ -18,5 +25,3 @@ meta:
   twitter: twitter link if any
   instagram: ins link if any
   stackoverflow: stackoverflow link if any
-ignores:  # NOTE: the path is **HTTP RequestURI** format
-  - '^/[^/]+\.md$' # ignore *.md in root dir

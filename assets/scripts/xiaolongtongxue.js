@@ -54,22 +54,11 @@ function openLink(el, url) {
 function banner(s, el) {
   el.style.cursor = 'pointer';
 
-  var cdn = CDN_URL ? CDN_URL : ''; // cdn may enabled...
   if (!s) {
-     // s = a.background = cdn + '/assets/images/default.jpg'
-     return;
-  }
-  if (s.charAt(0) == '#') {
-    el.style.backgroundColor = s;
-    return;
-  }
-  var url = s;
-  // if it's not an abs url
-  if (!/^(?:[a-z]+:)?\/\//i.test(url)) {
-    url = cdn + url
+    s = '/assets/images/default.jpg'
   }
 
-  el.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), url("{0}")'.format(url);
+  el.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), url("{0}")'.format(s);
   el.style.backgroundSize = 'cover';
   el.style.backgroundRepeat = 'no-repeat';
   el.style.backgroundPosition = 'center center';

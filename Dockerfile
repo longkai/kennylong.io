@@ -37,6 +37,8 @@ RUN apk add --no-cache git && \
   apk del .build-deps && \
   rm -rf /tmp/*
 
+USER nobody
+
 EXPOSE 1217
-VOLUME ["/repo", "/env.yml", "/log.txt"]
-CMD /xiaolongtongxue.com /env.yml 2>&1 | tee /log.txt
+VOLUME ["/repo", "/conf.yml", "/log.txt"]
+CMD /xiaolongtongxue.com /conf.yml 2>&1 | tee /log.txt

@@ -32,10 +32,11 @@ func TestMe(t *testing.T) {
 	saved := provideURL
 	defer func() { provideURL = saved }()
 	provideURL = func(p string) string { return ts.URL + p }
+	m := &Medium{}
 	t.Run("OK", func(t *testing.T) {
 		status = http.StatusOK
 		wantID := "5303d74c64f66366f00cb9b2a94f3251bf5"
-		id, err := me()
+		id, err := me(m.token)
 		if err != nil {
 			t.Errorf("me() fail: %v", err)
 		}
@@ -46,16 +47,16 @@ func TestMe(t *testing.T) {
 
 	t.Run("StatusFail", func(t *testing.T) {
 		status = http.StatusBadRequest
-		if _, err := me(); err == nil {
-			t.Errorf("me() status %d, want %d", http.StatusOK, http.StatusBadRequest)
+		if _, err := me(m.token); err == nil {
+			t.Errorf("me(_) status %d, want %d", http.StatusOK, http.StatusBadRequest)
 		}
 	})
 
 	t.Run("MalformBody", func(t *testing.T) {
 		status = http.StatusOK
 		body = []byte(`balabala`)
-		if _, err := me(); err == nil {
-			t.Errorf("me() should fail")
+		if _, err := me(m.token); err == nil {
+			t.Errorf("me(_) should fail")
 		}
 	})
 }
@@ -71,14 +72,15 @@ func TestPost(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	saved1, saved2 := provideURL, uid
-	defer func() { provideURL, uid = saved1, saved2 }()
+	saved1 := provideURL
+	defer func() { provideURL = saved1 }()
 	provideURL = func(p string) string { return ts.URL + p }
-	uid = "balabala"
+
+	m := &Medium{}
 
 	t.Run("OK", func(t *testing.T) {
 		status = http.StatusCreated
-		b, err := new(payload).post()
+		b, err := new(payload).post(m.uid, m.token)
 		if err != nil {
 			t.Errorf("post() fail: %v", err)
 		}
@@ -89,7 +91,7 @@ func TestPost(t *testing.T) {
 
 	t.Run("Fail", func(t *testing.T) {
 		status = http.StatusOK
-		_, err := new(payload).post()
+		_, err := new(payload).post(m.uid, m.token)
 		if err == nil {
 			t.Errorf("post() should fail with status %d", status)
 		}

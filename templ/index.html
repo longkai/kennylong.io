@@ -7,7 +7,7 @@
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-      https://www.apache.org/licenses/LICENSE-2.0
+  https://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,62 +25,61 @@
 <title>{{$.Meta.Title}}</title>
 <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
   <main class="mdl-layout__content">
-    <div id="grid" class="demo-blog__posts mdl-grid">
-      {{range $i, $a := $.List -}}
-      <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
-        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{$a.Background}}">
-          <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.ID}}">{{$a.Title}}</a></h3>
-        </div>
-        {{if $a.Summary -}}
-        <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.ID}}'>
-          {{$a.Summary}}
-        </div>
-        {{- end}}
-        <div class="mdl-card__supporting-text meta mdl-color-text--grey-600">
-          <div class="minilogo"></div>
-          <div>
-            <strong>{{$.Meta.Name}}</strong>
-            <span>🗓 {{$a.Date | daysAgo}} days ago {{if $a.Tags -}} {{$a.Tags | tags}}{{- end}}
-            </span>
-          </div>
-        </div>
+  <div id="grid" class="demo-blog__posts mdl-grid">
+    {{range $i, $a := $.List -}}
+    <div class="mdl-card mdl-cell {{if eq $i 0 -}}coffee-pic mdl-cell--8-col{{- else -}}on-the-road-again mdl-cell--12-col{{- end}}">
+      <div class="mdl-card__media mdl-color-text--grey-50" banner="{{template "bg" $a.Background}}">
+        <h3 {{if not $a.Summary -}}class="quote"{{- end}}><a href="{{$a.URL}}">{{$a.Title}}</a></h3>
       </div>
-      {{if eq $i 0 -}}
-      <div class="mdl-card something-else mdl-cell mdl-cell--8-col mdl-cell--4-col-desktop">
-        <button id="code" class="mdl-button mdl-js-ripple-effect mdl-js-button mdl-button--fab mdl-color--accent">
-          <i class="material-icons mdl-color-text--white" role="presentation">code</i>
-          <span class="visuallyhidden">add</span>
-        </button>
-        <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600">
-          <img src="/assets/images/qrcode.jpg" />
-          <pre id="bio">{{$.Meta.Bio}}</pre>
-        </div>
-        <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
-          <div>
-            <strong>{{$.Meta.Name}}</strong>
-          </div>
-          <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right mdl-js-ripple-effect" for="menubtn">
-            <li class="mdl-menu__item" id="about">About</li>
-            <li class="mdl-menu__item">CC BY 4.0</li>
-          </ul>
-          <button id="menubtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
-            <i class="material-icons" role="presentation">more_vert</i>
-            <span class="visuallyhidden">show menu</span>
-          </button>
-        </div>
+      {{if $a.Summary -}}
+      <div class="mdl-color-text--grey-600 summary mdl-card__supporting-text" href='{{$a.URL}}'>
+        {{$a.Summary}}
       </div>
       {{- end}}
-      {{- end}}
-      <nav id="nav" class="demo-nav mdl-cell mdl-cell--12-col">
-        <div id="progress" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
-        <a id="more" class="demo-nav__button" title="show more">
-          <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
-            <i class="material-icons" role="presentation">arrow_downward</i>
-          </button>
-        </a>
-      </nav>
+      <div class="mdl-card__supporting-text meta mdl-color-text--grey-600">
+        <div class="minilogo"></div>
+        <div>
+          <strong>{{$.Meta.Name}}</strong>
+          <span class="extras" data-date='{{$a.Date.Format "Jan 02, 2006 15:04:05 UTC"}}' data-tags="{{if $a.Tags -}} {{$a.Tags}}{{- end}}"></span>
+        </div>
+      </div>
     </div>
-    {{template "footer" $}}
+    {{if eq $i 0 -}}
+    <div class="mdl-card something-else mdl-cell mdl-cell--8-col mdl-cell--4-col-desktop">
+      <button id="code" class="mdl-button mdl-js-ripple-effect mdl-js-button mdl-button--fab mdl-color--accent">
+        <i class="material-icons mdl-color-text--white" role="presentation">code</i>
+        <span class="visuallyhidden">add</span>
+      </button>
+      <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600 profile">
+        <img src="/assets/images/qrcode.jpg" />
+        <pre id="bio">{{$.Meta.Bio}}</pre>
+      </div>
+      <div class="mdl-card__supporting-text meta meta--fill mdl-color-text--grey-600">
+        <div>
+          <strong>{{$.Meta.Name}}</strong>
+        </div>
+        <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right mdl-js-ripple-effect" for="menubtn">
+          <li class="mdl-menu__item" id="about">About</li>
+          <li class="mdl-menu__item">CC BY 4.0</li>
+        </ul>
+        <button id="menubtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+          <i class="material-icons" role="presentation">more_vert</i>
+          <span class="visuallyhidden">show menu</span>
+        </button>
+      </div>
+    </div>
+    {{- end}}
+    {{- end}}
+    <nav id="nav" class="demo-nav mdl-cell mdl-cell--12-col">
+      <div id="progress" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+      <a id="more" class="demo-nav__button" title="show more">
+        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+          <i class="material-icons" role="presentation">arrow_downward</i>
+        </button>
+      </a>
+    </nav>
+  </div>
+  {{template "footer" $}}
   </main>
   <div class="mdl-layout__obfuscator"></div>
 </div>
@@ -97,94 +96,108 @@ function handleScreenSize() {
 }
 handleScreenSize(); window.onresize = function(event) { handleScreenSize(); };
 
-  var path = window.location.pathname;
-  var layout = document.getElementsByClassName('mdl-layout__content')[0];
-  var grid = document.getElementById('grid');
+var path = window.location.pathname;
+var layout = document.getElementsByClassName('mdl-layout__content')[0];
+var grid = document.getElementById('grid');
 
-  var items;
+var items;
 
-  window.onload = function() {
-    // load data...
-    var essays = sessionStorage['essays'];
-    if (essays) {
-      //console.log('get back items ' + essays);
-      items = JSON.parse(essays);
-      appendEssays(items);
-    }
+window.onload = function() {
+  // load data...
+  var essays = sessionStorage['essays'];
+  if (essays) {
+    //console.log('get back items ' + essays);
+    items = JSON.parse(essays);
+    appendEssays(items);
+  }
 
-    var lastPos = sessionStorage[path];
-    if (lastPos) {
-      //console.log("get back " + lastPos);
-      layout.scrollTop -= lastPos;
-    } else {
-      //console.log("first load");
-    }
-  };
+  var lastPos = sessionStorage[path];
+  if (lastPos) {
+    //console.log("get back " + lastPos);
+    layout.scrollTop -= lastPos;
+  } else {
+    //console.log("first load");
+  }
+};
 
-  window.onunload = function() {
-    var pos = grid.getBoundingClientRect().top - 230; // 230 is the paddingTop css attr in style.css
-    //console.log('saving pos for ' + path + ' ' + pos);
-    sessionStorage[path] = pos;
+window.onunload = function() {
+  var pos = grid.getBoundingClientRect().top - 230; // 230 is the paddingTop css attr in style.css
+  //console.log('saving pos for ' + path + ' ' + pos);
+  sessionStorage[path] = pos;
 
-    if (items) {
-      //console.log('saving items: ' + items);
-      sessionStorage['essays'] = JSON.stringify(items);
-    }
-  };
+  if (items) {
+    //console.log('saving items: ' + items);
+    sessionStorage['essays'] = JSON.stringify(items);
+  }
+};
 
-  Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media, .summary'), function (el) {
+Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media'), function (el) {
+  var className = el.getAttribute('class');
+  if (className.indexOf('profile') == -1) {
     banner(el.getAttribute('banner'), el);
     go(el);
-  });
+  }
+});
+Array.prototype.forEach.call(document.querySelectorAll('.meta .extras'), function (el) {
+  var date = el.getAttribute('data-date');
+  el.textContent = daysAgo(date) + ' days ago';
+  var str = el.getAttribute('data-tags');
+  if (str) {
+    str = str.substring(1, str.length-1);
+    var tags = str.split(' ');
 
-  var hasMore = true;
+    el.textContent += formatTags(tags);
+  }
+});
 
-  var nav = document.getElementById('nav');
-  var more = document.getElementById('more');
-  var progress = document.getElementById('progress');
-  var toast = document.getElementById('toast');
+var hasMore = true;
 
-  var _link = {{$.Meta.Link}};
-  openLink(document.getElementById('about'), _link);
-  openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
+var nav = document.getElementById('nav');
+var more = document.getElementById('more');
+var progress = document.getElementById('progress');
+var toast = document.getElementById('toast');
 
-  // hide it first
-  progress.style.width = '100%';
-  progress.style.display = 'none';
+var _link = {{$.Meta.Link}};
+openLink(document.getElementById('about'), _link);
+openLink(document.getElementById('code'), '//github.com/longkai/xiaolongtongxue.com');
 
-  more.addEventListener('click', function () {
-    more.style.display = 'none';
-    progress.style.display = 'block';
+// hide it first
+progress.style.width = '100%';
+progress.style.display = 'none';
 
-    ajax(
-        'GET',
-        "//{0}/ls/{1}".format(window.location.host, lastKey()),
-        function (data) {
-          //console.log(data);
-          hasMore = data.length != 0;
-          if (data.length == 0) {
-            toast.MaterialSnackbar.showSnackbar({message: 'no more 😰'});
-          }
+more.addEventListener('click', function () {
+  more.style.display = 'none';
+  progress.style.display = 'block';
 
-          // do append
-          appendEssays(data);
-          if (items) {
-            items = items.concat(data);
-          } else {
-            items = data;
-          }
-          
-          more.style.display = 'block';
-          progress.style.display = 'none';
-        },
-        function (code, text) {
-          console.log('load more error: code {0}, text {1}'.format(code, text ? text : 'nop'));
-          more.style.display = 'block';
-          progress.style.display = 'none';
-          toast.MaterialSnackbar.showSnackbar({message: 'Something wrong 😳'});
-        }
-    );
-  });
+  ajax(
+    'GET',
+    "//{0}/ls{1}".format(window.location.host, lastKey()),
+    function (data) {
+      //console.log(data);
+      hasMore = data.length != 0;
+      if (data.length == 0) {
+        toast.MaterialSnackbar.showSnackbar({message: 'no more 😰'});
+      }
+
+      // do append
+      appendEssays(data);
+      if (items) {
+        items = items.concat(data);
+      } else {
+        items = data;
+      }
+
+      more.style.display = 'block';
+      progress.style.display = 'none';
+    },
+    function (code, text) {
+      console.log('load more error: code {0}, text {1}'.format(code, text ? text : 'nop'));
+      more.style.display = 'block';
+      progress.style.display = 'none';
+      toast.MaterialSnackbar.showSnackbar({message: 'Something wrong 😳'});
+    }
+  );
+});
 
 function appendEssays(data) {
   for (var i = 0; i < data.length; i++) {
@@ -195,9 +208,12 @@ function appendEssays(data) {
 
     var cardMedia = document.createElement('div');
     cardMedia.className = 'mdl-card__media mdl-color-text--grey-50';
+    if (!a.background) {
+      a.background = '/assets/images/default.jpg';
+    }
     banner(a.background, cardMedia);
 
-    var link = a.id;
+    var link = a.url;
 
     var h3 = document.createElement('h3');
     if (!a.summary) {
@@ -227,12 +243,7 @@ function appendEssays(data) {
 
     // tags
     if (a.tags) {
-      for (var j = 0; j < a.tags.length; j++) {
-        date.textContent += ' 🏷 ' + a.tags[j];
-        if (j != a.tags.length - 1) {
-          //date.textContent += ' ';
-        }
-      }
+      date.textContent += formatTags(a.tags);
     }
 
     div.appendChild(author);
@@ -246,11 +257,8 @@ function appendEssays(data) {
     if (a.summary) {
       var summary = document.createElement('div');
       summary.className = 'mdl-color-text--grey-600 mdl-card__supporting-text';
-      summary.style.cursor = 'pointer';
-      summary.setAttribute('href', link);
       summary.textContent = a.summary;
 
-      go(summary);
       card.appendChild(summary);
     }
     card.appendChild(meta);
@@ -261,25 +269,34 @@ function appendEssays(data) {
   }
 }
 
-  function lastKey() {
-    var e = nav.previousElementSibling;
-    key = e.getElementsByTagName('a')[0].href.replace(/^.*\/\/[^\/]+/, '');
-    //console.log(key);
-    return key;
+function formatTags(tags) {
+  var s = '';
+  for (var j = 0; j < tags.length; j++) {
+    s += ' 🏷 ' + tags[j];
   }
+  return s;
+}
 
-  function go(el) {
-    var link = el.querySelector('a');
-    var target = '';
-    if (!link) {
-      target = el.getAttribute('href');
-    } else {
-      target = link.getAttribute('href');
-    }
-    if (!target) {
-      return;
-    }
-    openLink(el, target);
+// lastKey must start with `/`.
+function lastKey() {
+  var e = nav.previousElementSibling;
+  key = e.getElementsByTagName('a')[0].href.replace(/^.*\/\/[^\/]+/, '');
+  //console.log(key);
+  return key;
+}
+
+function go(el) {
+  var link = el.querySelector('a');
+  var target = '';
+  if (!link) {
+    target = el.getAttribute('href');
+  } else {
+    target = link.getAttribute('href');
   }
+  if (!target) {
+    return;
+  }
+  openLink(el, target);
+}
 </script>
 {{template "GA" $.Meta.GA}}

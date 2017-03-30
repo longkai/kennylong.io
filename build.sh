@@ -11,8 +11,8 @@ if [ ! -d "assets/fonts" ]; then
 fi
 
 cmd="go build -ldflags \"\
-  -X github.com/longkai/xiaolongtongxue.com/config.v=`git rev-parse --short HEAD` \
-  -X github.com/longkai/xiaolongtongxue.com/config.b=`git rev-parse --abbrev-ref HEAD` \
+  -X github.com/longkai/xiaolongtongxue.com/context.v=`git rev-parse --short HEAD` \
+  -X github.com/longkai/xiaolongtongxue.com/context.b=`git rev-parse --abbrev-ref HEAD` \
   \""
 
 echo $cmd && eval $cmd

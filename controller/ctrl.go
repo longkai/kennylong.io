@@ -2,17 +2,14 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
-	"log"
 	"net/http"
-	"path/filepath"
 	"strings"
 
-	"github.com/longkai/xiaolongtongxue.com/config"
+	"github.com/longkai/xiaolongtongxue.com/context"
 	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/longkai/xiaolongtongxue.com/medium"
-	"github.com/longkai/xiaolongtongxue.com/render"
+	"github.com/longkai/xiaolongtongxue.com/repo"
 )
 
 const (
@@ -20,119 +17,75 @@ const (
 )
 
 var (
-	env    *config.Configuration
-	sakura render.Engine
-	templs *template.Template
+	conf       context.Conf
+	repository repo.Repo
+	staticFS   http.Handler
+	templs     *template.Template
 )
 
 // Ctrl main controller.
-func Ctrl() {
-	env = config.Env
-	sakura = render.NewSakura(env.Meta.CDN)
-	sakura.Post(env.Repo)
-	installTempls()
-	initFS(env.Meta.CDN, env.Meta.V)
+func Ctrl(_conf context.Conf) {
+	conf = _conf
 
-	github.Init(`/api/github/hook`, env.Repo, env.HookSecret, env.AccessToken, revalidate)
-	if env.MediumToken != "" {
-		medium.Init(env.MediumToken, env.Meta.Origin)
-	}
+	repository = repo.NewRepo(conf.RepoDir, conf.SkipDirs, conf.GlobDocs,
+		conf.Github.User, conf.Github.Repo, medium.NewMedium(conf))
 
-	http.HandleFunc("/", home)
+	github.Init("/api/github/hook", conf.RepoDir, conf.Github.HookSecret,
+		conf.Github.AccessToken, func(a, m, d []string) { repository.Batch(a, m, d) })
+
+	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
+	staticFS = http.FileServer(http.Dir(conf.RepoDir))
+
+	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./assets"))))
+	http.HandleFunc("/", handle)
 	http.HandleFunc("/ls/", ls)
-	for _, v := range config.Roots() {
-		installHanlder(v)
-	}
 }
 
-var installTempls = func() {
-	templs = template.Must(template.New(`sakura`).Funcs(template.FuncMap{
-		`tags`:    Tags,
-		`format`:  Format,
-		`daysAgo`: DaysAgo,
-		`cdn`:     TransformCDN,
-	}).ParseGlob(`templ/*`))
-}
-
-var installHanlder = func(p string) {
-	p = fmt.Sprintf("/%s/", p)
-	log.Printf("mapping url %s*", p)
-	http.HandleFunc(p, entry)
-}
-
-var revalidate = func(a, m, d []string) {
-	for i := range a {
-		p := filepath.Join(env.Repo, a[i])
-		// check if new router(i.e., URL starts with /balalaba/...)
-		if v := config.Root(p); v != "" {
-			installHanlder(v)
+func handle(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		v := repository.List("", pageSize)
+		data := &struct {
+			List repo.Docs
+			Meta interface{}
+		}{v, conf.Meta}
+		if err := templs.ExecuteTemplate(w, "index.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		// TODO: better handling path travel stuffs...
-		if env.MediumToken != "" && !config.Ignored(p) && strings.HasSuffix(p, ".md") {
-			// meidum only allow posting new stuff, no other editing allow right now...
-			go func() {
-				if err := medium.Post(p); err != nil {
-					log.Printf("medium.Post(%q) fail: %v", p, err)
-				}
-			}()
-		}
-	}
-	if err := sakura.Revalidate(a, m, d); err != nil {
-		log.Printf("revalidate fail: %v", err)
-	}
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
 		return
 	}
-
-	v, err := sakura.Ls("", pageSize)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	data := &struct {
-		List interface{}
-		Meta interface{}
-	}{v, config.Env.Meta}
-	if err := templs.ExecuteTemplate(w, "index.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	// Otherwise it should be a entry request.
+	entry(w, r)
 }
 
 func entry(w http.ResponseWriter, r *http.Request) {
-	if !strings.HasSuffix(r.URL.Path, "/") {
-		serveFile(w, r)
+	// Compatible with old URL scheme, i.e., `/a/b/title/` to `/a/b/title`.
+	if p := r.URL.Path; strings.HasSuffix(p, "/") {
+		http.Redirect(w, r, p[:len(p)-1], http.StatusMovedPermanently)
 		return
 	}
-
-	v, err := sakura.Get(r.URL.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	data := &struct {
-		A    interface{}
-		Meta interface{}
-	}{v, config.Env.Meta}
-	if err = templs.ExecuteTemplate(w, "entry.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// Try article first.
+	doc, err := repository.Get(r.URL.Path)
+	switch e := err.(type) {
+	case nil:
+		data := &struct {
+			A    repo.Doc
+			Meta interface{}
+		}{doc, conf.Meta}
+		// w.Header().Add("Cache-Control", "max-age=7200, public")
+		if err = templs.ExecuteTemplate(w, "entry.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	case repo.NotFound:
+		// If no doc found, fallback to static files.
+		staticFS.ServeHTTP(w, r)
+	default: // general error
+		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
 }
 
 func ls(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Path[len("/ls"):]
-	if len(key) <= 1 { // `/` is not allowed
-		http.Error(w, fmt.Sprintf("Path %q, last segment not found", r.URL.Path), http.StatusBadRequest)
-		return
-	}
-	v, err := sakura.Ls(key, pageSize)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	v := repository.List(key, pageSize)
 	b, err := json.Marshal(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

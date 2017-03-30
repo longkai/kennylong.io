@@ -17,7 +17,7 @@
 -->
 <meta name="description" content="{{$.A.Summary}}">
 {{template "header" $}}
-<link rel="stylesheet" href="{{"/assets/bower_components/github-markdown-css/github-markdown.css" | cdn}}">
+<link rel="stylesheet" href="/assets/bower_components/github-markdown-css/github-markdown.css?v={{$.Meta.V}}">
 <style>
 .tags { display: flex; align-items: center; }
 article p { text-align: justify; } /* better look :) */
@@ -42,7 +42,7 @@ article blockquote:before, article blockquote:after { content: none; }
     </div>
     <div class="demo-blog__posts mdl-grid">
       <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
-        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{$.A.Background}}">
+        <div class="mdl-card__media mdl-color-text--grey-50" banner="{{template "bg" $.A.Background}}">
           <h3>{{$.A.Title}}</h3>
         </div>
         <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
@@ -67,19 +67,22 @@ article blockquote:before, article blockquote:after { content: none; }
           </div>
           -->
         </div>
-        <article class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
+        <div class="mdl-color-text--grey-700 mdl-card__supporting-text markdown-body">
           <!-- content start -->
           {{$.A.Body}}
           <!-- content end -->
-        </article>
+        </div>
         <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
           <div class="tags">
             {{range $i, $t := $.A.Tags -}}
               🏷 {{$t}}&nbsp;&nbsp;
             {{- end}}
-            {{if $.A.License -}}
+            
             <div class="section-spacer"></div>
-            <span style="font-size: 1.2em">©&nbsp;</span>{{$.A.License}}
+            <span style="font-size: 1.2em">©&nbsp;</span>{{if $.A.License -}}
+              {{$.A.License}}
+              {{- else -}}
+              all-rights-reserved
             {{- end}}
           </div>
           <!-- NOTE: for cleaness, comments have been removed from here... -->
@@ -118,28 +121,28 @@ article blockquote:before, article blockquote:after { content: none; }
 </div>
 {{template "script" $}}
 <script>
-  var md_meta = document.getElementById('md_meta');
-  if (md_meta) {
-    var date = '{{$.A.Date | format}}';
-    var _location = '{{$.A.Location}}';
-    var weather = '{{$.A.Weather}}';
+ var md_meta = document.getElementById('md_meta');
+ if (md_meta) {
+     var date = '{{$.A.Date.Format "Jan 02, 2006 15:04:05 UTC"}}';
+     var _location = '{{$.A.Location}}';
+     var weather = '{{$.A.Weather}}';
 
-    var html = '🗓 ';
-    html += daysAgo(date) + ' days ago';
-    if (_location) {
-      html += ' 📍 ' + _location;
-    }
-    if (weather) {
-      html += ' 🌦  ' + weather;
-    }
-    md_meta.innerHTML = html;
-  }
+     var html = '🗓 ';
+     html += daysAgo(date) + ' days ago';
+     if (_location) {
+         html += ' 📍 ' + _location;
+     }
+     if (weather) {
+         html += ' 🌦  ' + weather;
+     }
+     md_meta.innerHTML = html;
+ }
 
-  var el = document.getElementsByClassName('mdl-card__media')[0];
-  banner(el.getAttribute('banner'), el);
+ var el = document.getElementsByClassName('mdl-card__media')[0];
+ banner(el.getAttribute('banner'), el);
 
-  document.getElementById('home').addEventListener('click', function () {
-    window.open(window.location.protocol + '//' + window.location.host, "_self");
-  });
+ document.getElementById('home').addEventListener('click', function () {
+     window.open(window.location.protocol + '//' + window.location.host, "_self");
+ });
 </script>
 {{template "GA" $.Meta.GA}}
