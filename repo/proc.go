@@ -3,7 +3,7 @@ package repo
 import (
 	"log"
 	"path/filepath"
-	"strings"
+	"regexp"
 	"sync"
 )
 
@@ -71,15 +71,14 @@ func (p *DocProcessor) process(path string, ch chan<- Doc) {
 		return
 	}
 
-	doc.Path = path
-	doc.URL = url
-	// URL is case insensitive.
-	doc.Background = strings.ToLower(doc.Background)
-	if bg := doc.Background; bg != "" && !strings.HasPrefix(bg, "/") &&
-		!strings.HasPrefix(bg, "https://") && !strings.HasPrefix(bg, "http://") {
-		// Normalize relative links.
-		doc.Background = filepath.Join(doc.URL, doc.Background)
+	doc.Path, doc.URL = path, url
+	if bg := doc.Background; bg != "" && !absURLRegex.MatchString(doc.Background) {
+		// Complete relative links.
+		doc.Background = filepath.Join(doc.URL, bg)
 	}
-
 	ch <- doc
 }
+
+// Anything that begins with a path relative links,
+// e.g., no scheme(include relative scheme), no start with '/'.
+var absURLRegex = regexp.MustCompile(`(^\w+:\/\/)|(^\/{1,2})`)

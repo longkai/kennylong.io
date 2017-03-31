@@ -44,5 +44,6 @@ func (s *DocScanner) Scan(path string) []string {
 		}
 		return nil
 	})
+	log.Printf("scan %s, got %d", path, len(res))
 	return res
 }

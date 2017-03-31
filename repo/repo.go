@@ -131,6 +131,7 @@ func (r *Repository) get(req getReq) {
 
 func (r *Repository) put(path string) {
 	// Delete then repost.
+	log.Printf("revalidate: %s", path)
 	r.del(path)
 	go r.processor.Process(path)
 }
@@ -140,6 +141,7 @@ func (r *Repository) del(path string) {
 		return doc.URL == path
 	})
 	if i > -1 {
+		log.Printf("delete %s", path)
 		copy(r.docs[i:], r.docs[i+1:])
 		r.docs = r.docs[:len(r.docs)-1]
 		delete(r.cache, path)
@@ -184,19 +186,17 @@ func (r *Repository) Get(path string) (Doc, error) {
 
 // Del a document for the path.
 func (r *Repository) Del(path string) {
-	log.Printf("delete: %s", path)
 	r.reqs.del <- path
 }
 
 // Put revalidate a document.
 func (r *Repository) Put(path string) {
-	log.Printf("revalidate: %s", path)
 	r.reqs.put <- path
 }
 
 // Post process the path for documents.
 func (r *Repository) Post(path string) {
-	log.Printf("post: %s", path)
+	log.Printf("post %s", path)
 	go r.processor.Process(path)
 }
 
