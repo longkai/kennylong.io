@@ -1,6 +1,7 @@
 package helper_test
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 	"testing"
@@ -8,8 +9,12 @@ import (
 	"github.com/longkai/xiaolongtongxue.com/helper"
 )
 
+var isIntegration = flag.Bool("integration", false, "run integration tests?")
+
 func TestTry(t *testing.T) {
-	t.Skip("integration test: system timer")
+	if !*isIntegration {
+		t.Skip("integration test: system timer")
+	}
 	var i int
 	f := func() (interface{}, error) {
 		if i == 1 {
@@ -31,7 +36,9 @@ func TestTry(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	t.Skip("integetaion test: system timeout")
+	if !*isIntegration {
+		t.Skip("integetaion test: system timeout")
+	}
 	f := func() (interface{}, error) {
 		return nil, fmt.Errorf("alwasy fail")
 	}

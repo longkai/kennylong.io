@@ -7,7 +7,9 @@ import (
 )
 
 func TestExist(t *testing.T) {
-	t.Skip("integration test: file system")
+	if !*isIntegration {
+		t.Skip("integration test: file system")
+	}
 	tests := []struct {
 		input string
 		want  bool
