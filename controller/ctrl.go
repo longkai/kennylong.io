@@ -42,8 +42,9 @@ func Ctrl(_conf context.Conf) {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		v := repository.List("", pageSize)
+	if r.URL.Path == "/" { // Home page request.
+		// `/` never exists as an entry, so it indicates from the beginning.
+		v := repository.List("/", pageSize)
 		data := &struct {
 			List repo.Docs
 			Meta interface{}
@@ -53,7 +54,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// Otherwise it should be a entry request.
+	// Otherwise it should be a entry request or its file resources.
 	entry(w, r)
 }
 

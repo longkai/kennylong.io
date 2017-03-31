@@ -36,7 +36,7 @@ func (e *entry) call(path string, r Renderer) {
 }
 
 type listReq struct {
-	key  string
+	path string
 	size int
 	resp chan Docs
 }
@@ -68,12 +68,9 @@ type Repository struct {
 	processor Processor
 	visitors  []Visitor
 
-	// Rendering cache.
-	cache map[string]*entry
-	// It's fast enough and simple implementation, plus easy understood.
-	docs Docs
-	// TODO: should we indexing for quick lookup instead of sequential search?
-	// indexing map[string]Doc
+	docs  Docs              // More read, less write.
+	index map[string]int    // Fast lookup.
+	cache map[string]*entry // Rendering cache.
 }
 
 func (r *Repository) loop() {
@@ -94,10 +91,8 @@ func (r *Repository) loop() {
 }
 
 func (r *Repository) get(req getReq) {
-	i := r.docs.matchFirst(func(doc Doc) bool {
-		return doc.URL == req.path
-	})
-	if i < 0 {
+	i, ok := r.index[req.path]
+	if !ok {
 		go func() { req.resp <- getResp{Doc{}, NotFoundError(req.path)} }()
 		return
 	}
@@ -137,13 +132,17 @@ func (r *Repository) put(path string) {
 }
 
 func (r *Repository) del(path string) {
-	i := r.docs.matchFirst(func(doc Doc) bool {
-		return doc.URL == path
-	})
-	if i > -1 {
+	if i, ok := r.index[path]; ok {
 		log.Printf("delete %s", path)
+		// Rebuild index, partially.
+		for j := i + 1; j < r.docs.Len(); j++ {
+			r.index[r.docs[j].URL]--
+		}
+		delete(r.index, path)
+		// Delete from slice.
 		copy(r.docs[i:], r.docs[i+1:])
 		r.docs = r.docs[:len(r.docs)-1]
+		// Clear its rendering cache.
 		delete(r.cache, path)
 	}
 }
@@ -151,17 +150,23 @@ func (r *Repository) del(path string) {
 func (r *Repository) post(docs Docs) {
 	r.docs = append(r.docs, docs...)
 	sort.Sort(r.docs)
+
+	// Rebuild index.
+	m := make(map[string]int)
+	for i, d := range r.docs {
+		m[d.URL] = i
+	}
+	r.index = m
+
 	log.Printf("receive %d new articles, total %d", docs.Len(), r.docs.Len())
 }
 
 func (r *Repository) list(req listReq) {
-	var i = 0
-
-	if req.key != "" {
-		i = r.docs.matchFirst(func(doc Doc) bool {
-			return doc.URL == req.key
-		}) + 1 // Skip the current one.
-		// If not found any match, start from 0.
+	i, ok := r.index[req.path]
+	if !ok {
+		i = 0 // If not found any match, start from 0.
+	} else {
+		i++ // Skip the current one.
 	}
 
 	res := r.docs.travel(i, req.size, true, r.docs.filterHidden)
@@ -178,6 +183,12 @@ func (r *Repository) List(since string, size int) []Doc {
 
 // Get a document for the path.
 func (r *Repository) Get(path string) (Doc, error) {
+	// Read only index, fast indexing without channel synchronization.
+	// It's safe since lookup success, the go-routine will lookup again.
+	// Hence, when lookup fail, maybe it's just removed or never exists.
+	if _, ok := r.index[path]; !ok {
+		return Doc{}, NotFoundError(path)
+	}
 	resp := make(chan getResp)
 	r.reqs.get <- getReq{path, resp}
 	v := <-resp
@@ -237,6 +248,7 @@ func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vis
 	r := new(Repository)
 	r.dir = dir
 	r.cache = make(map[string]*entry)
+	r.index = make(map[string]int)
 	r.processor = p
 	r.visitors = vistors
 

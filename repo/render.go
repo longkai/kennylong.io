@@ -55,7 +55,8 @@ func NewRenderer(user, repo string, dir Dir) Renderer {
 
 // Render a file in a repository of a Github user.
 func (r *GithubRenderer) Render(file string) (template.HTML, error) {
-	url := fmt.Sprintf("https://github.com/%s/%s/blob/master/%s", r.User, r.Repo, r.Dir.Rel(file))
+	const branch = "master" // May be support other branches other than master?
+	url := fmt.Sprintf("https://github.com/%s/%s/blob/%s/%s", r.User, r.Repo, branch, r.Dir.Rel(file))
 
 	dummy := template.HTML("")
 	resp, err := http.Get(url)
