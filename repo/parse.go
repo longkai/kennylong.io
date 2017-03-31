@@ -22,9 +22,9 @@ type DocParser struct {
 }
 
 // Parse parse implementation.
-func (p *DocParser) Parse(file string) (Doc, error) {
+func (p *DocParser) Parse(path string) (Doc, error) {
 	doc := Doc{}
-	f, err := os.Open(file)
+	f, err := os.Open(path)
 	if err != nil {
 		return doc, err
 	}

@@ -1,12 +1,13 @@
 package helper_test
 
 import (
-	"github.com/longkai/xiaolongtongxue.com/helper"
 	"testing"
+
+	"github.com/longkai/xiaolongtongxue.com/helper"
 )
 
 func TestExist(t *testing.T) {
-	t.Skip("skip integration test")
+	t.Skip("integration test involves file system")
 	tests := []struct {
 		input string
 		want  bool

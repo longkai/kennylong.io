@@ -36,7 +36,7 @@ func NewMedium(conf context.Conf) *Medium {
 		renderer: &repo.GithubRenderer{
 			User:       conf.Github.User,
 			Repo:       conf.Github.Repo,
-			Pt:         repo.NewPathTransformer(conf.RepoDir),
+			Dir:        repo.Dir(conf.RepoDir),
 			StripTitle: false,
 			URLTransformer: func(str string) string {
 				return fmt.Sprintf("%s/%s", origin, str)
@@ -56,7 +56,7 @@ func (m *Medium) Visit(docs repo.Docs) {
 
 // It must be called before any othter functions in this package.
 func (m *Medium) fetchUID() {
-	val, err := helper.Retry(3, func() (interface{}, error) { return me(m.token) })
+	val, err := helper.Try(3, func() (interface{}, error) { return me(m.token) })
 	if err != nil {
 		log.Printf("medium.me() fail: %v", err)
 	} else {

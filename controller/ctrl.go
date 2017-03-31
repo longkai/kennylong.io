@@ -75,7 +75,7 @@ func entry(w http.ResponseWriter, r *http.Request) {
 		if err = templs.ExecuteTemplate(w, "entry.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	case repo.NotFound:
+	case repo.NotFoundError:
 		// If no doc found, fallback to static files.
 		staticFS.ServeHTTP(w, r)
 	default: // general error

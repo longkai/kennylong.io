@@ -13,7 +13,7 @@ type Scanner interface {
 
 // DocScanner scan a path for documents.
 type DocScanner struct {
-	pt       PathTransformer
+	dir      Dir
 	skipDirs []string
 	globDocs []string
 }
@@ -23,10 +23,13 @@ func (s *DocScanner) Scan(path string) []string {
 	var res []string
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		switch {
+		case info == nil:
+			log.Printf("info of %q is nil, err: %v", path, err)
+			// Nope.
 		case info.IsDir():
 			for _, p := range s.skipDirs {
 				// If match fail, don't skip, same below.
-				if ok, _ := filepath.Match(filepath.Join(s.pt.baseDir, p), path); ok {
+				if ok, _ := filepath.Match(filepath.Join(string(s.dir), p), path); ok {
 					log.Printf("skip scan path: %q", path)
 					return filepath.SkipDir
 				}

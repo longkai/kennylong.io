@@ -12,9 +12,9 @@ type Processor interface {
 	Process(path string) Docs
 }
 
-// DocsProcessor render mark up documents as articles.
-type DocsProcessor struct {
-	pt       PathTransformer
+// DocProcessor render mark up documents as articles.
+type DocProcessor struct {
+	dir      Dir
 	scanner  Scanner
 	parser   Parser
 	callback func(docs Docs)
@@ -22,9 +22,9 @@ type DocsProcessor struct {
 
 // Process the given for documents, either using callback
 // or return value to receiving the results, or both.
-func (p *DocsProcessor) Process(path string) Docs {
+func (p *DocProcessor) Process(path string) Docs {
 	// Ensure path absolute.
-	if path = p.pt.Abs(path); path == "" {
+	if path = p.dir.Abs(path); path == "" {
 		log.Printf("skip outside path: %q", path)
 		return nil
 	}
@@ -58,9 +58,9 @@ func (p *DocsProcessor) Process(path string) Docs {
 	return docs
 }
 
-func (p *DocsProcessor) process(path string, ch chan<- Doc) {
-	url := p.pt.URLPath(path)
-	if url == "" || url == "/" {
+func (p *DocProcessor) process(path string, ch chan<- Doc) {
+	url := p.dir.URLPath(path)
+	if url == "" {
 		log.Printf("skip process path: %q", path)
 		return
 	}

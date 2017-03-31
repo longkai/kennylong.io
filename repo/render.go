@@ -3,15 +3,16 @@ package repo
 import (
 	"bytes"
 	"fmt"
-	"github.com/longkai/xiaolongtongxue.com/helper"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/longkai/xiaolongtongxue.com/helper"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 var re = regexp.MustCompile(`<article[\s\S]*>[\s\S]*</article>`)
@@ -36,17 +37,17 @@ type Renderer interface {
 // GithubRenderer render a mark up document using the Github favored style.
 type GithubRenderer struct {
 	User, Repo     string
-	Pt             PathTransformer
+	Dir            Dir
 	StripTitle     bool
 	URLTransformer func(src string) string
 }
 
 // NewRenderer default Github renderer, the URL in the HTML will remain unchanged.
-func NewRenderer(user, repo string, pt PathTransformer) Renderer {
+func NewRenderer(user, repo string, dir Dir) Renderer {
 	return &GithubRenderer{
 		User:           user,
 		Repo:           repo,
-		Pt:             pt,
+		Dir:            dir,
 		StripTitle:     true,
 		URLTransformer: func(src string) string { return src },
 	}
@@ -54,7 +55,7 @@ func NewRenderer(user, repo string, pt PathTransformer) Renderer {
 
 // Render a file in a repository of a Github user.
 func (r *GithubRenderer) Render(file string) (template.HTML, error) {
-	url := fmt.Sprintf("https://github.com/%s/%s/blob/master/%s", r.User, r.Repo, r.Pt.Rel(file))
+	url := fmt.Sprintf("https://github.com/%s/%s/blob/master/%s", r.User, r.Repo, r.Dir.Rel(file))
 
 	dummy := template.HTML("")
 	resp, err := http.Get(url)
@@ -183,11 +184,12 @@ strip:
 					// Apply back to <a> if any.
 					if hrefIdx > -1 {
 						href := n.Attr[hrefIdx]
-						i := strings.LastIndex(url, ".")
-						// Test existence of a `img@full.ext`.
-						urlFull := fmt.Sprintf("%s@full%s", url[:i], url[i:])
-						if path := r.Pt.Abs(urlFull); helper.Exists(path) {
-							url = urlFull
+						if i := strings.LastIndex(url, "."); i > -1 {
+							// Test existence of a `img@full.ext`.
+							urlFull := fmt.Sprintf("%s@full%s", url[:i], url[i:])
+							if path := r.Dir.Abs(urlFull); helper.Exists(path) {
+								url = urlFull
+							}
 						}
 						n.Attr[hrefIdx] = html.Attribute{Namespace: href.Namespace, Key: href.Key, Val: r.URLTransformer(url)}
 					}

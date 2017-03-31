@@ -1,10 +1,11 @@
 package repo
 
 import (
-	"github.com/longkai/xiaolongtongxue.com/helper"
 	"html/template"
 	"log"
 	"sort"
+
+	"github.com/longkai/xiaolongtongxue.com/helper"
 )
 
 // Repo the articles repository.
@@ -29,7 +30,7 @@ type entry struct {
 }
 
 func (e *entry) call(path string, r Renderer) {
-	val, err := helper.Retry(3, func() (interface{}, error) { return r.Render(path) })
+	val, err := helper.Try(3, func() (interface{}, error) { return r.Render(path) })
 	e.val, e.err = val.(template.HTML), err
 	close(e.ready)
 }
@@ -50,57 +51,46 @@ type getResp struct {
 	err error
 }
 
-type requests struct {
+type reqs struct {
 	get  chan getReq
-	post chan Docs
 	put  chan string
 	del  chan string
+	post chan Docs
 	list chan listReq
 }
 
 // Repository articles repository implements.
 type Repository struct {
-	requests
-	visitors  []Visitor
-	pt        PathTransformer
+	reqs
+
+	dir       Dir
 	renderer  Renderer
 	processor Processor
+	visitors  []Visitor
 
 	// Rendering cache.
 	cache map[string]*entry
-	docs  Docs
+	// It's fast enough and simple implementation, plus easy understood.
+	docs Docs
+	// TODO: should we indexing for quick lookup instead of sequential search?
+	// indexing map[string]Doc
 }
 
 func (r *Repository) loop() {
 	for {
 		select {
-		case req := <-r.requests.list:
-			r.list(req)
-		case req := <-r.requests.get:
+		case req := <-r.reqs.get:
 			r.get(req)
-		case path := <-r.requests.del:
-			r.del(path)
-		case path := <-r.requests.put:
+		case path := <-r.reqs.put:
 			r.put(path)
-		case article := <-r.requests.post:
-			r.post(article)
+		case path := <-r.reqs.del:
+			r.del(path)
+		case doc := <-r.reqs.post:
+			r.post(doc)
+		case req := <-r.reqs.list:
+			r.list(req)
 		}
 	}
-}
-
-func (r *Repository) list(req listReq) {
-	var i = 0
-
-	if req.key != "" {
-		i = r.docs.matchFirst(func(doc Doc) bool {
-			return doc.URL == req.key
-		}) + 1 // Skip the current one.
-		// If not found any match, start from 0.
-	}
-
-	res := r.docs.travel(i, req.size, true, r.docs.filterHidden)
-
-	go func() { req.resp <- res }()
 }
 
 func (r *Repository) get(req getReq) {
@@ -108,7 +98,7 @@ func (r *Repository) get(req getReq) {
 		return doc.URL == req.path
 	})
 	if i < 0 {
-		go func() { req.resp <- getResp{Doc{}, NotFound(req.path)} }()
+		go func() { req.resp <- getResp{Doc{}, NotFoundError(req.path)} }()
 		return
 	}
 
@@ -116,10 +106,10 @@ func (r *Repository) get(req getReq) {
 
 	// A hidden doc has no newer/older navigation.
 	if !doc.Hide {
-		if docs := r.docs.travel(i+1, 1, true, r.docs.filterHidden); len(docs) > 0 {
+		if docs := r.docs.travel(i+1, 1, true, r.docs.filterHidden); docs.Len() > 0 {
 			doc.Older = docs[0].URL
 		}
-		if docs := r.docs.travel(i-1, 1, false, r.docs.filterHidden); len(docs) > 0 {
+		if docs := r.docs.travel(i-1, 1, false, r.docs.filterHidden); docs.Len() > 0 {
 			doc.Newer = docs[0].URL
 		}
 	}
@@ -139,6 +129,12 @@ func (r *Repository) get(req getReq) {
 	}()
 }
 
+func (r *Repository) put(path string) {
+	// Delete then repost.
+	r.del(path)
+	go r.processor.Process(path)
+}
+
 func (r *Repository) del(path string) {
 	i := r.docs.matchFirst(func(doc Doc) bool {
 		return doc.URL == path
@@ -150,29 +146,38 @@ func (r *Repository) del(path string) {
 	}
 }
 
-func (r *Repository) put(path string) {
-	// Delete then repost.
-	r.del(path)
-	go r.processor.Process(path)
-}
-
 func (r *Repository) post(docs Docs) {
 	r.docs = append(r.docs, docs...)
 	sort.Sort(r.docs)
-	log.Printf("receive %d new articles, total %d", len(docs), len(r.docs))
+	log.Printf("receive %d new articles, total %d", docs.Len(), r.docs.Len())
+}
+
+func (r *Repository) list(req listReq) {
+	var i = 0
+
+	if req.key != "" {
+		i = r.docs.matchFirst(func(doc Doc) bool {
+			return doc.URL == req.key
+		}) + 1 // Skip the current one.
+		// If not found any match, start from 0.
+	}
+
+	res := r.docs.travel(i, req.size, true, r.docs.filterHidden)
+
+	go func() { req.resp <- res }()
 }
 
 // List articles since a specific path, excluded.
 func (r *Repository) List(since string, size int) []Doc {
 	resp := make(chan Docs)
-	r.requests.list <- listReq{since, size, resp}
+	r.reqs.list <- listReq{since, size, resp}
 	return <-resp
 }
 
 // Get a document for the path.
 func (r *Repository) Get(path string) (Doc, error) {
 	resp := make(chan getResp)
-	r.requests.get <- getReq{path, resp}
+	r.reqs.get <- getReq{path, resp}
 	v := <-resp
 	return v.doc, v.err
 }
@@ -180,13 +185,13 @@ func (r *Repository) Get(path string) (Doc, error) {
 // Del a document for the path.
 func (r *Repository) Del(path string) {
 	log.Printf("delete: %s", path)
-	r.requests.del <- path
+	r.reqs.del <- path
 }
 
 // Put revalidate a document.
 func (r *Repository) Put(path string) {
 	log.Printf("revalidate: %s", path)
-	r.requests.put <- path
+	r.reqs.put <- path
 }
 
 // Post process the path for documents.
@@ -213,29 +218,29 @@ func (r *Repository) Batch(adds, mods, dels []string) {
 			}
 		}()
 	})
-	handle(mods, func(f string) { go r.Put(r.pt.URLPath(f)) })
-	handle(dels, func(f string) { go r.Del(r.pt.URLPath(f)) })
+	handle(mods, func(f string) { go r.Put(r.dir.URLPath(f)) })
+	handle(dels, func(f string) { go r.Del(r.dir.URLPath(f)) })
 }
 
 // NewRepo create a new article repository.
 func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vistors ...Visitor) Repo {
-	pt := NewPathTransformer(repoDir)
+	dir := Dir(repoDir)
 
-	p := &DocsProcessor{pt: pt}
+	p := &DocProcessor{dir: dir}
 	p.scanner = &DocScanner{
 		skipDirs: skipDirs,
 		globDocs: globDocs,
-		pt:       pt,
+		dir:      dir,
 	}
 	p.parser = &DocParser{}
 
 	r := new(Repository)
-	r.pt = pt
+	r.dir = dir
 	r.cache = make(map[string]*entry)
 	r.processor = p
 	r.visitors = vistors
 
-	r.requests = requests{
+	r.reqs = reqs{
 		list: make(chan listReq),
 		del:  make(chan string),
 		put:  make(chan string),
@@ -243,9 +248,10 @@ func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vis
 		post: make(chan Docs),
 	}
 
-	r.renderer = NewRenderer(user, repo, pt)
+	r.renderer = NewRenderer(user, repo, dir)
 
-	p.callback = func(docs Docs) { r.requests.post <- docs }
+	// Receive result asynchronously.
+	p.callback = func(docs Docs) { r.reqs.post <- docs }
 
 	go r.loop()
 	r.Post(repoDir)

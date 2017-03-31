@@ -5,10 +5,10 @@ import (
 	"time"
 )
 
-// NotFound indicates the doc is not existed.
-type NotFound string
+// NotFoundError indicates the requested doc is not existed.
+type NotFoundError string
 
-func (s NotFound) Error() string { return "404 doc not found: " + string(s) }
+func (s NotFoundError) Error() string { return "404 doc not found: " + string(s) }
 
 // Doc representation of the document.
 type Doc struct {
@@ -23,14 +23,15 @@ type Doc struct {
 	Location   string        `json:"location"`
 	Background string        `json:"background"`
 	License    string        `json:"license"`
-	// hide from the list, but still can get with URL
+	// Hide from the list, but still can get with URL.
 	Hide  bool   `json:"hide"`
 	Older string `json:"older,omitempty"`
 	Newer string `json:"newer,omitempty"`
 }
 
 // Docs a list of articles. Maybe a BST is faster,
-// an list is fast enough for such a tiny program, however.
+// an list is fast enough for such a tiny program.
+// Simplicity, generality and clarity is more important, however.
 type Docs []Doc
 
 // Len _

@@ -6,6 +6,8 @@ ENV GOPATH /tmp
 ENV PATH $PATH:$GOPATH/bin
 ENV SRC /tmp/src/github.com/longkai/xiaolongtongxue.com
 
+ARG branch=master
+
 RUN apk add --no-cache git && \
   apk add --no-cache --virtual .build-deps \
                                   build-base \
@@ -15,7 +17,7 @@ RUN apk add --no-cache git && \
                                   nodejs && \
   runDeps="$( \
     mkdir -p $SRC && cd $SRC/.. && \
-    git clone --depth=1 https://github.com/longkai/xiaolongtongxue.com.git && \
+    git clone --branch $branch --depth=1 https://github.com/longkai/xiaolongtongxue.com.git && \
     npm install -g bower && echo '{ "allow_root": true }' > /root/.bowerrc && \
     cd $SRC/assets/ && \
     bower install && \
