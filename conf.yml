@@ -25,3 +25,6 @@ meta:
   twitter: twitter link if any
   instagram: ins link if any
   stackoverflow: stackoverflow link if any
+redir: # Redirection mapping
+  "/path/to/old": "/path/to/new"
+

@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 
@@ -60,12 +61,19 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 func entry(w http.ResponseWriter, r *http.Request) {
 	// Compatible with old URL scheme, i.e., `/a/b/title/` to `/a/b/title`.
-	if p := r.URL.Path; strings.HasSuffix(p, "/") {
+	p := r.URL.Path
+	if strings.HasSuffix(p, "/") {
 		http.Redirect(w, r, p[:len(p)-1], http.StatusMovedPermanently)
 		return
 	}
+	// User-defined redirection mapping.
+	if predir, ok := conf.Redirects[p]; ok {
+		log.Printf("redirect %q to %q", p, predir)
+		http.Redirect(w, r, predir, http.StatusMovedPermanently)
+		return
+	}
 	// Try article first.
-	doc, err := repository.Get(r.URL.Path)
+	doc, err := repository.Get(p)
 	switch e := err.(type) {
 	case nil:
 		data := &struct {

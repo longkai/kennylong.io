@@ -20,6 +20,8 @@ type Conf struct {
 		HookSecret  string `yaml:"hook_secret"`
 		AccessToken string `yaml:"access_token"`
 	} `yaml:"github"`
+	Redirects map[string]string `yaml:"redir"`
+
 	Meta struct {
 		V             string
 		B             string
