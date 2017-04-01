@@ -30,7 +30,9 @@ type entry struct {
 }
 
 func (e *entry) call(path string, r Renderer) {
-	val, err := helper.Try(3, func() (interface{}, error) { return r.Render(path) })
+	val, err := helper.Try(3, func() (interface{}, error) {
+		return r.Render(path)
+	})
 	e.val, e.err = val.(template.HTML), err
 	close(e.ready)
 }
@@ -39,6 +41,10 @@ type listReq struct {
 	path string
 	size int
 	resp chan Docs
+}
+
+type batchReq struct {
+	adds, mods, dels []string
 }
 
 type getReq struct {
@@ -52,11 +58,10 @@ type getResp struct {
 }
 
 type reqs struct {
-	get  chan getReq
-	put  chan string
-	del  chan string
-	post chan Docs
-	list chan listReq
+	get   chan getReq
+	post  chan Docs
+	list  chan listReq
+	batch chan batchReq
 }
 
 // Repository articles repository implements.
@@ -78,16 +83,55 @@ func (r *Repository) loop() {
 		select {
 		case req := <-r.reqs.get:
 			r.get(req)
-		case path := <-r.reqs.put:
-			r.put(path)
-		case path := <-r.reqs.del:
-			r.del(path)
 		case doc := <-r.reqs.post:
 			r.post(doc)
 		case req := <-r.reqs.list:
 			r.list(req)
+		case req := <-r.reqs.batch:
+			r.batch(req)
 		}
 	}
+}
+
+func (r *Repository) batch(req batchReq) {
+	rm := func(paths []string) {
+		for _, path := range paths {
+			if _, ok := r.index[path]; ok {
+				delete(r.index, path)
+				delete(r.cache, path)
+			}
+		}
+	}
+	// Re-process adds and mods.
+	if plen := len(req.adds) + len(req.mods); plen > 0 {
+		combine := make([]string, plen)
+		copy(combine, req.adds)
+		copy(combine[len(req.adds):], req.mods)
+		go func() {
+			docs := r.processor.Process(combine...)
+			// Post process.
+			for _, v := range r.visitors {
+				v.Visit(docs)
+			}
+		}()
+	}
+	// Deletions.
+	rm(req.dels)
+	// Modifications.
+	rm(req.mods)
+	// Rearrangement, strip dels and mods, the order still remains.
+	idx := 0
+	tmp := make(Docs, 0, len(r.docs))
+	for _, doc := range r.docs {
+		// Pick those who are not deleted or modified.
+		if _, ok := r.index[doc.URL]; ok {
+			tmp = append(tmp, doc)
+			r.index[doc.URL] = idx
+			idx++
+		}
+	}
+	r.docs = tmp
+	// Hence, the time complexity is O(n).
 }
 
 func (r *Repository) get(req getReq) {
@@ -124,39 +168,24 @@ func (r *Repository) get(req getReq) {
 	}()
 }
 
-func (r *Repository) put(path string) {
-	// Delete then repost.
-	log.Printf("revalidate: %s", path)
-	r.del(path)
-	go r.processor.Process(path)
-}
-
-func (r *Repository) del(path string) {
-	if i, ok := r.index[path]; ok {
-		log.Printf("delete %s", path)
-		// Rebuild index, partially.
-		for j := i + 1; j < r.docs.Len(); j++ {
-			r.index[r.docs[j].URL]--
-		}
-		delete(r.index, path)
-		// Delete from slice.
-		copy(r.docs[i:], r.docs[i+1:])
-		r.docs = r.docs[:len(r.docs)-1]
-		// Clear its rendering cache.
-		delete(r.cache, path)
-	}
-}
-
 func (r *Repository) post(docs Docs) {
-	r.docs = append(r.docs, docs...)
+	// If a some of a newly doc has been existed already, replace them.
+	// i.e., avoid duplicated.
+	for _, d := range docs {
+		if i, ok := r.index[d.URL]; ok {
+			r.docs[i] = d          // Replace the old one.
+			delete(r.cache, d.URL) // Clear its rendering cache, if any.
+		} else {
+			r.docs = append(r.docs, d) // Append the new one.
+		}
+	}
 	sort.Sort(r.docs)
 
 	// Rebuild index.
-	m := make(map[string]int)
+	index := r.index
 	for i, d := range r.docs {
-		m[d.URL] = i
+		index[d.URL] = i
 	}
-	r.index = m
 
 	log.Printf("receive %d new articles, total %d", docs.Len(), r.docs.Len())
 }
@@ -197,51 +226,56 @@ func (r *Repository) Get(path string) (Doc, error) {
 
 // Del a document for the path.
 func (r *Repository) Del(path string) {
-	r.reqs.del <- path
+	r.Batch(nil, nil, []string{path})
 }
 
 // Put revalidate a document.
 func (r *Repository) Put(path string) {
-	r.reqs.put <- path
+	r.Batch(nil, []string{path}, nil)
 }
 
-// Post process the path for documents.
+// Post publish the path for documents.
+// This method should be called when you start the application.
+// Since it won't call the visitors let them do post process.
 func (r *Repository) Post(path string) {
 	log.Printf("post %s", path)
-	go r.processor.Process(path)
+	r.processor.Process(path)
 }
 
-// Batch batch reqeust.
+// Batch additions, modifications and deletions into a single request.
 func (r *Repository) Batch(adds, mods, dels []string) {
-	log.Printf("Batch(%v, %v, %v)", adds, mods, dels)
 	// Git only tracks files, hence, all of the slice are files path.
-	handle := func(a []string, f func(s string)) {
-		for _, v := range a {
-			f(v)
-		}
-	}
 
-	handle(adds, func(f string) {
-		go func() {
-			docs := r.processor.Process(f)
-			for _, v := range r.visitors {
-				v.Visit(docs)
-			}
-		}()
-	})
-	handle(mods, func(f string) { go r.Put(r.dir.URLPath(f)) })
-	handle(dels, func(f string) { go r.Del(r.dir.URLPath(f)) })
+	// `git mv a b`: a deletion plus a addition, a and b is different.
+	// `git rm`: deletion only.
+	// `git add`: addition or modification.
+
+	// Hence, the strategy is:
+	// 1. deletion: just delete it from slice and rendering cache.
+	// 2. modification: delete first then adding.
+	// 3. addition: adding it.
+	// 4. renaming: a delete and a addition.
+
+	// What about a user modifies follows a renaming? A deletion and addition.
+
+	// The key point: `adds`, `mods` and `dels` slice are distinct.
+	// Therefore, order doesn't matter.
+
+	log.Printf("Batch(%v, %v, %v)", adds, mods, dels)
+
+	r.reqs.batch <- batchReq{adds, mods, dels}
 }
 
 // NewRepo create a new article repository.
-func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vistors ...Visitor) Repo {
+func NewRepo(repoDir string, skipDirs, globDocs []string,
+	user, repo string, vistors ...Visitor) Repo {
 	dir := Dir(repoDir)
 
 	p := &DocProcessor{dir: dir}
 	p.scanner = &DocScanner{
+		dir:      dir,
 		skipDirs: skipDirs,
 		globDocs: globDocs,
-		dir:      dir,
 	}
 	p.parser = &DocParser{}
 
@@ -253,11 +287,10 @@ func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vis
 	r.visitors = vistors
 
 	r.reqs = reqs{
-		list: make(chan listReq),
-		del:  make(chan string),
-		put:  make(chan string),
-		get:  make(chan getReq),
-		post: make(chan Docs),
+		list:  make(chan listReq),
+		get:   make(chan getReq),
+		post:  make(chan Docs),
+		batch: make(chan batchReq),
 	}
 
 	r.renderer = NewRenderer(user, repo, dir)
@@ -266,6 +299,6 @@ func NewRepo(repoDir string, skipDirs, globDocs []string, user, repo string, vis
 	p.callback = func(docs Docs) { r.reqs.post <- docs }
 
 	go r.loop()
-	r.Post(repoDir)
+	go r.Post(repoDir)
 	return r
 }

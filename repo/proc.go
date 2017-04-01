@@ -9,7 +9,7 @@ import (
 
 // Processor process a path, which could be a file or dir.
 type Processor interface {
-	Process(path string) Docs
+	Process(paths ...string) Docs
 }
 
 // DocProcessor render mark up documents as articles.
@@ -22,14 +22,16 @@ type DocProcessor struct {
 
 // Process the given for documents, either using callback
 // or return value to receiving the results, or both.
-func (p *DocProcessor) Process(path string) Docs {
-	// Ensure path absolute.
-	if path = p.dir.Abs(path); path == "" {
-		log.Printf("skip outside path: %q", path)
-		return nil
+func (p *DocProcessor) Process(paths ...string) Docs {
+	var files []string
+	for _, path := range paths {
+		// Ensure absolute path.
+		if path = p.dir.Abs(path); path == "" {
+			log.Printf("skip outside path: %q", path)
+			continue
+		}
+		files = append(files, p.scanner.Scan(path)...)
 	}
-
-	files := p.scanner.Scan(path)
 
 	var wg sync.WaitGroup
 	ch := make(chan Doc)
