@@ -10,8 +10,13 @@ import (
 )
 
 const (
-	templ = `# %s
-Content goes here..
+	md  = "md"
+	org = "org"
+)
+
+const (
+	templMD = `# %s
+Content goes here...
 
 ## EOF
 ` + "```yaml" + `
@@ -25,11 +30,30 @@ tags:
   - tag2
 date: %s
 ` + "```"
+
+	templORG = `* %s
+
+Content goes here...
+
+** EOF
+
+#+BEGIN_SRC yaml
+summary: 
+weather: 
+license: cc-40-by
+location: 
+background: 
+tags: [tag1, tag2]
+date: %s
+#+END_SRC
+`
 )
 
 var mkdir = func(name string) error {
 	return os.MkdirAll(name, 0755)
 }
+
+var kind = org // Default org-mode.
 
 func mayFail(err error) {
 	if err != nil {
@@ -40,15 +64,17 @@ func mayFail(err error) {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s title\n", os.Args[0])
+		fmt.Printf("Usage: %s title [md | org]\n", os.Args[0])
 		os.Exit(1)
 	}
 	title := os.Args[1]
+	if len(os.Args) >= 3 {
+		kind = os.Args[2]
+	}
 	dir := formatName(title)
 
 	mayFail(mkdir(dir))
-
-	f := filepath.Join(dir, "README.md")
+	f := filepath.Join(dir, "README."+kind)
 	_, err := os.Stat(f)
 	if err == nil {
 		fmt.Printf("%s already existed, discard it? y/n: ", f)
@@ -71,6 +97,15 @@ func main() {
 }
 
 func newMD(title string, out io.Writer) error {
+	var templ string
+	switch kind {
+	case org:
+		templ = templORG
+	case md:
+		templ = templMD
+	default:
+		panic("unknown type " + kind)
+	}
 	_, err := out.Write([]byte(fmt.Sprintf(templ, title, time.Now().Format(time.RFC3339))))
 	return err
 }
