@@ -2,6 +2,7 @@ package repo
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"io/ioutil"
 	"regexp"
@@ -37,7 +38,7 @@ func (p *DocParser) Parse(path string) (Doc, error) {
 	return doc, nil
 }
 
-var parseYAML = func(in io.Reader, v interface{}) error {
+var parseDoc = func(in io.Reader, v interface{}) error {
 	b, err := ioutil.ReadAll(in)
 	if err != nil {
 		return err
@@ -46,14 +47,17 @@ var parseYAML = func(in io.Reader, v interface{}) error {
 }
 
 func unmarshal(in io.Reader, d *Doc) error {
-	title, _yaml, err := parse(in)
+	title, yml, err := parse(in)
 	if err != nil {
 		return err
+	}
+	if yml == nil {
+		return errors.New("yaml block is empty")
 	}
 
 	// Default title if not specify in yaml block.
 	d.Title = title
-	return parseYAML(bytes.NewReader(_yaml), d)
+	return parseDoc(bytes.NewReader(yml), d)
 }
 
 var (
@@ -63,7 +67,10 @@ var (
 	ymlEndMarkRegex   = regexp.MustCompile(`\s*date:`)
 )
 
-// Parse a reader
+// Parse a title and yaml meta block from a reader.
+// The logic is:
+// A headline followed by a yaml code block, and ends with a `data` field.
+// Empty line in between will be stripped.
 func parse(in io.Reader) (title string, yml []byte, err error) {
 	scanner := bufio.NewScanner(in)
 
@@ -71,8 +78,10 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 		line := scanner.Text()
 		if !emptyLineRegex.MatchString(line) {
 			title = line
-			// Treat the first utf8 code point >= '0' as the starting title, if any.
-			// The most common mark up symbols are less than '0' in ascii: '#', '*', etc.
+			// Treat the first utf8 rune great and equal than '0'
+			// as the starting title, if any.
+			// Luckily, The most common mark up symbols are less than '0'
+			// in ascii: '#', '*', etc.
 			for i, c := range line {
 				if c >= '0' {
 					title = line[i:]
@@ -83,8 +92,10 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 		}
 	}
 
+	buf := make([]byte, 0, 256)
 	for scanner.Scan() {
 		if eofMarkRegex.Match(scanner.Bytes()) {
+		try:
 			// Skip empty lines.
 			for scanner.Scan() && emptyLineRegex.Match(scanner.Bytes()) {
 			}
@@ -93,11 +104,12 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 				continue
 			}
 			// Gather yaml source.
-			buf := make([]byte, 0, 256)
 			for scanner.Scan() {
 				b := scanner.Bytes()
-				if emptyLineRegex.Match(b) {
-					continue
+				// If we find another `EOF`, drop current and try parsing again.
+				if eofMarkRegex.Match(b) {
+					buf = buf[:0] // Reset buffer.
+					goto try
 				}
 				buf = append(buf, b...)
 				buf = append(buf, '\n')
