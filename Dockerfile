@@ -39,7 +39,6 @@ RUN apk add --no-cache git && \
   apk del .build-deps && \
   rm -rf /tmp/*
 
-USER nobody
 
 EXPOSE 1217
 VOLUME ["/repo", "/conf.yml", "/log.txt"]
