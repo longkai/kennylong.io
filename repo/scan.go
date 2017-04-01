@@ -23,8 +23,11 @@ func (s *DocScanner) Scan(path string) []string {
 	var res []string
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		switch {
+		case err != nil:
+			log.Printf("scan %q err: %v", path, err)
+			// Nope.
 		case info == nil:
-			log.Printf("info of %q is nil, err: %v", path, err)
+			log.Printf("scan info of %q is nil, err: %v", path, err)
 			// Nope.
 		case info.IsDir():
 			for _, p := range s.skipDirs {

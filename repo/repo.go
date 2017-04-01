@@ -18,11 +18,6 @@ type Repo interface {
 	Batch(adds, mods, dels []string)
 }
 
-// Visitor post render operation.
-type Visitor interface {
-	Visit(docs Docs)
-}
-
 type entry struct {
 	ready chan struct{}
 	val   template.HTML
@@ -111,7 +106,10 @@ func (r *Repository) batch(req batchReq) {
 			docs := r.processor.Process(combine...)
 			// Post process.
 			for _, v := range r.visitors {
-				v.Visit(docs)
+				v.Visit(docs, map[int]interface{}{
+					Adds: req.adds,
+					Mods: req.mods,
+				})
 			}
 		}()
 	}

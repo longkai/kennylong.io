@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sort"
 
 	"github.com/longkai/xiaolongtongxue.com/context"
 	"github.com/longkai/xiaolongtongxue.com/helper"
@@ -48,9 +49,18 @@ func NewMedium(conf context.Conf) *Medium {
 }
 
 // Visit repost the newly docs to the medium.
-func (m *Medium) Visit(docs repo.Docs) {
-	for _, doc := range docs {
-		go m.Post(doc)
+func (m *Medium) Visit(docs repo.Docs, cookie map[int]interface{}) {
+	// Since medium only allows creating post, nothing we can do about editing.
+	if v, ok := cookie[repo.Adds]; ok {
+		if adds, ok := v.([]string); ok {
+			sort.Strings(adds)
+			for _, doc := range docs {
+				i := sort.SearchStrings(adds, doc.Path)
+				if i >= 0 && i < len(adds) {
+					go m.Post(doc)
+				}
+			}
+		}
 	}
 }
 
@@ -70,7 +80,7 @@ func (m *Medium) fetchUID() {
 func (m *Medium) Post(doc repo.Doc) error {
 	<-m.ready
 	if m.uid == "" {
-		return fmt.Errorf("Post(%q) without uid, abort posting", doc.Path)
+		return fmt.Errorf("medium.Post(%q) without uid, abort posting", doc.Path)
 	}
 
 	html, err := m.renderer.Render(doc.Path)
@@ -78,10 +88,9 @@ func (m *Medium) Post(doc repo.Doc) error {
 		return err
 	}
 
-	// Always `html` and `public` since you have publish to your site
+	// Always `html` and `public` since you have publish to your site.
 	p := &payload{Title: doc.Title, Tags: doc.Tags, License: doc.License, Format: "html", Status: "public"}
 	p.CanonicalURL = m.origin + "/" + doc.URL
-	// title has been stripped by parser, however, medium needs it, so we have to prepend it. see their doc at: https://github.com/Medium/medium-api-docs#33-posts
 	p.Content = string(html)
 
 	if _, err := p.post(m.uid, m.token); err != nil {
