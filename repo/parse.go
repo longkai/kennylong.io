@@ -96,6 +96,9 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 			buf := make([]byte, 0, 256)
 			for scanner.Scan() {
 				b := scanner.Bytes()
+				if emptyLineRegex.Match(b) {
+					continue
+				}
 				buf = append(buf, b...)
 				buf = append(buf, '\n')
 				// Meta yaml block must end with a `date` field.
