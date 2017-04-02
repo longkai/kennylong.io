@@ -167,14 +167,19 @@ func (r *Repository) get(req getReq) {
 }
 
 func (r *Repository) post(docs Docs) {
+	oldSize := r.docs.Len()
 	// If a some of a newly doc has been existed already, replace them.
-	// i.e., avoid duplicated.
+	// i.e., avoid duplication.
 	for _, d := range docs {
 		if i, ok := r.index[d.URL]; ok {
+			log.Printf("replace %q with %q", r.docs[i].URL, d.URL)
 			r.docs[i] = d          // Replace the old one.
 			delete(r.cache, d.URL) // Clear its rendering cache, if any.
 		} else {
 			r.docs = append(r.docs, d) // Append the new one.
+			// If there are multiple docs have a same URL,
+			// the last one will be kept.
+			r.index[d.URL] = r.docs.Len() - 1
 		}
 	}
 	sort.Sort(r.docs)
@@ -185,7 +190,7 @@ func (r *Repository) post(docs Docs) {
 		index[d.URL] = i
 	}
 
-	log.Printf("receive %d new articles, total %d", docs.Len(), r.docs.Len())
+	log.Printf("receive %d docs, len %d to %d", docs.Len(), oldSize, r.docs.Len())
 }
 
 func (r *Repository) list(req listReq) {
