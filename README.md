@@ -1,4 +1,4 @@
-# xiaolongtongxue.com v3.0
+# xiaolongtongxue.com
 
 [![Build Status](https://travis-ci.org/longkai/xiaolongtongxue.com.svg?branch=master)](https://travis-ci.org/longkai/xiaolongtongxue.com)
 [![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg?maxAge=2592000)](https://hub.docker.com/r/longkai/xiaolongtongxue.com/)
@@ -23,15 +23,13 @@ For example:
 
 ```sh
 $ cd /path/to/repo
-$ ll articles/2017/how-does-qq-know-who-i-am
-$ total 56K
--rw-r--r-- 1 longkai staff 7.2K Mar 27 16:23 README.md
--rw-r--r-- 1 longkai staff  48K Mar 24 02:04 qq.jpg
+$ ls articles/2017/how-does-qq-know-who-i-am
+README.md  qq.jpg
 ```
 
-The *README.md* is your document which will be rendered as a web page, you could, however, change the file name pattern with willcard, see [configuration](#configuration). Its URL path is `/articles/2017/how-does-qq-know-who-i-am`, same layout as directory.
+The *README.md* is your document which will be rendered as a web page, you could, however, change the file name pattern with willcard, see the configurationi section. Its URL path is `/articles/2017/how-does-qq-know-who-i-am`, same layout as directory.
 
-You could import any image relative in you repository directory, or internet resources, of course. Suppose you have a full image along with its thumbnail, call *nice.jpg* for instance, by convention the full image should be named as *nice@full.jpg*.
+You could import any image relative in you repository directory, or internet resources, of course. Suppose you have a full image along with its thumbnail, call `nice.jpg` for instance, by convention the full image should be named as `nice@full.jpg`.
 
 Each doc shoud have a mark up convention providing its metadata.
 
