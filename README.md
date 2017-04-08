@@ -88,7 +88,8 @@ glob_docs: # The markup file name wilcards.
   - README.* # Any file start with README.xxx would be parse as an article.
 skip_dirs: # Dirs will be skipped when parsing.
   - .* # Skip hidden dirs.
-  - assets # *assets* dir is resered as front-end resources.
+  - assets # Reserved for front-end resources.
+  - list # Reserved for pagination.
 github:
   user: # Github user name
   repo: # Github repo name
@@ -176,5 +177,4 @@ Happy hacking.
 [bower]: https://bower.io/
 [medium]: https://github.com/Medium/medium-api-docs/issues/52
 [go-template]: https://golang.org/pkg/text/template/
-
 

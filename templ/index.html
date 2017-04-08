@@ -171,7 +171,7 @@ more.addEventListener('click', function () {
 
   ajax(
     'GET',
-    "//{0}/ls{1}".format(window.location.host, lastKey()),
+    "//{0}/list?since={1}".format(window.location.host, lastKey()),
     function (data) {
       //console.log(data);
       hasMore = data.length != 0;

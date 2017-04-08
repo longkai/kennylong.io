@@ -74,7 +74,7 @@ func (p *DocProcessor) process(path string, ch chan<- Doc) {
 	}
 
 	doc.Path, doc.URL = path, url
-	if bg := doc.Background; bg != "" && !absURLRegex.MatchString(doc.Background) {
+	if bg := doc.Background; bg != "" && !absURLRegex.MatchString(bg) {
 		// Complete relative links.
 		doc.Background = filepath.Join(doc.URL, bg)
 	}

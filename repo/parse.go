@@ -31,11 +31,9 @@ func (p *DocParser) Parse(path string) (Doc, error) {
 	}
 	defer f.Close()
 
-	if err = unmarshal(f, &doc); err != nil {
-		return doc, err
-	}
+	err = unmarshal(f, &doc)
 
-	return doc, nil
+	return doc, err
 }
 
 var parseDoc = func(in io.Reader, v interface{}) error {
@@ -63,8 +61,8 @@ func unmarshal(in io.Reader, d *Doc) error {
 var (
 	emptyLineRegex    = regexp.MustCompile(`^\s*$`)
 	eofMarkRegex      = regexp.MustCompile(`(?i)\s+EOF\s*$`)
-	ymlStartMarkRegex = regexp.MustCompile(`\s*ya?ml\s*$`)
-	ymlEndMarkRegex   = regexp.MustCompile(`\s*date:`)
+	ymlStartMarkRegex = regexp.MustCompile(`ya?ml\s*$`)
+	ymlEndMarkRegex   = regexp.MustCompile(`^\s*date:`)
 )
 
 // Parse a title and yaml meta block from a reader.

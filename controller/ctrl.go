@@ -32,33 +32,60 @@ func Ctrl(_conf context.Conf) {
 		conf.Github.User, conf.Github.Repo, medium.NewMedium(conf))
 
 	github.Init("/api/github/hook", conf.RepoDir, conf.Github.HookSecret,
-		conf.Github.AccessToken, func(a, m, d []string) { repository.Batch(a, m, d) })
+		conf.Github.AccessToken, func(a, m, d []string) {
+			repository.Batch(a, m, d)
+		})
 
 	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
-	staticFS = http.FileServer(http.Dir(conf.RepoDir))
 
-	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./assets"))))
+	// Document's assets, e.g., its images.
+	staticFS = http.FileServer(http.Dir(conf.RepoDir))
+	// Front-end resources.
+	http.Handle("/assets",
+		http.StripPrefix("/assets", http.FileServer(http.Dir("assets"))))
+	// Global handler.
 	http.HandleFunc("/", handle)
-	http.HandleFunc("/ls/", ls)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" { // Home page request.
-		// `/` never exists as an entry, so it indicates from the beginning.
-		v := repository.List("/", pageSize)
-		data := &struct {
-			List repo.Docs
-			Meta interface{}
-		}{v, conf.Meta}
-		if err := templs.ExecuteTemplate(w, "index.html", data); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		return
+	switch r.URL.Path {
+	case "/": // Home page.
+		home(w, r)
+	case "/list": // Pagination.
+		list(w, r)
+	default: // Otherwise it should be an entry or its static resources request.
+		entry(w, r)
 	}
-	// Otherwise it should be a entry request or its file resources.
-	entry(w, r)
 }
 
+func home(w http.ResponseWriter, r *http.Request) {
+	v := repository.List("/", pageSize)
+	data := &struct {
+		List repo.Docs
+		Meta interface{}
+	}{v, conf.Meta}
+
+	if err := templs.ExecuteTemplate(w, "index.html", data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func list(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Query().Get("since")
+	// If the key is not found, return the latest ones.
+	v := repository.List(key, pageSize)
+	b, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(b)
+}
+
+// entry bundles entry and its static resources into a same handler,
+// since we use the same directory layout, for doc and its static files(images).
+// If entry is not found in repository, fallback to its static resources.
 func entry(w http.ResponseWriter, r *http.Request) {
 	// Compatible with old URL scheme, i.e., `/a/b/title/` to `/a/b/title`.
 	p := r.URL.Path
@@ -72,7 +99,7 @@ func entry(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, predir, http.StatusMovedPermanently)
 		return
 	}
-	// Try article first.
+	// Try document first.
 	doc, err := repository.Get(p)
 	switch e := err.(type) {
 	case nil:
@@ -90,16 +117,4 @@ func entry(w http.ResponseWriter, r *http.Request) {
 	default: // general error
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
-}
-
-func ls(w http.ResponseWriter, r *http.Request) {
-	key := r.URL.Path[len("/ls"):]
-	v := repository.List(key, pageSize)
-	b, err := json.Marshal(v)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Write(b)
 }

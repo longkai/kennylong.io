@@ -8,9 +8,9 @@ import (
 	"github.com/longkai/xiaolongtongxue.com/helper"
 )
 
-// Repo the articles repository.
+// Repo the documents repository.
 type Repo interface {
-	List(since string, size int) []Doc
+	List(since string, size int) Docs
 	Get(path string) (Doc, error)
 	Del(path string)
 	Put(path string)
@@ -59,8 +59,8 @@ type reqs struct {
 	batch chan batchReq
 }
 
-// Repository articles repository implements.
-type Repository struct {
+// DocRepo documents repository implements.
+type DocRepo struct {
 	reqs
 
 	dir       Dir
@@ -73,7 +73,7 @@ type Repository struct {
 	cache map[string]*entry // Rendering cache.
 }
 
-func (r *Repository) loop() {
+func (r *DocRepo) loop() {
 	for {
 		select {
 		case req := <-r.reqs.get:
@@ -88,7 +88,7 @@ func (r *Repository) loop() {
 	}
 }
 
-func (r *Repository) batch(req batchReq) {
+func (r *DocRepo) batch(req batchReq) {
 	rm := func(paths []string) {
 		for _, path := range paths {
 			if _, ok := r.index[path]; ok {
@@ -132,7 +132,7 @@ func (r *Repository) batch(req batchReq) {
 	// Hence, the time complexity is O(n).
 }
 
-func (r *Repository) get(req getReq) {
+func (r *DocRepo) get(req getReq) {
 	i, ok := r.index[req.path]
 	if !ok {
 		go func() { req.resp <- getResp{Doc{}, NotFoundError(req.path)} }()
@@ -166,7 +166,7 @@ func (r *Repository) get(req getReq) {
 	}()
 }
 
-func (r *Repository) post(docs Docs) {
+func (r *DocRepo) post(docs Docs) {
 	oldSize := r.docs.Len()
 	// If a some of a newly doc has been existed already, replace them.
 	// i.e., avoid duplication.
@@ -193,7 +193,7 @@ func (r *Repository) post(docs Docs) {
 	log.Printf("receive %d docs, len %d to %d", docs.Len(), oldSize, r.docs.Len())
 }
 
-func (r *Repository) list(req listReq) {
+func (r *DocRepo) list(req listReq) {
 	i, ok := r.index[req.path]
 	if !ok {
 		i = 0 // If not found any match, start from 0.
@@ -207,14 +207,14 @@ func (r *Repository) list(req listReq) {
 }
 
 // List articles since a specific path, excluded.
-func (r *Repository) List(since string, size int) []Doc {
+func (r *DocRepo) List(since string, size int) Docs {
 	resp := make(chan Docs)
 	r.reqs.list <- listReq{since, size, resp}
 	return <-resp
 }
 
 // Get a document for the path.
-func (r *Repository) Get(path string) (Doc, error) {
+func (r *DocRepo) Get(path string) (Doc, error) {
 	// Read only index, fast indexing without channel synchronization.
 	// It's safe since lookup success, the go-routine will lookup again.
 	// Hence, when lookup fail, maybe it's just removed or never exists.
@@ -228,25 +228,25 @@ func (r *Repository) Get(path string) (Doc, error) {
 }
 
 // Del a document for the path.
-func (r *Repository) Del(path string) {
+func (r *DocRepo) Del(path string) {
 	r.Batch(nil, nil, []string{path})
 }
 
 // Put revalidate a document.
-func (r *Repository) Put(path string) {
+func (r *DocRepo) Put(path string) {
 	r.Batch(nil, []string{path}, nil)
 }
 
 // Post publish the path for documents.
 // This method should be called when you start the application.
 // Since it won't call the visitors let them do post process.
-func (r *Repository) Post(path string) {
+func (r *DocRepo) Post(path string) {
 	log.Printf("post %s", path)
 	r.processor.Process(path)
 }
 
 // Batch additions, modifications and deletions into a single request.
-func (r *Repository) Batch(adds, mods, dels []string) {
+func (r *DocRepo) Batch(adds, mods, dels []string) {
 	// Git only tracks files, hence, all of the slice are files path.
 
 	// `git mv a b`: a deletion plus a addition, a and b is different.
@@ -282,7 +282,7 @@ func NewRepo(repoDir string, skipDirs, globDocs []string,
 	}
 	p.parser = &DocParser{}
 
-	r := new(Repository)
+	r := new(DocRepo)
 	r.dir = dir
 	r.cache = make(map[string]*entry)
 	r.index = make(map[string]int)

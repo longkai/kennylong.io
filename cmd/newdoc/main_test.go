@@ -22,15 +22,15 @@ func TestFormatName(t *testing.T) {
 	}
 }
 
-func TestNewMD(t *testing.T) {
+func TestNewDoc(t *testing.T) {
 	out := new(bytes.Buffer)
 	title := "balabala"
 	err := newMD(title, out)
 	if err != nil {
-		t.Errorf("newMD(%q, _) fail: %v", title, err)
+		t.Errorf("newDoc(%q, _) fail: %v", title, err)
 	}
 	got := out.String()
 	if !strings.Contains(got, title) {
-		t.Errorf("newMD(%q,_) = %s, not contains %q", title, got, title)
+		t.Errorf("newDoc(%q, _) = %s, not contains %q", title, got, title)
 	}
 }
