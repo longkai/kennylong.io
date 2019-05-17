@@ -87,6 +87,7 @@ article blockquote:before, article blockquote:after { content: none; }
           </div>
           <!-- NOTE: for cleaness, comments have been removed from here... -->
         </div>
+        
       </div>
 
       {{if not $.A.Hide -}}
@@ -114,10 +115,18 @@ article blockquote:before, article blockquote:after { content: none; }
         {{- end}}
       </nav>
       {{- end}}
+
+      <script src="https://utteranc.es/client.js" repo="longkai/essays" issue-term="pathname" theme="github-light"
+        crossorigin="anonymous" async>
+      </script>
     </div>
     {{template "footer" $}}
+
+
   </main>
   <div class="mdl-layout__obfuscator"></div>
+
+
 </div>
 {{template "script" $}}
 <script>
@@ -145,4 +154,5 @@ article blockquote:before, article blockquote:after { content: none; }
      window.open(window.location.protocol + '//' + window.location.host, "_self");
  });
 </script>
+
 {{template "GA" $.Meta.GA}}
