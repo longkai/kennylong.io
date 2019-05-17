@@ -14,6 +14,7 @@ RUN apk add --no-cache git && \
                                   linux-headers \
                                   curl \
                                   go \
+                                  nodejs-npm \
                                   nodejs && \
   runDeps="$( \
     mkdir -p $SRC && cd $SRC/.. && \
