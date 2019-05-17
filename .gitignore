@@ -28,4 +28,4 @@ _testmain.go
 build/
 
 assets/fonts/
-bower_components/
+node_modules/
