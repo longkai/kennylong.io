@@ -141,7 +141,7 @@ Run `docker-compose up -d`.
 ### Pre-requisite
 
 - [golang][go] >= 1.7
-- [bower][bower]
+- [npm][npm]
 
 ### Building
 
@@ -174,7 +174,7 @@ Happy hacking.
 [org-mode]: http://orgmode.org
 [rst]: http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html
 [go]: https://golang.org/
-[bower]: https://bower.io/
+[npm]: https://www.npmjs.com/
 [medium]: https://github.com/Medium/medium-api-docs/issues/52
 [go-template]: https://golang.org/pkg/text/template/
 

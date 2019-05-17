@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # fetch frontend assets if necessary
-if [ ! -d "assets/bower_components" ]; then
-  cd assets && bower install && cd ..
+if [ ! -d "assets/node_modules" ]; then
+  cd assets && npm install && cd ..
 fi
 
 # test existence of Google Fonts 

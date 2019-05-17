@@ -19,13 +19,10 @@ RUN apk add --no-cache git && \
   runDeps="$( \
     mkdir -p $SRC && cd $SRC/.. && \
     git clone --branch $branch --depth=1 https://github.com/longkai/xiaolongtongxue.com.git && \
-    npm install -g bower && echo '{ "allow_root": true }' > /root/.bowerrc && \
     cd $SRC/assets/ && \
-    bower install && \
-    bower cache clean && \
+    npm install && \
     rm -rf /root/.[a-zA-Z]* && \
-    npm uninstall -g bower && \
-    curl https://code.getmdl.io/1.3.0/material.light_green-green.min.css > bower_components/material-design-lite/material.min.css && \
+    curl https://code.getmdl.io/1.3.0/material.light_green-green.min.css > node_modules/material-design-lite/material.min.css && \
     cd $SRC/cmd/gfdl/ && \
     go install && \
     cd $SRC/assets/ && \
