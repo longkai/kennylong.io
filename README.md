@@ -11,6 +11,7 @@ Turn your favorite markup git repository as a website, with Github favorite rend
 - Support or mix many markup formats, [markdown][], [org-mode][], [rst][], etc.
 - The moment push your work to the Github, your website will sync changes automatically.
 - Misc configuration like posting new documents to Medium, controlling which file to be rendered, skipped, hide, redirections and so forth.
+- *New*: Support comments with Github Issue!
 
 ## Document Format Requirement
 
