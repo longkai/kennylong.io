@@ -4,6 +4,7 @@ import (
 	"log"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -20,6 +21,32 @@ type DocProcessor struct {
 	callback func(docs Docs)
 }
 
+func rmExt(file string) string {
+	f := filepath.Ext(file)
+	index := strings.LastIndex(file, f)
+	return file[:index]
+}
+
+// filter prefers md over org if a dir contains multiple valid docs.
+func filter(files []string) []string {
+	m := make(map[string]string)
+	for _, file := range files {
+		f := rmExt(file)
+		if _, ok := m[f]; ok {
+			if filepath.Ext(file) == ".md" {
+				m[f] = file
+			}
+		} else {
+			m[f] = file
+		}
+	}
+	var res []string
+	for _, v := range m {
+		res = append(res, v)
+	}
+	return res
+}
+
 // Process the given for documents, either using callback
 // or return value to receiving the results, or both.
 func (p *DocProcessor) Process(paths ...string) Docs {
@@ -30,7 +57,7 @@ func (p *DocProcessor) Process(paths ...string) Docs {
 			log.Printf("skip outside path: %q", path)
 			continue
 		}
-		files = append(files, p.scanner.Scan(path)...)
+		files = append(files, filter(p.scanner.Scan(path))...)
 	}
 
 	var wg sync.WaitGroup
