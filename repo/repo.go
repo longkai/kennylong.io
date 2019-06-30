@@ -264,7 +264,7 @@ func (r *DocRepo) Batch(adds, mods, dels []string) {
 	// The key point: `adds`, `mods` and `dels` slice are distinct.
 	// Therefore, order doesn't matter.
 
-	log.Printf("Batch(%v, %v, %v)", adds, mods, dels)
+	log.Printf("Batch(%v, %v, %v)", filter(adds), filter(mods), filter(dels))
 
 	r.reqs.batch <- batchReq{adds, mods, dels}
 }
