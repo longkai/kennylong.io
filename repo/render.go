@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 
+	"path/filepath"
+
 	"github.com/longkai/xiaolongtongxue.com/helper"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -56,10 +58,15 @@ func NewRenderer(user, repo string, dir Dir) Renderer {
 // Render a file in a repository of a Github user.
 func (r *GithubRenderer) Render(file string) (template.HTML, error) {
 	const branch = "master" // May be support other branches other than master?
-	url := fmt.Sprintf("https://github.com/%s/%s/blob/%s/%s", r.User, r.Repo, branch, r.Dir.Rel(file))
+	f := r.Dir.Rel(file)
+	url := fmt.Sprintf("https://github.com/%s/%s/blob/%s/%s", r.User, r.Repo, branch, f[:strings.LastIndex(f, filepath.Ext(f))]+".md")
 
-	dummy := template.HTML("")
 	resp, err := http.Get(url)
+	if resp.StatusCode == http.StatusNotFound {
+		url = fmt.Sprintf("https://github.com/%s/%s/blob/%s/%s", r.User, r.Repo, branch, f)
+		resp, err = http.Get(url)
+	}
+	dummy := template.HTML("")
 	if err != nil {
 		return dummy, err
 	}
