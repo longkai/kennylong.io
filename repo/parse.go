@@ -45,7 +45,7 @@ var parseDoc = func(in io.Reader, v interface{}) error {
 }
 
 func unmarshal(in io.Reader, d *Doc) error {
-	title, yml, err := parse(in)
+	title, yml, body, err := parse(in)
 	if err != nil {
 		return err
 	}
@@ -55,6 +55,8 @@ func unmarshal(in io.Reader, d *Doc) error {
 
 	// Default title if not specify in yaml block.
 	d.Title = title
+	d.rawBody = body
+
 	return parseDoc(bytes.NewReader(yml), d)
 }
 
@@ -69,7 +71,7 @@ var (
 // The logic is:
 // A headline followed by a yaml code block, and ends with a `data` field.
 // Empty line in between will be stripped.
-func parse(in io.Reader) (title string, yml []byte, err error) {
+func parse(in io.Reader) (title string, yml []byte, body string, err error) {
 	scanner := bufio.NewScanner(in)
 
 	for scanner.Scan() {
@@ -91,6 +93,7 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 	}
 
 	buf := make([]byte, 0, 256)
+	var tmp bytes.Buffer
 	for scanner.Scan() {
 		if eofMarkRegex.Match(scanner.Bytes()) {
 		try:
@@ -114,9 +117,13 @@ func parse(in io.Reader) (title string, yml []byte, err error) {
 				// Meta yaml block must end with a `date` field.
 				if ymlEndMarkRegex.Match(b) {
 					yml = buf
+					body = tmp.String()
 					return
 				}
 			}
+		} else {
+			tmp.WriteString(scanner.Text())
+			tmp.WriteByte('\n')
 		}
 	}
 	err = scanner.Err()

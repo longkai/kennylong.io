@@ -12,6 +12,7 @@ import (
 
 	"path/filepath"
 
+	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/longkai/xiaolongtongxue.com/helper"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -33,7 +34,23 @@ func extractArticle(in io.Reader) ([]byte, error) {
 
 // Renderer render a document into HTML.
 type Renderer interface {
-	Render(path string) (template.HTML, error)
+	Render(doc Doc) (template.HTML, error)
+}
+
+type newRender struct {
+	wrap Renderer
+}
+
+func (r *newRender) Render(doc Doc) (template.HTML, error) {
+	if !strings.HasSuffix(doc.Path, ".md") {
+		return r.wrap.Render(doc)
+	}
+	b, err := github.Markdown(strings.NewReader(doc.rawBody))
+	var buf bytes.Buffer
+	buf.WriteString(`<article class="markdown-body entry-content" itemprop="text">`)
+	buf.Write(b)
+	buf.WriteString(`</article>`)
+	return template.HTML(buf.String()), err
 }
 
 // GithubRenderer render a mark up document using the Github favored style.
@@ -56,9 +73,9 @@ func NewRenderer(user, repo string, dir Dir) Renderer {
 }
 
 // Render a file in a repository of a Github user.
-func (r *GithubRenderer) Render(file string) (template.HTML, error) {
+func (r *GithubRenderer) Render(d Doc) (template.HTML, error) {
 	const branch = "master" // May be support other branches other than master?
-	f := r.Dir.Rel(file)
+	f := r.Dir.Rel(d.Path)
 	url := fmt.Sprintf("https://github.com/%s/%s/blob/%s/%s", r.User, r.Repo, branch, f[:strings.LastIndex(f, filepath.Ext(f))]+".md")
 
 	resp, err := http.Get(url)

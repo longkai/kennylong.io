@@ -32,12 +32,12 @@ func filter(files []string) []string {
 	m := make(map[string]string)
 	for _, file := range files {
 		f := rmExt(file)
-		if _, ok := m[f]; ok {
-			if filepath.Ext(file) == ".md" {
+		if filepath.Ext(file) == ".md" {
+			m[f] = file
+		} else {
+			if _, ok := m[f]; !ok {
 				m[f] = file
 			}
-		} else {
-			m[f] = file
 		}
 	}
 	var res []string

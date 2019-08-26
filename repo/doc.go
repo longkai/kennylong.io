@@ -27,6 +27,8 @@ type Doc struct {
 	Hide  bool   `json:"hide"`
 	Older string `json:"older,omitempty"`
 	Newer string `json:"newer,omitempty"`
+
+	rawBody string
 }
 
 // Docs a list of articles. Maybe a BST is faster,

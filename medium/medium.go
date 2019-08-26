@@ -83,7 +83,7 @@ func (m *Medium) Post(doc repo.Doc) error {
 		return fmt.Errorf("medium.Post(%q) without uid, abort posting", doc.Path)
 	}
 
-	html, err := m.renderer.Render(doc.Path)
+	html, err := m.renderer.Render(doc)
 	if err != nil {
 		return err
 	}

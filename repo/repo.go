@@ -24,9 +24,9 @@ type entry struct {
 	err   error
 }
 
-func (e *entry) call(path string, r Renderer) {
+func (e *entry) call(doc Doc, r Renderer) {
 	val, err := helper.Try(3, func() (interface{}, error) {
-		return r.Render(path)
+		return r.Render(doc)
 	})
 	e.val, e.err = val.(template.HTML), err
 	close(e.ready)
@@ -155,7 +155,7 @@ func (r *DocRepo) get(req getReq) {
 	if e == nil {
 		// Cache misses.
 		e = &entry{ready: make(chan struct{})}
-		go e.call(doc.Path, r.renderer)
+		go e.call(doc, r.renderer)
 		r.cache[req.path] = e
 	}
 
@@ -296,7 +296,9 @@ func NewRepo(repoDir string, skipDirs, globDocs []string,
 		batch: make(chan batchReq),
 	}
 
-	r.renderer = NewRenderer(user, repo, dir)
+	r.renderer = &newRender{
+		wrap: NewRenderer(user, repo, dir),
+	}
 
 	// Receive result asynchronously.
 	p.callback = func(docs Docs) { r.reqs.post <- docs }
