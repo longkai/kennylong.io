@@ -97,6 +97,8 @@ func (r *DocRepo) batch(req batchReq) {
 			}
 		}
 	}
+	req.adds = filter(req.adds)
+	req.mods = filter(req.mods)
 	// Re-process adds and mods.
 	if plen := len(req.adds) + len(req.mods); plen > 0 {
 		combine := make([]string, plen)
