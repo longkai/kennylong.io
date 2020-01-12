@@ -38,11 +38,6 @@ func Ctrl(_conf context.Conf) {
 
 	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
 
-	// Document's assets, e.g., its images.
-	staticFS = http.FileServer(http.Dir(conf.RepoDir))
-	// Front-end resources.
-	http.Handle("/assets",
-		http.StripPrefix("/assets", http.FileServer(http.Dir("assets"))))
 	// Global handler.
 	http.HandleFunc("/", handle)
 }

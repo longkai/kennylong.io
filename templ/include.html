@@ -1,28 +1,17 @@
 {{define "header" -}}
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="editor" content="emacs&vim">
+<meta name="editor" content="vim&emacs&vscode">
 <meta name="docker" content="true">
 <meta name="backend" content="go">
 <meta name="branch" content="{{$.Meta.B}}">
 <meta name="version" content="{{$.Meta.V}}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
-<!-- Add to homescreen for Chrome on Android -->
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" sizes="192x192" href="/assets/images/android-desktop.png?v={{$.Meta.V}}">
-
-<!-- Add to homescreen for Safari on iOS -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="{{$.Meta.Title}}">
-<link rel="apple-touch-icon-precomposed" href="/assets/images/ios-desktop.png?v={{$.Meta.V}}">
-
-<!-- Tile icon for Win8 (144x144 + tile color) -->
-<meta name="msapplication-TileImage" content="/assets/images/ms-touch-icon-144x144-precomposed.png?v={{$.Meta.V}}">
-<meta name="msapplication-TileColor" content="#da532c">
-
-<link rel="shortcut icon" href="/assets/images/favicon.png?v={{$.Meta.V}}">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+<link rel="manifest" href="/assets/favicon/site.webmanifest">
 
 {{if $.Meta.GF -}}
 <!-- go to `cmd/gfdl` to find some useful stuff if google is blocked -->
@@ -30,11 +19,11 @@
 <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 {{- else -}}
 <!-- download fonts locally or with CDN -->
-<link rel="stylesheet" href="/assets/fonts/fonts.css?v={{$.Meta.V}}">
-<link rel="stylesheet" href="/assets/fonts/icons.css?v={{$.Meta.V}}">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/fonts/icons.css">
 {{- end}}
-<link rel="stylesheet" href="/assets/node_modules/material-design-lite/material.min.css?v={{$.Meta.V}}">
-<link rel="stylesheet" href="/assets/layouts/styles.css?v={{$.Meta.V}}">
+<link rel="stylesheet" href="//cdn.bootcss.com/material-design-lite/1.3.0/material.orange-deep_purple.min.css">
+<link rel="stylesheet" href="/assets/layouts/styles.css">
 {{- end}}
 
 {{define "footer" -}}
@@ -79,8 +68,8 @@
 {{- end}}
 
 {{define "script" -}}
-<script src="/assets/node_modules/material-design-lite/material.min.js?v={{$.Meta.V}}"></script>
-<script src="/assets/scripts/xiaolongtongxue.js?v={{$.Meta.V}}"></script>
+<script src="//cdn.bootcss.com/material-design-lite/1.3.0/material.min.js"></script>
+<script src="/assets/scripts/xiaolongtongxue.js"></script>
 {{- end}}
 
 {{define "bg" -}}

@@ -15,7 +15,8 @@ const (
 )
 
 const (
-	templMD = `# %s
+	templMD = `#+OPTIONS: toc:nil
+# %s
 Content goes here...
 
 ## EOF
