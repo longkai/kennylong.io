@@ -10,4 +10,4 @@ COPY --from=build /opt/app /
 COPY --from=busybox /bin/busybox /busybox/busybox
 RUN ["/busybox/busybox", "--install", "/bin"]
 ENV TZ=Asia/Chongqing
-ENTRYPOINT ["/app" "/config.yaml"]
+ENTRYPOINT ["/app", "/config.yaml"]
