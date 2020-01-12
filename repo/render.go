@@ -7,10 +7,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
-
-	"path/filepath"
 
 	"github.com/longkai/xiaolongtongxue.com/github"
 	"github.com/longkai/xiaolongtongxue.com/helper"
@@ -42,7 +41,9 @@ type newRender struct {
 }
 
 func (r *newRender) Render(doc Doc) (template.HTML, error) {
-	if !strings.HasSuffix(doc.Path, ".md") {
+	//if !strings.HasSuffix(doc.Path, ".md") {
+	// TODO: use it for image cdn...
+	if true {
 		return r.wrap.Render(doc)
 	}
 	b, err := github.Markdown(strings.NewReader(doc.rawBody))
@@ -68,7 +69,8 @@ func NewRenderer(user, repo string, dir Dir) Renderer {
 		Repo:           repo,
 		Dir:            dir,
 		StripTitle:     true,
-		URLTransformer: func(src string) string { return src },
+		// TODO: hard code right now, should redesign next iteration.
+		URLTransformer: func(src string) string { return "//cdn.jsdelivr.net/gh/longkai/essays" + src },
 	}
 }
 

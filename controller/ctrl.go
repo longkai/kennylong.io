@@ -35,7 +35,16 @@ func Ctrl(_conf context.Conf) {
 			repository.Batch(a, m, d)
 		})
 
-	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
+	templs = template.Must(template.New("templ").Funcs(map[string]interface{}{
+		"bg": func(bg string) string {
+			lo := strings.ToLower(bg)
+			if strings.HasPrefix(lo, "//") || strings.HasPrefix(lo, "http://") || strings.HasPrefix(lo, "https://") {
+				return bg
+			}
+			// TODO: hard code, local resource use cdn
+			return "//cdn.jsdelivr.net/gh/longkai/essays" + bg
+		},
+	}).ParseGlob("templ/*"))
 
 	// Global handler.
 	http.HandleFunc("/", handle)

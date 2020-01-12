@@ -55,7 +55,7 @@ function banner(s, el) {
   el.style.cursor = 'pointer';
 
   if (!s) {
-    s = '/assets/images/default.jpg'
+    s = '../images/default.jpg'
   }
 
   el.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), url("{0}")'.format(s);
