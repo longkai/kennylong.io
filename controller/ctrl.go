@@ -35,7 +35,7 @@ func Ctrl(_conf context.Conf) {
 			repository.Batch(a, m, d)
 		})
 
-	templs = template.Must(template.New("templ").ParseGlob("/templ/*"))
+	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
 
 	// Global handler.
 	http.HandleFunc("/", handle)
