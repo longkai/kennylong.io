@@ -20,7 +20,6 @@ const (
 var (
 	conf       context.Conf
 	repository repo.Repo
-	staticFS   http.Handler
 	templs     *template.Template
 )
 
@@ -36,7 +35,7 @@ func Ctrl(_conf context.Conf) {
 			repository.Batch(a, m, d)
 		})
 
-	templs = template.Must(template.New("templ").ParseGlob("templ/*"))
+	templs = template.Must(template.New("templ").ParseGlob("/templ/*"))
 
 	// Global handler.
 	http.HandleFunc("/", handle)
@@ -107,8 +106,7 @@ func entry(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case repo.NotFoundError:
-		// If no doc found, fallback to static files.
-		staticFS.ServeHTTP(w, r)
+		http.NotFound(w, r)
 	default: // general error
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
