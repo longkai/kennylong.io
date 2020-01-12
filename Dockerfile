@@ -5,7 +5,7 @@ ADD . .
 RUN make build
 
 # Now copy it into our base image.
-FROM gcr.io/distroless/static-debian10
+FROM gcr.io/distroless/base-debian10
 COPY --from=build /opt/app /opt/templ /
 COPY --from=busybox /bin/busybox /busybox/busybox
 RUN ["/busybox/busybox", "--install", "/bin"]
