@@ -6,11 +6,11 @@ RUN make build
 
 # Now copy it into our base image.
 #FROM gcr.io/distroless/base-debian10
-FROM alpine
+# sadly, git and its dependencies is too large,
+# in the future we can use https://github.com/src-d/go-git
+FROM debian
 COPY --from=build /opt/app /
 COPY --from=build /opt/templ /templ
-RUN apk add tzdata git && \
-    cp /usr/share/zoneinfo/Asia/Chongqing /etc/localtime && \
-    echo "Asia/Chongqing" > /etc/timezone && \
-    apk del tzdata
+RUN apt update && apt install -y git
+ENV TZ=Asia/Chongqing
 ENTRYPOINT ["/app", "/conf.yaml"]
