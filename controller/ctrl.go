@@ -9,7 +9,6 @@ import (
 
 	"github.com/longkai/xiaolongtongxue.com/context"
 	"github.com/longkai/xiaolongtongxue.com/github"
-	"github.com/longkai/xiaolongtongxue.com/medium"
 	"github.com/longkai/xiaolongtongxue.com/repo"
 )
 
@@ -28,7 +27,7 @@ func Ctrl(_conf context.Conf) {
 	conf = _conf
 
 	repository = repo.NewRepo(conf.RepoDir, conf.SkipDirs, conf.GlobDocs,
-		conf.Github.User, conf.Github.Repo, medium.NewMedium(conf))
+		conf.Github.User, conf.Github.Repo)
 
 	github.Init("/api/github/hook", conf.RepoDir, conf.Github.HookSecret,
 		conf.Github.AccessToken, func(a, m, d []string) {
