@@ -10,7 +10,7 @@ const threshold = time.Minute
 // RetryTimeoutError return when the retry delay exceeds the max threshold.
 type RetryTimeoutError time.Duration
 
-func (t RetryTimeoutError) Error() string { return "timeout: exceeds " + string(t) }
+func (t RetryTimeoutError) Error() string { return "timeout: exceeds " + time.Duration(t).String() }
 
 // Try a simple exponential retry strategy whose first retry starting after 1s.
 // The max delay timeout is 1min, if exceeds, a timeout error will be returned.

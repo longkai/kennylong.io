@@ -40,6 +40,10 @@ body::before {
   body::before {
     background-image: url('../images/cover-2880.jpg');
   }
+
+  .demo-blog .demo-blog__posts {
+    max-width: 61.8% !important;
+  }
 }
 body .demo-blog {
   font-family: 'Roboto', 'Helvetica', sans-serif;

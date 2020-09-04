@@ -1,5 +1,5 @@
 # Start by building the application.
-FROM golang:1.13-buster as build
+FROM golang:1.15-buster as build
 WORKDIR /opt
 ADD . .
 RUN make build
