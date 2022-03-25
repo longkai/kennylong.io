@@ -1,9 +1,0 @@
-essays:
-  image: longkai/xiaolongtongxue.com:latest
-  ports:
-    - 1217:1217
-  volumes:
-    - $PWD/log.txt:/log.txt
-    - $PWD/conf.yml:/conf.yml:ro
-    - $HOME/src/github.com/longkai/essays:/repo
-  restart: always
