@@ -1,0 +1,43 @@
+name: Release Charts to GitHub OCI
+
+on:
+  push:
+    branches:
+    - main
+      
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.8.1
+
+    - name: Login OCI Registry
+      run: helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Update Helm Dependency
+      run: |
+        helm dependency update charts
+
+        for dep in charts/charts/* ; do
+          if [ -d "$dep" ]; then
+            helm dependency update "$dep"
+          fi
+        done
+
+    - name: Package and Push Chart
+      run: |
+        helm package charts
+        helm push kennylong.io-*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
