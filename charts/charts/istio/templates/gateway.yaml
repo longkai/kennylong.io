@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "istio.fullname" . }}-gateway
+  labels:
+    {{- include "istio.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: {{ .Release.Name }}
+  servers:
+  {{- range $i, $domain := .Values.domains }}
+  - port:
+      number: 80
+      name: http-{{ $domain.name }}
+      protocol: HTTP
+    hosts: {{ $domain.hosts | toYaml | nindent 4 }}
+    # tls:
+    #   httpsRedirect: true # sends 301 redirect for http requests
+  - port:
+      number: 443
+      name: https-{{ $domain.name }}
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: {{ $domain.name }} # This should match the Certificate secretName
+    hosts: # This should match a DNS name in the Certificate
+    {{- $domain.hosts | toYaml | nindent 4 }}
+  {{ end -}}

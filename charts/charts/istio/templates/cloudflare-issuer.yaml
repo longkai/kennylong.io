@@ -1,0 +1,44 @@
+{{- if .Values.cloudflare -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "istio.fullname" . }}-cloudflare-api-token
+  labels:
+    {{- include "istio.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  api-token: {{ .Values.cloudflare.apiToken }}
+---
+apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+kind: Issuer
+metadata:
+  name: {{ include "istio.fullname" . }}-letsencrypt-prod
+  labels:
+    {{- include "istio.labels" . | nindent 4 }}
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: {{ .Values.cloudflare.email }}
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: {{ include "istio.fullname" . }}-letsencrypt-prod
+    # Enable the HTTP-01 challenge provider
+    #solvers:
+    ## An empty 'selector' means that this solver matches all domains
+    #- selector: {}
+    #  http01:
+    #    ingress:
+    #      class: istio
+    # ACME DNS-01 provider configurations
+    solvers:
+    - dns01:
+        # Here we define a list of DNS-01 providers that can solve DNS challenges
+        cloudflare:
+          email: {{ .Values.cloudflare.email }}
+          apiTokenSecretRef:
+            name: {{ include "istio.fullname" . }}-cloudflare-api-token
+            key: api-token
+{{- end -}}

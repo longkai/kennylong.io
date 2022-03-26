@@ -1,0 +1,52 @@
+istiod:
+  enabled: true
+  pilot:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+global:
+  proxy:
+    # Resources for the sidecar.
+    resources:
+      requests:
+        cpu: 50m
+        memory: 50Mi
+      limits:
+        cpu: 2000m
+        memory: 1024Mi
+
+gateway:
+  # enabled: true # FIXME: schema validation fails
+  service:
+    # Type of service. Set to "None" to disable the service entirely
+    type: NodePort
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+  
+cloudflare:
+  ## @require you cloudflare email
+  email: who@example.com
+  ## @required you cloudflare api token
+  ##
+  apiToken: ""
+
+domains:
+- name: xiaolongtongxue
+  commonName: "*.xiaolongtongxue.com"
+  hosts:
+  - "xiaolongtongxue.com"
+  - "*.xiaolongtongxue.com"
+- name: kennylong
+  commonName: "*.kennylong.io"
+  hosts:
+  - "kennylong.io"
+  - "*.kennylong.io"
+
+appReleaseName: "apps"

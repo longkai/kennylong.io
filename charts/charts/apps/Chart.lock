@@ -1,0 +1,18 @@
+dependencies:
+- name: nginx
+  repository: ""
+  version: '*'
+- name: omnifocus
+  repository: ""
+  version: '*'
+- name: www
+  repository: ""
+  version: '*'
+- name: shadowsocks-rust
+  repository: ""
+  version: '*'
+- name: ghost
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.3.0
+digest: sha256:54c2bd829c749466c97ba5dccb64a9fa238326a62c8134a30cc96e740fc482a5
+generated: "2022-03-26T05:11:40.567119669+08:00"

@@ -1,0 +1,20 @@
+{{- if .Values.cloudflare -}}
+{{- $root := . -}}
+{{- range $i, $domain := .Values.domains }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $domain.name }}
+  labels:
+    {{- include "istio.labels" $root | nindent 4 }}
+spec:
+  secretName: {{ $domain.name }}
+  issuerRef:
+    name: {{ include "istio.fullname" $root }}-letsencrypt-prod
+    #kind: ClusterIssuer
+  commonName: {{ $domain.commonName | quote }}
+  dnsNames:
+  {{- $domain.hosts | toYaml | nindent 2 }}
+---
+{{ end -}}
+{{- end -}}

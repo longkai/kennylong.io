@@ -1,0 +1,9 @@
+nfs:
+  server: localhost
+  path: /
+
+ghost:
+  mariadb:
+    enabled: false
+  service:
+    type: ClusterIP

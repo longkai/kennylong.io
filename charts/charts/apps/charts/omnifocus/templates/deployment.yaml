@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "omnifocus.fullname" . }}
+  labels:
+    {{- include "omnifocus.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "omnifocus.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "omnifocus.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "omnifocus.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-storage
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            port: http
+            path: /
+            httpHeaders:
+            - name: authorization 
+              value: Basic {{ (printf "%s:%s" .Values.username .Values.password) | b64enc }}
+          initialDelaySeconds: 1
+          failureThreshold: 3
+          timeoutSeconds: 1
+          periodSeconds: 2
+        readinessProbe:
+          httpGet:
+            port: http
+            path: /
+            httpHeaders:
+            - name: authorization
+              value: Basic {{ (printf "%s:%s" .Values.username .Values.password) | b64enc }}
+          initialDelaySeconds: 2
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/dav
+          subPath: omnifocus
+        env:
+        - name: AUTH_TYPE
+          value: Basic
+        - name: USERNAME
+          value: {{ .Values.username }}
+        - name: PASSWORD
+          value: {{ .Values.password }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

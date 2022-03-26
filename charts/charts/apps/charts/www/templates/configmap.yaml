@@ -1,0 +1,40 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "www.fullname" . }}
+data:
+  conf.yaml: |
+    port: 1217
+    repo_dir: /repo
+    medium_token: 2a36d936304fc8cd2836d3bf6c6fff830dc24180b066c3c28357eac25f8260947
+    glob_docs:
+      - README.*
+    skip_dirs:
+      - .*
+      - assets
+    github:
+      user: longkai
+      repo: essays
+      hook_secret: yuejia
+      access_token: {{ .Values.github.token }}
+    meta:
+      ga: {{ .Values.ga }}
+      gf: false
+      origin: {{ .Values.origin }} # required only if using medium
+      bio: |
+        Gopher
+        Networks Boy
+        Thinking Design
+        Former Android/Java Engineer
+      link: /
+      name: 小龙同学
+      title: 小龙同学
+      mail: i@xiaolongtongxue.com
+      github: https://github.com/longkai
+      medium: https://essays.xiaolongtongxue.com
+      twitter: https://twitter.com/xiaolongtongxue
+      instagram: https://www.instagram.com/0xcaffee
+      stackoverflow: https://stackoverflow.com/users/3280791/longkai
+    redir:
+      "/articles/2016/intro-xiaolongtongxue-2.0": "/articles/2017/xiaolongtongxue.com"
+---

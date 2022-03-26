@@ -1,0 +1,15 @@
+dependencies:
+- name: apps
+  repository: ""
+  version: '*'
+- name: cert-manager
+  repository: ""
+  version: '*'
+- name: istio
+  repository: ""
+  version: '*'
+- name: mariadb
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.4.2
+digest: sha256:efcb0e44efbb8c182eca9da2441323326bf25f48476398b64389417702d8537e
+generated: "2022-03-26T05:10:47.297235397+08:00"
