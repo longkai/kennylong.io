@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package github.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// The Github webhook service.
+service Webhook {
+  rpc CreateWebhook(CreateWebhookRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/v1/webhooks"
+    };
+  };
+}
+
+// A github repository.
+message Repository {
+  int32 id = 1;
+  string name = 2;
+  string full_name = 3;
+  bool private = 4;
+  string url = 5;
+}
+
+// A git commit.
+message Commit {
+  string id = 1;
+  string message = 2;
+  repeated string added = 3;
+  repeated string removed = 4;
+  repeated string modified = 5;
+}
+
+// The webhook payload github sends to us.
+message CreateWebhookRequest {
+  string ref = 1;
+  Repository repository = 2;
+  repeated Commit commits = 3;
+}

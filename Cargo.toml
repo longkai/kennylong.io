@@ -11,3 +11,8 @@ jsonwebtoken = "7"
 serde = {version = "1.0", features = ["derive"] }
 chrono = "0.4"
 hex = "0.4"
+tonic = "0.6"
+prost = "0.9"
+
+[build-dependencies]
+tonic-build = "0.6"
